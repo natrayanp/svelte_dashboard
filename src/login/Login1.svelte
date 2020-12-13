@@ -6,11 +6,13 @@ import { session } from '../stores/stores';
 	import Httpclient from '../services/httpservice/Httpclientservice';
 	//import {authstore} from '../services/authservice/authstore';	
 	
-
+  var pristine;
 	let user="";
 	let password="";
 	
 	onMount(async () => {
+   // var form = document.getElementById("form1");
+    
 		let tt = session;
 		console.log("start auth");
 		//let c = await redirectCall();
@@ -19,7 +21,18 @@ import { session } from '../stores/stores';
 		authstore.set(new authVal(null,'',false));
 	});
 
-	
+  var form = document.getElementById("form1");
+  console.log(form);
+pristine = new Pristine(form);
+
+form.addEventListener('submit', function (e) {
+   e.preventDefault();
+   var valid = pristine.validate();
+   //alert('Form is valid: ' + valid);
+
+});
+  
+
 function handlelogin(){
 	let m = signinGoogle();
 	
@@ -72,12 +85,14 @@ $: showmodal = false;
 <div class="{container}">
 	<div class="forms-container">
 	  <div class="signin-signup">
-		<form action="#" class="sign-in-form">
-		  <h2 class="title">Sign in</h2>
-		  <div class="input-field">
-			<i class="fas fa-user"></i>
-			<input type="text" placeholder="Username" />
-		  </div>
+		<form id="form1" action="#" class="sign-in-form">
+      <h2 class="title">Sign in</h2>
+      <div class ="form-group">
+        <div class="input-field">
+          <i class="fas fa-user"></i>
+          <input type="text" placeholder="Username" />
+        </div>
+      </div>
 		  <div class="input-field">
 			<i class="fas fa-lock"></i>
 			<input type="password" placeholder="Password" />

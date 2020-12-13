@@ -11,6 +11,7 @@ const config = {
     auth: null,
     user: null,
     error: null,
+    email:null,
     isredir: false,
     issignup: false,
     islogin: false,
@@ -45,7 +46,7 @@ const config = {
         src: 'loader',
         onDone: [ { target: 'signupDB', actions: 'setUser', cond: (ctx) => ctx.issignup },
                   { target: 'loginDB', actions: 'setUser', cond: (ctx) => ctx.isredir || ctx.islogin},                                                         
-                  { target: 'sessionConf'}],
+                  { target: 'sessionConf', actions: 'setUser'}],
         onError: {
           target: 'signedOut.failure',
           actions: ['setError', 'clearAuth','toggleRedir']
@@ -54,8 +55,8 @@ const config = {
     },
     sessionConf: { 
       on: {
-            LOGIN : {target: 'signingIn'},
-            LOGOUT : {target: 'signingOut'}
+            LOGIN : {target: 'loginDB',actions: 'toggleLogin'},
+            LOGOUT : {target: 'signingOut' }
       }
       /*
       on:{
@@ -63,23 +64,22 @@ const config = {
       }
       */
     },
-    signupDB: {
+    signupDB: {      
       invoke: {
         id: 'signupDBUpdate',
         src: 'signupDBUpdate',
         onDone: 'signingOut',
       }
+      /*on:{'':{target:'signingOut'}}*/
     },
-    loginDB: {
-      /*
+    loginDB: {     
+      
       invoke: {
         id: 'loginDBUpdate',
         src: 'loginDBUpdate',
         onDone: 'signedIn',
-      }*/
-      on:{
-        '': {target : 'signedIn'}
       }
+      /*on:{'':{target:'signedIn'}}*/
     },
     signedIn: { 
       // Register to Authchange Listener
@@ -110,6 +110,7 @@ const config = {
       }
     },
     signingIn: {
+      entry: ['setEmail'],
       invoke: {
         id: 'authenticator',
         src: 'authenticator',
@@ -118,13 +119,38 @@ const config = {
           // clear error if successful login
           actions: 'clearError'
         },
-        onError: {
+        onError: [{
           // transition to failure state
           // and set an error
           target: 'signedOut.failure',
-          actions: 'setError'
-        }
+          actions: 'setError',
+          cond: (ctx) => !ctx.issignup
+        },
+        {target:'validateError',actions: 'setError'}
+      ]
       }
+    },
+    validateError:{
+      invoke : {
+        id : 'errorvalidator',
+        src : 'errorvalidator',
+        //onDone: { target: 'signedOut.failure'}        
+      },
+      on: {
+        // Registration completed in firebase but not in our local DB
+        SIGNUPV :  { target: 'signupApint' },
+        ERRORV  :  {target: 'signedOut.failure'}                  
+      }
+    },
+    signupApint: { 
+      // "Signup API with no token" as the user is already created in firebase
+      // but still not created in our DB
+      invoke: {
+        id: 'signupApiwemail',
+        src: 'signupApiwemail',
+        onDone: 'signingOut',
+      }
+      /*on:{'':{target:'signingOut'}}*/
     },
     signingOut: {
       invoke: {
@@ -151,7 +177,7 @@ export const initAuthMachine = services => {
   const actions = {
     // clear user info on logout
     clearAuth: assign({ user: null, auth: null }),
-    clearError: assign({ error: null }),
+    clearError: assign({ error: null }),    
     // put Firebase auth object on context
     setAuth: assign({ auth: (_, event) => event.data }),
     // put user on context in loading service
@@ -159,10 +185,10 @@ export const initAuthMachine = services => {
     setError: assign({
       error: (_, event) => event.data,
     }),
-    toggleRedir: assign({isredir:(ctx,event) => !(ctx.isredir)}),
-    toggleSignup: assign({issignup:(ctx,event) => !(ctx.issignup)}),
-    toggleLogin: assign({islogin:(ctx,event) => !ctx.islogin}),
-
+    toggleRedir: assign({isredir:(ctx,_) => !(ctx.isredir)}),
+    toggleSignup: assign({issignup:(ctx,_) => !(ctx.issignup)}),
+    toggleLogin: assign({islogin:(ctx,_) => !ctx.islogin}),
+    setEmail: assign({email:(ctx,event)=> (ctx.issignup)?event.email:null })
   };
 
 

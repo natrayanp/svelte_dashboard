@@ -13,8 +13,12 @@
       removeAfter,
     } = notification;
     
-    const removeNotificationHandler = () => removeNotification(id,event);
-    
+    const removeNotificationHandler = (event) => {
+      console.log("-------");
+      console.log(event);
+      removeNotification(event.notiobj,event.data);
+
+    }
     let timeout = null;
     
     if (removeAfter) {

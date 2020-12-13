@@ -13,7 +13,7 @@
     removeAfter,
   } = notification;
 
-  const removeNotificationHandler = () => removeNotification(id);
+  const removeNotificationHandler = (event) => removeNotification(event);
 
   let timeout = null;
 

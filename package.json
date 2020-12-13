@@ -36,6 +36,7 @@
   },
   "dependencies": {
     "@open-wc/building-rollup": "^1.9.4",
+    "@tailwindcss/forms": "^0.2.1",
     "axios": "^0.21.0",
     "firebase": "^8.1.2",
     "firebaseui": "^4.7.1",

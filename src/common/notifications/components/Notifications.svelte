@@ -75,8 +75,9 @@
   });
 
   function seleselectmynct(n) {
+    console.log(n);
     if(n.comp) return n.comp;
-    if(n.modaltype = 'modal-no-action') return DefaultModal;
+    if(['modal-no-action','modal-accept-reject'].some((ele)=> ele===n.modaltype)) return DefaultModal;
   }
 
 </script>

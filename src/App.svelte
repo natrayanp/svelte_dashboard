@@ -3,6 +3,7 @@
 	import { Router, Route, Link } from "svelte-routing";
 	import Login from './login/Login.svelte';
 	import Home from "./home/Home.svelte";
+	import Test from './test/Test.svelte';
 	import { onMount } from "svelte";
 	import { session } from './stores/stores';
 	import Notifications from './common/notifications';
@@ -28,11 +29,13 @@
   <Router url="{url}">
 	<nav>
 		<Link to="home">Home</Link>
+		<Link to="login">login</Link>
 			
 	  </nav>
 	<div>
 		<Route path="/d" component="{Home}" />
 		<Route path="/" component="{Login}" />
+		<Route path="/test" component="{Test}" />
 	  
 	</div>
   </Router>

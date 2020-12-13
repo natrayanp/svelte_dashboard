@@ -9,12 +9,16 @@ import {environment as env} from '../../environment/production';
 
 import { useMachine } from './useMachine';
 import { initAuthMachine } from './authMachine';
+import { authapi_services } from './authapi';
 
-const userMapper = claims => ({
-	id: claims.user_id,
-	name: claims.name,
-	email: claims.email,
-	picture: claims.picture
+
+const userMapper = tokens => ({
+	id:      tokens.claims.user_id,
+	name:    tokens.claims.name,
+	email:   tokens.claims.email,
+	picture: tokens.claims.picture,
+	emailverified: tokens.claims.email_verified,
+	token: tokens.token
 });
 
 //export const initAuth = () => {};
@@ -33,6 +37,9 @@ export const initAuth = (useRedirect = false) => {
 
 	const loginWithEmailPassword = (email, password) =>
 		auth.signInWithEmailAndPassword(email, password);
+
+	const signupWithEmailPassword = (email, password) => 
+		auth.createUserWithEmailAndPassword(email,password);
 
 	const  login = (provider) => {
 		return useRedirect
@@ -65,9 +72,15 @@ export const initAuth = (useRedirect = false) => {
 					return auth ? resolve(auth) : reject();
 				});
 			}),
-		authenticator: (_, event) => {
+		authenticator: (ctx, event) => {
+
 			if (event.provider === 'email') {
-				return loginWithEmailPassword(event.email, event.password);
+				console.log(ctx);
+				if (ctx.issignup) {					
+					return (signupWithEmailPassword(event.email, event.password));
+				} else {
+					return (loginWithEmailPassword(event.email, event.password));
+				}					
 			} else if (event.provider === 'google') {
 				return loginWithGoogle();
 			}
@@ -79,17 +92,26 @@ export const initAuth = (useRedirect = false) => {
 					// by authChecker service
 					ctx.auth
 						.getIdTokenResult()
-						.then(({ claims }) => userMapper(claims))
+						.then((tokens) => userMapper(tokens))
+						//.then(({ claims }) => userMapper(claims))
 						.then(resolve);
 				}, 1500);
 			});
 		},
 		logout: () => auth.signOut(),
-		signupDBUpdate: () => {}
-		
+		errorvalidator: (ctx,_) => (callback,onReceive) => {
+			if(ctx.error.code === 'auth/email-already-in-use') {
+				 callback({type: 'SIGNUPV'});
+			} else {
+				 callback({type: 'ERRORV'});
+			}
+			//return tt;
+		}		
 	};
 
-	const authMachine = initAuthMachine(services);
+	let finalservices= {...services,...authapi_services};
+
+	const authMachine = initAuthMachine(finalservices);
 
 	return useMachine(authMachine);
 

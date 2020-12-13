@@ -62,18 +62,29 @@ export default Httpclient;
 
 
 window.fetch = (originalFetch => {
-  return (...args) => {    
+  return (...args) => {
+
+    //REQUEST Intercepter STARTS
+    console.log(args[0]);
+    console.log(args[1]);    
     const options = [args[0],{          
       headers: new Headers({'content-type': 'application/json','Accept': 'application/json'}),
       ...args[1]
     }];
     console.log('request sent');
+
+    //REQUEST Intercepter END
+
     //const result = originalFetch.apply(this, args);
     
     return  new Promise((resolve, reject) => {
-        originalFetch.apply(this, args)
+        originalFetch.apply(this, options)
         .then((resp) => {
+          //RESPONSE Intercepter START
           console.log('response');
+
+          
+          //RESPONSE Intercepter END
           resolve(resp);
         })
         .catch((err) => reject(err));

@@ -1,6 +1,6 @@
 <script >
 
-import Modals from '../common/notifications/components/modals/CustomModals.svelte';
+import Modals from '../common/notifications/components/modals/DefaultModal.svelte';
 import {Alerts} from '../common/notifications'
 import { getNotificationsContext } from '../common/notifications';
 
