@@ -17,6 +17,8 @@ const userMapper = tokens => ({
 	name:    tokens.claims.name,
 	email:   tokens.claims.email,
 	picture: tokens.claims.picture,
+	phonenumber: tokens.claims.phonenumber,
+	signInProvider: tokens.signInProvider,	
 	emailverified: tokens.claims.email_verified,
 	token: tokens.token
 });

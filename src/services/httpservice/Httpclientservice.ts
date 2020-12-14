@@ -1,3 +1,137 @@
+/*  HTTP Client takes two functions, one for request interceptor and the second for response interceptor
+ *  REQUEST interceptor function receives request data which can be operated upon
+ *  RESPONSE interceptor function receives response data which can be operated upon 
+ *  This client provides get, delete, post, put and patch
+ */
+
+
+const HttpClient = (req_interceptor_fn?,resp_interceptor_fn?) => {
+   
+
+  const apiRequest = (method, url, data?, opts?) => {    
+      /*  method = http method (get, post, etc...)
+       *  url = url of api ('http:/example.com/v1/login)
+       *  opts = object of properties   {  body: '{"foo": "bar"}', 
+       *                                   headers: new Headers({'content-type': 'application/json'}),
+       *                                 } 
+       */  
+    
+      //Create a request object      
+      //let dd={mode:'no-cors'}      
+      const request = new Request(url,{
+                                        method,
+                                        ...opts,
+                                        //...dd
+                                      });
+
+      function handleErrors(response) {
+        if (!response.ok) {
+            throw Error(response.statusText);
+        }
+        console.log(response.ok);
+        console.log('handlerror ok');
+        return response;
+      }
+
+                                      
+      return fetch(request)
+        .then(handleErrors)
+        .then(res => Promise.resolve(res.json()))
+        .catch(err => {
+          return Promise.reject(err);
+        });
+  };
+
+  
+  // function to execute the http get request
+  const get = (url, options?) => apiRequest("get",url,options);
+  
+  // function to execute the http delete request
+  const deleteRequest = (url, options) =>  apiRequest("delete", url, options);
+  
+  // function to execute the http post request
+  const post = (url, data, options) => apiRequest("post", url, data, options);
+  
+  // function to execute the http put request
+  const put = (url, options) => apiRequest("put", url, options);
+  
+  // function to execute the http path request
+  const patch = (url, options) =>  apiRequest("patch", url, options);
+
+
+
+
+
+  //Override windows fetch to implement inceptor functionality
+
+  window.fetch = (originalFetch => {
+      return (request) => {
+    
+        // REQUEST Intercepter STARTS
+        /*    request object examples
+         *    const url = request.url;
+         *    const method = request.method;
+         *    const credentials = request.credentials;
+         *    var myHeaders = new Headers();
+         *    myHeaders.append('Content-Type', 'image/jpeg');
+         */
+
+         
+       let req_post_intercept = null;
+       console.log(typeof req_interceptor_fn );
+       console.log(typeof req_interceptor_fn === 'function');
+       if(typeof req_interceptor_fn === 'function')  req_post_intercept = req_interceptor_fn(request);
+       if(!req_post_intercept) req_post_intercept = request;
+       console.log(req_post_intercept);
+
+        //REQUEST Intercepter END
+        console.log('request sent-------------------');
+        //const result = originalFetch.apply(this, args);
+        
+        return  new Promise((resolve, reject) => {
+            originalFetch.apply(this, [req_post_intercept])
+            .then((response) => {
+              //RESPONSE Intercepter START
+              console.log('response-----------------------');                
+              let resp_post_intercept = null;
+              if(typeof resp_interceptor_fn === 'function')  resp_post_intercept = resp_interceptor_fn(response);
+              if(!resp_post_intercept) resp_post_intercept = response;
+              console.log(resp_post_intercept);                 
+              
+              //RESPONSE Intercepter END
+              resolve(resp_post_intercept);
+            })
+            .catch((err) => reject(err));
+          });
+      };
+    })(window.fetch);
+
+
+  // return the HTTP methods
+  return {
+      get,
+      delete: deleteRequest,
+      post,
+      put,
+      patch
+  };
+};
+
+export default HttpClient;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // Api.js
 import axios from "axios";
 //import {req_interceptor} from './Httpinterceptor';
@@ -13,7 +147,7 @@ import {environment as env} from '../../environment/production';
   );
 */
 
-
+/*
 // implement a method to execute all the request from here.
 const apiRequest = (method, scr_nd_func, request) => {    
     //let url = env['url_' + scr_nd_func] + '/' + env['endpt_' + scr_nd_func];
@@ -58,6 +192,7 @@ const Httpclient ={
     put,
     patch
 };
+
 export default Httpclient;
 
 
