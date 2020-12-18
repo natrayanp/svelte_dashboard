@@ -4,7 +4,7 @@ import {positions,notificationtype,modaltype} from './modals'
 
 
 const isNotificationValid = notification => { 
-  if (!notification || !notification.title || !notification.text || !notification.notificationtype) return false;
+  if (!notification ||  !notification.text || !notification.notificationtype) return false;
   if (!notificationtype.includes(notification.notificationtype)) return false;
   if (typeof notification.title !== 'string' || typeof notification.text !== 'string') return false;
   if (((notification.notificationtype) === 'notification') && (!positions.includes(notification.position))) return false;
@@ -34,21 +34,34 @@ function variableChk(val) {
 
 
 const addNotification = (notification, update) => {
+
   if (!isNotificationValid(notification)) throw new Error('Notification object is not valid'); 
+  
   console.log(notification.hasbackdrop);
+  
   //Enrich Notification
   (variableChk(notification.disableClose)) ? notification['disableClose'] = true : notification['disableClose'] = notification.disableClose;
   (variableChk(notification.hasbackdrop)) ? notification['hasbackdrop'] = true : notification['hasbackdrop'] = notification.hasbackdrop;
+  (variableChk(notification.singleton)) ? notification['singleton'] = true : notification['singleton'] = notification.singleton;
+  let tid = notification.targetid? notification.targetid : (notification.notificationtype === 'alert'?'alert-default': null);
+  
+  notification['targetid'] = tid;
+  notification['id'] = new Date().getTime();
+  
+  //Enrich Notification
   console.log(notification.hasbackdrop);
+  
   let notobj   = notification;
-  let tid = notification.id? notification.id : (notification.notificationtype === 'alert'?'alert-default': new Date().getTime());
+  
+  
   const {
-    //id = notification.id? notification.id : (notification.notificationtype === 'alert'?'alert-default': new Date().getTime()),
-    id = tid,
+    id = new Date().getTime(),   
+    targetid = tid, 
     removeAfter = +notification.removeAfter,
     ...rest
   } = notification;
   
+  console.log(JSON.stringify(notification));
   
   let mypromise = new Deferred();
 
@@ -61,11 +74,33 @@ const addNotification = (notification, update) => {
   };
 
   console.log(notification.id);
-  let myobj = new retObj(tid, notobj, mypromise.promise);
+  let myobj = new retObj(id, notobj, mypromise.promise);
+  
+  //If Alert, remove the existing alert and show the last one
+
 
   update((notifications) => {
+    
+    //console.log(JSON.stringify(notifications));
+    //console.log(JSON.stringify(notification));
+    if (notification.singleton){
+    if(notification.notificationtype === 'alert') {
+      //let old_alert = notifications.filter( n => (((n.notificationtype === notification.notificationtype) && (n.id !== notification.id))));
+      notifications = notifications.filter( n => (!((n.notificationtype === notification.notificationtype) && (n.id !== notification.id))));     
+    }  
+    }
+    /*console.log(JSON.stringify(notifications));
+    console.log(JSON.stringify({
+      id,
+      removeAfter,
+      myobj,
+      mypromise,
+      ...rest,
+    }));
+    */
     return [...notifications, {
       id,
+      targetid,
       removeAfter,
       myobj,
       mypromise,
@@ -80,22 +115,28 @@ const addNotification = (notification, update) => {
 const removeNotification = (notiobj,data=null,update) => {  
   console.log(notiobj);
   let ncpy ;
+  let cc;
   update((notifications) => {    
-    console.log(notifications);
+    console.log(JSON.stringify(notifications));
     ncpy = notifications.filter(n => n.id === notiobj.id);
-    return notifications.filter(n => n.id !== notiobj.id);
+    cc = notifications.filter(n => n.id !== notiobj.id);
+    return cc;
   });  
+  console.log(JSON.stringify(ncpy));
+  console.log(console.log(JSON.stringify(cc)));
+  if(ncpy.length){
+      let mobj = ncpy[0];
+      console.log(mobj);
 
-  let mobj = ncpy[0];
-  console.log(mobj);
-
-  if(mobj.notificationtype === 'modal') {
-
-    mobj.mypromise.resolve(data);
-  } else {
-    mobj.mypromise.resolve( {'closed':true}); 
-  }
-  return {'closed':true};
+      if(mobj.notificationtype === 'modal') {
+        mobj.mypromise.resolve(data);
+      } else {
+        mobj.mypromise.resolve( {'closed':true}); 
+      }
+      return {'closed':true};
+    } else {
+      return {'closed': false};
+    }
 }
 
 const clearNotifications = (notificationtype: 'notification' | 'modal' |'all', set) =>  set((notifications) => {

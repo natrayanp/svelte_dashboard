@@ -20,12 +20,13 @@ const userMapper = tokens => ({
 	phonenumber: tokens.claims.phonenumber,
 	signInProvider: tokens.signInProvider,	
 	emailverified: tokens.claims.email_verified,
-	token: tokens.token
+	token: tokens.token,
+	session:null
 });
 
 //export const initAuth = () => {};
 
-
+export let authState =null;
 
 // construction function. need to call it after we
 // initialize our firebase app
@@ -54,7 +55,7 @@ export const initAuth = (useRedirect = false) => {
 		return login(provider);
 	};
 
-
+	
 	const services = {
 		redirectChecker: async () => {			
 			return firebase.auth().getRedirectResult().then(auth => (auth.user));
@@ -95,6 +96,7 @@ export const initAuth = (useRedirect = false) => {
 					ctx.auth
 						.getIdTokenResult()
 						.then((tokens) => userMapper(tokens))
+						//.then((tokens) => {let dd = userMapper(tokens); ctx.user = dd; return dd;})
 						//.then(({ claims }) => userMapper(claims))
 						.then(resolve);
 				}, 1500);
@@ -105,6 +107,7 @@ export const initAuth = (useRedirect = false) => {
 			if(ctx.error.code === 'auth/email-already-in-use') {
 				 callback({type: 'SIGNUPV'});
 			} else {
+				console.log("909090909")
 				 callback({type: 'ERRORV'});
 			}
 			//return tt;
@@ -115,7 +118,11 @@ export const initAuth = (useRedirect = false) => {
 
 	const authMachine = initAuthMachine(finalservices);
 
-	return useMachine(authMachine);
+	const { state, send } = useMachine(authMachine);	
+	authState = state;
+	return {state, send }
 
 };
+
+
 

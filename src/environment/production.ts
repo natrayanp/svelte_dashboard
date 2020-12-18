@@ -1,7 +1,7 @@
 export const apiurls = {
     // Common routes for all
     all_api_url:
-        'http://127.0.0.1:8080/v1',
+        'http://127.0.0.1:8000/v1/',
     // 'https://e294sbftrc.execute-api.ap-south-1.amazonaws.com/acdev',
     // Individual routes
     url_regis: 'http://127.0.0.1:8081',
@@ -57,3 +57,5 @@ export const installation = {
     // usertype:''               // This is mandatory.  "" for thirdpartyauth and "S" only for standalone installations
     // This is mandatory only for standalone installations
 };
+
+export const noAuthToken_endpt = ['signupemail'];

@@ -1,21 +1,22 @@
-import HttpClient from '../httpservice/Httpclientservice';
+import HttpClient from '../httpservice/Http';
 import {environment as env} from '../../environment/production';
 
-let http = HttpClient(req_int);
+let http = HttpClient();
 
 
 export const authapi_services = {
     
 
-    signupApiwemail: () => {
+    signupApiwemail: (ctx,_) => {
         // This is to handle scenario where user crated in FB not in DB.
-        http.get('http://127.0.0.1:8000/v1/test',{headers: new Headers({'content-type': 'application/json'})})
-        .then((d)=>console.log(d))
-        .catch(err => console.log(err));
-        
+        console.log(ctx.email);
+        return http.post('signupemail',{useremail:ctx.email});
     },
-    signupDBUpdate: () => {},    
-    loginDBUpdate: () =>  {}
+    signupDBUpdate: () => {
+      //console.log(ctx.email);
+      return http.post('signuptoken',{});
+    },    
+    loginDBUpdate: () =>  http.post('logintoken',{}),
     
 };
 
@@ -32,9 +33,10 @@ let allowCrossDomain = req => {
     console.log(req.headers);  
     req.headers.append('Access-Control-Allow-Origin', "*");
     req.headers.append('Access-Control-Allow-Headers', "*");
+    console.log( req.headers.get('content-type')); 
     req = {...req, mode:'cors' };
     console.log("@@@@@@@@@@@@@@@@@@@@@@")
-    console.log(req);  
+     
     //return req;    
   }
 

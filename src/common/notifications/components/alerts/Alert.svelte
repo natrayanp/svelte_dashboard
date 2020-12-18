@@ -13,8 +13,18 @@
       removeAfter,
     } = notification;
     
-    const removeNotificationHandler = () => removeNotification(id);
-  
+    /*
+    const removeNotificationHandler = () => { 
+      console.log('inside close');
+      removeNotification(id);
+    };
+  */
+    const removeNotificationHandler = (event) => {
+      console.log("-------");
+      console.log(event);
+      removeNotification(event.notiobj,event.data);
+
+    }
     let timeout = null;
     
     if (removeAfter) {

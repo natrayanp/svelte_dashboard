@@ -90,7 +90,7 @@
   {#each positions as position}
     <div class={getClass(position)}>
       {#each mynoti as notification (notification.id)}        
-          {#if notification.position === position}
+          {#if notification.position === position}          
             <Notification
               {notification}
               {withoutStyles}

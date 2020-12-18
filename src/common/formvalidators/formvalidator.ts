@@ -24,9 +24,7 @@ export const formValidator = (fieldconf) => {
     //ValInit=true;
   };
   //Get status of the form
-  let isformValid =() => {
-    pristine.validate();
-  }
+  let isformValid =() => {return pristine.validate()};  
   
   let formReset = () => pristine.reset();
   

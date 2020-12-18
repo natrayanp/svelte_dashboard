@@ -10,12 +10,12 @@ const config = {
   context: {
     auth: null,
     user: null,
-    error: null,
+    error: null,   
+    apimsg: null, 
     email:null,
     isredir: false,
     issignup: false,
-    islogin: false,
-    mmodal:null
+    islogin: false,    
   },
   // all possible authentication states
   states: {
@@ -44,14 +44,15 @@ const config = {
       invoke: {
         id: 'loader',
         src: 'loader',
-        onDone: [ { target: 'signupDB', actions: 'setUser', cond: (ctx) => ctx.issignup },
-                  { target: 'loginDB', actions: 'setUser', cond: (ctx) => ctx.isredir || ctx.islogin},                                                         
-                  { target: 'sessionConf', actions: 'setUser'}],
+        onDone: [ { target: 'signupDB', cond: (ctx) => ctx.issignup },
+                  { target: 'loginDB', cond: (ctx) => ctx.isredir || ctx.islogin},                                                         
+                  { target: 'sessionConf'}],
         onError: {
           target: 'signedOut.failure',
           actions: ['setError', 'clearAuth','toggleRedir']
         }
-      }
+      },
+      exit: ['setUser'],
     },
     sessionConf: { 
       on: {
@@ -64,12 +65,13 @@ const config = {
       }
       */
     },
-    signupDB: {      
+    signupDB: {            
       invoke: {
         id: 'signupDBUpdate',
         src: 'signupDBUpdate',
-        onDone: 'signingOut',
-      }
+        onDone: {target:'setSilentMsg',actions: 'setApiMsgr'},
+        onError: {target:'setSilentMsg',actions: 'setApiError'}
+      }      
       /*on:{'':{target:'signingOut'}}*/
     },
     loginDB: {     
@@ -77,11 +79,12 @@ const config = {
       invoke: {
         id: 'loginDBUpdate',
         src: 'loginDBUpdate',
-        onDone: 'signedIn',
+        onDone: {target:'signedIn', action: 'setSession'},
+        onError: {target:'setSilentMsg',actions: 'setApiError'}
       }
       /*on:{'':{target:'signedIn'}}*/
     },
-    signedIn: { 
+    signedIn: {       
       // Register to Authchange Listener
       invoke: {
         id: 'authchangelistener',
@@ -99,6 +102,7 @@ const config = {
     // case of wrong password, username
     // or network error
     signedOut: {
+      entry:['clearAll'],
       initial: 'ok',
       states: {
         ok: { type: 'final' },
@@ -119,13 +123,13 @@ const config = {
           // clear error if successful login
           actions: 'clearError'
         },
-        onError: [{
+        onError: [/*{
           // transition to failure state
           // and set an error
           target: 'signedOut.failure',
           actions: 'setError',
           cond: (ctx) => !ctx.issignup
-        },
+        },*/
         {target:'validateError',actions: 'setError'}
       ]
       }
@@ -139,8 +143,16 @@ const config = {
       on: {
         // Registration completed in firebase but not in our local DB
         SIGNUPV :  { target: 'signupApint' },
-        ERRORV  :  {target: 'signedOut.failure'}                  
+        ERRORV  :  {target: 'setSilentFBEr'}                  
       }
+    },
+    setSilentFBEr: {
+      on: {DONE: {target:'signingOut'} },
+      exit:['clearError','clearApiMsg']
+    },
+    setSilentMsg: {
+      on: {DONE: {target:'signingOut'} },
+      exit:['clearError','clearApiMsg']
     },
     signupApint: { 
       // "Signup API with no token" as the user is already created in firebase
@@ -148,7 +160,8 @@ const config = {
       invoke: {
         id: 'signupApiwemail',
         src: 'signupApiwemail',
-        onDone: 'signingOut',
+        onDone: {target:'setSilentMsg',actions: 'setApiMsgr'},
+        onError: {target:'setSilentMsg',actions: 'setApiError'}
       }
       /*on:{'':{target:'signingOut'}}*/
     },
@@ -158,7 +171,7 @@ const config = {
         src: 'logout',
         onDone: {
           target: 'signedOut',
-          actions: ['clearAuth', 'clearError']
+          actions: ['clearError']
         },
         onError: {
           target: 'signedOut.failure',
@@ -175,9 +188,11 @@ export const initAuthMachine = services => {
   // define XState actions so that we can
   // refer to them by name in machine config
   const actions = {
+    clearAll: assign({auth: null, user: null, error: null, apimsg: null, email:null, isredir: false, issignup: false, islogin: false}),
     // clear user info on logout
     clearAuth: assign({ user: null, auth: null }),
     clearError: assign({ error: null }),    
+    clearApiMsg: assign({ apimsg: null }),    
     // put Firebase auth object on context
     setAuth: assign({ auth: (_, event) => event.data }),
     // put user on context in loading service
@@ -185,10 +200,27 @@ export const initAuthMachine = services => {
     setError: assign({
       error: (_, event) => event.data,
     }),
+    setApiMsgr: assign({
+      apimsg: (_, event) => {
+        console.log(event);
+        console.log('0909090909 inside api msg');
+        return JSON.parse(event.data.data);   
+      }
+    }),   
+    setApiError: assign({apimsg: (_, event) => {
+      console.log("iweuijk89798kl");
+      console.log(JSON.parse(event.data.response.data).detail);
+     return JSON.parse(event.data.response.data).detail;
+    
+    }
+    }),
     toggleRedir: assign({isredir:(ctx,_) => !(ctx.isredir)}),
-    toggleSignup: assign({issignup:(ctx,_) => !(ctx.issignup)}),
-    toggleLogin: assign({islogin:(ctx,_) => !ctx.islogin}),
-    setEmail: assign({email:(ctx,event)=> (ctx.issignup)?event.email:null })
+    toggleSignup: assign({issignup:(ctx,_) => true}),
+    toggleLogin: assign({islogin:(ctx,_) => true}),
+    setEmail: assign({email:(ctx,event)=> (ctx.issignup)?event.email:null }),
+    setSession: assign({ user : (ctx,event) => ({...ctx.user,session:event.data.sessionid})),
+    singupdbstart:assign({apimsg: (ctx,event) => {console.log('start db'); console.log(JSON.stringify(ctx))} })
+    singupdbstart1:assign({apimsg: (ctx,event) => {console.log('start db exit'); console.log(JSON.stringify(ctx))} })
   };
 
 

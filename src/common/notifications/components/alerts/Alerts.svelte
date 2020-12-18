@@ -50,7 +50,7 @@
     
     let item = null;
     let withoutStyles = false;
-    export let id ='alert-default';
+    export let targetid ='alert-default';
   
     const getClass = (position = '') => {
       const defaultPositionClass = ` default-position-style-${position}`;
@@ -60,6 +60,7 @@
   
 
     let myalert;    
+    $: myalert;
     
 
     const unsubscribe = store.subscribe(value => {
@@ -74,7 +75,7 @@
   <div class="notifications">
 
         {#each myalert as notification (notification.id)}        
-            {#if notification.id === id}
+            {#if notification.targetid === targetid}
               <Alert
                 {notification}
                 {withoutStyles}

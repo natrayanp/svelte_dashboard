@@ -12,21 +12,30 @@ const { addNotification } = getNotificationsContext();
 	//import { fade } from 'svelte/transition';
 
 	// Form Validator usuage starts
+	let mform
+	let sform
 	let loginform;	
 	let loginstore;
 	let logindata;
+	let logindata_init;
 	$: logindata;
-	logindata = {name: '',password:''};
+	logindata_init = {email: '',password:''};
+	logindata = JSON.parse(JSON.stringify(logindata_init));
 
 	let signupform;
 	let signupstore;
 	let signupdata;
+	let signupdata_init;
 	$: signupdata;
-	signupdata = {name: '',email:'',password:''};
+	signupdata_init = {name: '',email:'',password:''};
+	signupdata = JSON.parse(JSON.stringify(signupdata_init));
 
 	loginform = formValidator(logindata);
 	loginstore = loginform.data;	
 	$loginstore = logindata;
+
+	let login_alert;
+	let signin_alert;
 	
 	const loginunsub = loginstore.subscribe(value => {		
 		console.log(value)	;
@@ -44,10 +53,10 @@ const { addNotification } = getNotificationsContext();
 
 
 	onMount(async() => {		
-		let mform = document.getElementById("loginform");		
+		mform = document.getElementById("loginform");		
 		loginform.initVal(mform);
 
-		let sform = document.getElementById("signupform");		
+		sform = document.getElementById("signupform");		
 		signupform.initVal(sform);		
 		
 	});
@@ -56,6 +65,7 @@ const { addNotification } = getNotificationsContext();
 
 	// use custom auth machine store
 	const { state, send } = initAuth();
+	
 
 	const loginHandler = async event => {
 		//const { email, password } = event.target.elements;
@@ -77,6 +87,7 @@ const { addNotification } = getNotificationsContext();
 	const signupHandler = async (provider,data={}) => {
 		//const { email, password } = event.target.elements;
 		// send login event
+		console.log(data);
 		let mcheve = (sign_up_mode)?'SIGNUP':'LOGIN';
 		console.log("-----------------");
 		console.log(mcheve);
@@ -104,8 +115,23 @@ const { addNotification } = getNotificationsContext();
 
 	const emailSignup = () => {
 		console.log(signupdata);
-		const {name,email,password}=signupdata;		
-		signupHandler('email',{name:name,email:email,password:password});		
+			
+		let formvalid = false;
+		let data_to_api = null;
+		signupform.status()
+		if (sign_up_mode) {	
+			const {name,email,password}=signupdata;			
+			if (signupform.status()) formvalid = true;
+			data_to_api = {name:name,email:email,password:password};
+		} else {
+			const {email,password}=logindata;	
+			if (loginform.status()) formvalid = true;
+			data_to_api = {email:email,password:password};
+			console.log(data_to_api)
+		}		
+		if(formvalid) {
+			signupHandler('email',data_to_api);		
+		}
 	}
 
 	const googleSignup = () => {
@@ -113,12 +139,28 @@ const { addNotification } = getNotificationsContext();
 		signupHandler('google');
 	}
 
+	
+ 
+
+	const restFormh = () => {
+
+		if(sign_up_mode) {
+			signupdata = signupdata_init;
+			$signupstore = JSON.parse(JSON.stringify(signupdata));
+			signupform.reset();			
+		} else {			
+			logindata = JSON.parse(JSON.stringify(logindata_init));
+			$loginstore = logindata;
+			loginform.reset();
+		}
+	}
+
 	let mymodal = null;
 	const unsubscribe = state.subscribe(value => {
 		console.log('my statie');
 		console.log(value.value);
 		
-		if(!['sessionConf','signedIn', 'signedOut'].some(value.matches)) { 
+		if(!['sessionConf','signedIn', 'signedOut','setSilentMsg','setSilentFBEr'].some(value.matches)) { 
 			console.log('my statie mymo');
 			console.log(mymodal);
 			if(!mymodal){
@@ -159,17 +201,66 @@ const { addNotification } = getNotificationsContext();
 		}
 		} else if (['signedOut.failure'].some(value.matches)){
 			if(mymodal) {
-				console.log('sessionconif mymod');
+				console.log('signedOut . failure mymod');
 				mymodal.close();
 				mymodal=null;
 			}
+			restFormh();
 			let myerror = addNotification({
-				title : 'alert test',				
-				text: $state.context.error.message,
+				targetid: sign_up_mode?'signup': 'login',
+				title : sign_up_mode?'Signup Alert': 'Login Alert',				
+				//text: 'kdkdkdkdkdk',
+				text: $state.context.apimsg.message || $state.context.error.detail || $state.context.error.message,
 				notificationtype: 'alert',            
+				type: 'error',
+				disableClose: false,    
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});				
+			sign_up_mode ? signin_alert= myerror: login_alert = myerror;
+
+		} else if (['setSilentMsg'].some(value.matches)){	
+			console.log("#################");
+		//	console.log($state.context.error.message);
+			let myerror = addNotification({
+				targetid: sign_up_mode?'signup': 'login',
+				title : sign_up_mode?'Signup Alert': 'Login Alert',				
+				//text: 'dkdkdk',
+				text: $state.context.apimsg.message || $state.context.error.detail || $state.context.error.message,
+				type: $state.context.apimsg? 
+								($state.context.apimsg.error?'error':'success'): 'error',										
+				notificationtype: 'alert',     
+				disableClose: false,        
 				//modaltype:'modal-no-action',  	
 				//comp:Modals				
 			});	
+			sign_up_mode ? signin_alert= myerror: login_alert = myerror;			
+			send('DONE');
+		} else if (['setSilentFBEr'].some(value.matches)){	
+			console.log("################# setSilentFBEr");
+			let myerror = addNotification({
+				targetid: sign_up_mode?'signup': 'login',
+				title : sign_up_mode?'Signup Alert': 'Login Alert',				
+				//text: 'dkdkdk',
+				text: $state.context.error.message,
+				type:'error',										
+				notificationtype: 'alert',     
+				disableClose: false,        
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});	
+			sign_up_mode ? signin_alert= myerror: login_alert = myerror;			
+			send('DONE');
+		} else if(['signedIn', 'signedOut'].some(value.matches)){
+			console.log("----------------sd3434$$$$$$$");
+			restFormh();
+			if(mymodal) {
+				console.log(mymodal);
+				let dd = mymodal.close();					
+				console.log(dd);
+				console.log("closed");
+				mymodal=null;
+			}
 		}else {	
 			console.log(value);
 			console.log(mymodal);
@@ -210,45 +301,70 @@ const { addNotification } = getNotificationsContext();
 	function toggle_signup() {
 		sign_up_mode=!sign_up_mode;
 		container = sign_up_mode?'container sign-up-mode':'container sign-in-mode';
-		if(sign_up_mode) signupform.reset();
-		if(!sign_up_mode) loginform.reset();
+		//if(sign_up_mode) signupform.reset();
+		//if(!sign_up_mode) loginform.reset();
+		restFormh();
+		
 	}
+
+
+
+	function todel(){
+		console.log('kdjdf');
+		let myerror = addNotification({
+				targetid:'login',
+				title : 'alert test',				
+				text: 'myerre sadfafafsd asfasdfasdf asdfasdfasd fsfasd fasfasdf asfasdfasdf asdf fasdfasdf',
+				notificationtype: 'alert',      
+				type: 'success',     
+				disableClose: false, 
+				singleton:true,
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});	
+	}
+
+
 </script>
 
 
 <!---
 <button on:click={loginHandler}>nat</button>
 <button on:click={logoutHandler}>logout</button>
--->
+	-->
 	<p> I am in login</p>
 	{JSON.stringify($state.value)}
 	<p></p>
 	{JSON.stringify($state.context)}
-	
 
-<!---
+
+
 <p>Login form</p>
 <prev>{JSON.stringify($loginstore)}</prev>
 <p>Sign form</p>
 <prev>{JSON.stringify($signupstore)}</prev>
 
--->
+
 
 <div class="flex items-center justify-center">
 
 
 	<div class="{container}">
-		<div class="forms-container">
-			
+		<div class="forms-container">			
 		  <div class="signin-signup">
-			<Alerts/>
+			<div class="al">
+			
+			</div>
 			<form id="loginform" action="#xxx" class="sign-in-form" on:submit|preventDefault={emailSignup}>
 			  <h2 class="title">Sign in</h2>
+			  <div class="ale">			  
+			  <Alerts targetid="login" />
+			  </div>
 			  <div class="form-group pristine-form-group">
 				<!--div class="input-field"-->
 				<div>
 					<i class="fas fa-user"></i>
-					<input type="text" required placeholder="Username" bind:value={$loginstore.name}
+					<input type="text" required placeholder="Username" bind:value={$loginstore.email}
 					class="mt-0 block w-full px-0.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"		
 					/>
 				</div>
@@ -295,13 +411,17 @@ const { addNotification } = getNotificationsContext();
 				<!--a href="#" class="social-icon">
 				  <i class="fab fa-google"></i>
 				</a-->
-				<a href="#" class="social-icon">
+				<a href="#" class="social-icon" on:click={todel}>
 				  <i class="fab fa-linkedin-in"></i>
 				</a>
 			  </div>
 			</form>
+			
 			<form id = "signupform" action="#" class="sign-up-form" on:submit|preventDefault={emailSignup}>
 			  <h2 class="title">Sign up</h2>
+			  <div class="ale">
+				<Alerts targetid="signup" />				
+				</div>
 			  <!--div class="input-field"-->
 			  <div class="pristine-form-group">
 				<i class="fas fa-user"></i>
@@ -398,6 +518,9 @@ const { addNotification } = getNotificationsContext();
 	  </div>
 	
 	</div>
+
+
+		
 	
 	  
 	<style>
@@ -437,6 +560,15 @@ const { addNotification } = getNotificationsContext();
 	  grid-template-columns: 1fr;
 	  z-index: 5;
 	}
+
+	.al {
+		grid-column:1/2;
+		grid-row:1/2;
+	}
+
+	.ale{
+		width: 100%;
+	}
 	
 	form {
 	  display: flex;
@@ -447,7 +579,7 @@ const { addNotification } = getNotificationsContext();
 	  transition: all 0.2s 0.7s;
 	  overflow: hidden;
 	  grid-column: 1 / 2;
-	  grid-row: 1 / 2;
+	  grid-row: 2 / 3;
 	}
 	
 	form.sign-up-form {
