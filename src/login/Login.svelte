@@ -1,15 +1,26 @@
 <script>
 //import Modals from../common/notifications/components/modals/DefaultModal.sveltete';
 import {formValidator} from '../common/formvalidators/formvalidator';
-import {onMount} from 'svelte';
+import {onMount, onDestroy} from 'svelte';
 
 import { getNotificationsContext } from '../common/notifications';
+import { navigate } from "svelte-routing";
 
 const { addNotification } = getNotificationsContext();
 
-	import { initAuth} from '../services/authservice';
+
+//import {authapi_services} from '../services/authservice/authapi';
+import {authInit,signupHandler,dosignout,sessionexist,providerlogin,activateListener} from '../services/authservice/authservice';
+import {authStore} from '../stores/stores';
+import {providertype} from '../services/authservice/authModals';
+
+
+
+	//import { initAuth} from '../services/authservice';
 	import Alerts from '../common/notifications/components/alerts/Alerts.svelte';
 	//import { fade } from 'svelte/transition';
+
+	let sign_up_mode = false;
 
 	// Form Validator usuage starts
 	let mform
@@ -17,7 +28,7 @@ const { addNotification } = getNotificationsContext();
 	let loginform;	
 	let loginstore;
 	let logindata;
-	let logindata_init;
+	let logindata_init;	
 	$: logindata;
 	logindata_init = {email: '',password:''};
 	logindata = JSON.parse(JSON.stringify(logindata_init));
@@ -25,7 +36,7 @@ const { addNotification } = getNotificationsContext();
 	let signupform;
 	let signupstore;
 	let signupdata;
-	let signupdata_init;
+	let signupdata_init;	
 	$: signupdata;
 	signupdata_init = {name: '',email:'',password:''};
 	signupdata = JSON.parse(JSON.stringify(signupdata_init));
@@ -37,6 +48,9 @@ const { addNotification } = getNotificationsContext();
 	let login_alert;
 	let signin_alert;
 	
+	console.log(loginstore);
+	
+
 	const loginunsub = loginstore.subscribe(value => {		
 		console.log(value)	;
 		logindata = value;		
@@ -46,8 +60,10 @@ const { addNotification } = getNotificationsContext();
 	signupstore = signupform.data;	
 	$signupstore = signupdata;
 	
+	console.log(signupstore);
+
 	const signupunsub = signupstore.subscribe(value => {		
-	//	console.log(value)	;
+		console.log(value)	;
 		signupdata = value;		
 	});
 
@@ -57,68 +73,156 @@ const { addNotification } = getNotificationsContext();
 		loginform.initVal(mform);
 
 		sform = document.getElementById("signupform");		
-		signupform.initVal(sform);		
+		signupform.initVal(sform);	
+		let redirfor = sessionStorage.getItem('acredirfor');
+		if(redirfor === 'signup') toggle_signup();
 		
 	});
 
+	onDestroy(async () => {
+		// await activateListener();
+	});
+	
+
 	// Form Validator usuage Ends
 
-	// use custom auth machine store
-	const { state, send } = initAuth();
+	console.log('start of authservice init');
+	let dd = authInit(true);
+	console.log('end of authservice init');
+	console.log(dd);
+
+
+	const restFormh = () => {
+		
+		if(sign_up_mode) {
+			signupdata =  JSON.parse(JSON.stringify(signupdata_init));
+			$signupstore = signupdata;
+			signupform.reset();			
+		} else {			
+			logindata = JSON.parse(JSON.stringify(logindata_init));
+			$loginstore = logindata;
+			loginform.reset();
+		}
+	}
+
+
+	const loginprogressmodal = () => {
+		return addNotification({
+				title : 'Checking your account',
+				text: 'hi i am custom notification why it cant be sol long so i can test it before using it' ,
+				notificationtype: 'modal',            
+				modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});
+	}
+
+	const sessionConfmodal = (val) => {
+			return addNotification({
+				title : 'Checking your account',
+				text: 'You are logging in as '+ val.user.email + ' and may have existing session.  Accept if you are '+ val.user.email + ' and to invalidate all other logins' ,
+				notificationtype: 'modal',   
+				rejectbtntxt:'Cancel',
+				acceptbtntxt:'Proceed',				
+				modaltype:'modal-accept-reject',  	
+				//comp:Modals				
+			});
+		}
+
+
+	const allAlerts = (val) => {
+		return addNotification({
+				targetid: sign_up_mode?'signup': 'login',
+				title : sign_up_mode?'Signup Alert': 'Login Alert',				
+				//text: 'dkdkdk',
+				text: val.detail.message,
+				type:val.detail.error?'error': 'success',										
+				notificationtype: 'alert',     
+				disableClose: false,        
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});	
+	}
+
+	let mymodal = null;
+	const unsub = authStore.subscribe(val => { 
+		console.log(val);
+		if(['redirectchkstart','FBUsrEmailStart','FBUsrCrStart','FBloginStart','FBLogoutStart','FBredirectStart','FBAuthChkStart'].includes(val.stage)) {
+			console.log('Open only Modal');
+			if(!mymodal){
+				mymodal = loginprogressmodal();
+			}
+		} else if (['SessionConf'].includes(val.stage)) {
+			console.log('sessionconif ');
+			if(mymodal) {
+				console.log('sessionconif mymod');
+				mymodal.close();
+				mymodal=null;
+			}
+			if(!mymodal){
+				console.log("opening modal");
+				mymodal = sessionConfmodal(val);
+			}			
+			console.log(mymodal);
+			mymodal.returneddata.then((val) => {
+				mymodal=null;
+				sessionConf(val); 
+				console.log('making modal as null');
+				//mymodal=null;
+				//mymodal.close();
+			});
+		} else if (['FBAuthChkFail','FBLogoutSuc','FBTokenFail'].includes(val.stage)) {
+			console.log('Just close the Modal');			
+			if(mymodal) {
+				restFormh();
+				console.log('FBAuthChkFail mymod');
+				mymodal.close();
+				mymodal=null;
+			}
+		} else if (['FBUsrCrFail','signupemailFail','signupemailSuc','signupFail','loginFail','FBUsrEmailFail','redirectloginFail','redirectsignupFail'].includes(val.stage)) {
+			console.log('close Modal & show alert');
+			if(mymodal) {
+				restFormh();
+				console.log('FBUsrCrFail mymod');
+				mymodal.close();
+				mymodal=null;
+			}			
+			let myerror = allAlerts(val);
+		} else if(['loginSuc','redirectloginSuc'].includes(val.stage)) {
+			console.log('Just close the Modal and navigate to secure page');				
+			if(mymodal) {
+				restFormh();
+				console.log('loginSuc mymod');
+				mymodal.close();
+				mymodal=null;
+			}
+			activateListener();
+			navigate("/dash", { replace: true });
+		}
+				
+	});
+
+	let sessionConf = async (val) => {
+		console.log("inside d");
+		console.log(val);
+		if (val.accept) {
+			await sessionexist();
+		} else {
+			await dosignout();
+			//send('LOGOUT');
+		}
+	}
 	
 
-	const loginHandler = async event => {
-		//const { email, password } = event.target.elements;
-		// send login event
-		send('LOGIN', {
-			provider: 'google',
-			//email: 'natrayan[@gmail..com',
-			//password: 'password.value'
-		});
-	};
-	
-	//testfor();
-	const logoutHandler = async event => {
-		//const { email, password } = event.target.elements;
-		// send login event
-		send('LOGOUT');
-	};
+	const googleSignup = async () => {	
+			await providerlogin(sign_up_mode,providertype.GOOGLE);
+	}
 
-	const signupHandler = async (provider,data={}) => {
-		//const { email, password } = event.target.elements;
-		// send login event
-		console.log(data);
-		let mcheve = (sign_up_mode)?'SIGNUP':'LOGIN';
-		console.log("-----------------");
-		console.log(mcheve);
-		switch(provider) {
-			case('email'):
-			{
-				//console.log(...({email,password} = $signupform.data));
-				send(mcheve, {
-					provider: provider,
-					...data
-					//email: 'natrayan[@gmail..com',
-					//password: 'password.value'
-				});
-				break;
-			}
-			case('google'):
-			{
-				send(mcheve, {provider: provider});
-				break;
-			}
-		}	
-
-	};
-
-
-	const emailSignup = () => {
+	const emailSignup = async () => {
 		console.log(signupdata);
 			
 		let formvalid = false;
 		let data_to_api = null;
-		signupform.status()
+
 		if (sign_up_mode) {	
 			const {name,email,password}=signupdata;			
 			if (signupform.status()) formvalid = true;
@@ -130,175 +234,16 @@ const { addNotification } = getNotificationsContext();
 			console.log(data_to_api)
 		}		
 		if(formvalid) {
-			signupHandler('email',data_to_api);		
+			await signupHandler(sign_up_mode,providertype.EMAILPASSWORD,data_to_api);		
 		}
 	}
 
-	const googleSignup = () => {
-		console.log("inside google");
-		signupHandler('google');
-	}
-
-	
- 
-
-	const restFormh = () => {
-
-		if(sign_up_mode) {
-			signupdata = signupdata_init;
-			$signupstore = JSON.parse(JSON.stringify(signupdata));
-			signupform.reset();			
-		} else {			
-			logindata = JSON.parse(JSON.stringify(logindata_init));
-			$loginstore = logindata;
-			loginform.reset();
-		}
-	}
-
-	let mymodal = null;
-	const unsubscribe = state.subscribe(value => {
-		console.log('my statie');
-		console.log(value.value);
-		
-		if(!['sessionConf','signedIn', 'signedOut','setSilentMsg','setSilentFBEr'].some(value.matches)) { 
-			console.log('my statie mymo');
-			console.log(mymodal);
-			if(!mymodal){
-				mymodal = addNotification({
-				title : 'Checking your account',
-				text: 'hi i am custom notification why it cant be sol long so i can test it before using it' ,
-				notificationtype: 'modal',            
-				modaltype:'modal-no-action',  	
-				//comp:Modals				
-			});
-		}
-		}  else if(['sessionConf'].some(value.matches)) {
-			console.log('sessionconif ');
-			if(mymodal) {
-				console.log('sessionconif mymod');
-				mymodal.close();
-				mymodal=null;
-			}
-			if(!mymodal){
-				console.log("opening modal");
-				mymodal = addNotification({
-				title : 'Checking your account',
-				text: 'You are logging in as xxxxxxxx@gmail.com and may have existing session.  Accept if you are xxxxxxx@gmail and to invalidate all other logins' ,
-				notificationtype: 'modal',   
-				rejectbtntxt:'Cancel',
-				acceptbtntxt:'Proceed',				
-				modaltype:'modal-accept-reject',  	
-				//comp:Modals				
-			});
-			console.log(mymodal);
-			mymodal.returneddata.then((val) => {
-				mymodal=null;
-				sessionConf(val); 
-				console.log('making modal as null');
-				//mymodal=null;
-				//mymodal.close();
-			});
-		}
-		} else if (['signedOut.failure'].some(value.matches)){
-			if(mymodal) {
-				console.log('signedOut . failure mymod');
-				mymodal.close();
-				mymodal=null;
-			}
-			restFormh();
-			let myerror = addNotification({
-				targetid: sign_up_mode?'signup': 'login',
-				title : sign_up_mode?'Signup Alert': 'Login Alert',				
-				//text: 'kdkdkdkdkdk',
-				text: $state.context.apimsg.message || $state.context.error.detail || $state.context.error.message,
-				notificationtype: 'alert',            
-				type: 'error',
-				disableClose: false,    
-				//modaltype:'modal-no-action',  	
-				//comp:Modals				
-			});				
-			sign_up_mode ? signin_alert= myerror: login_alert = myerror;
-
-		} else if (['setSilentMsg'].some(value.matches)){	
-			console.log("#################");
-		//	console.log($state.context.error.message);
-			let myerror = addNotification({
-				targetid: sign_up_mode?'signup': 'login',
-				title : sign_up_mode?'Signup Alert': 'Login Alert',				
-				//text: 'dkdkdk',
-				text: $state.context.apimsg.message || $state.context.error.detail || $state.context.error.message,
-				type: $state.context.apimsg? 
-								($state.context.apimsg.error?'error':'success'): 'error',										
-				notificationtype: 'alert',     
-				disableClose: false,        
-				//modaltype:'modal-no-action',  	
-				//comp:Modals				
-			});	
-			sign_up_mode ? signin_alert= myerror: login_alert = myerror;			
-			send('DONE');
-		} else if (['setSilentFBEr'].some(value.matches)){	
-			console.log("################# setSilentFBEr");
-			let myerror = addNotification({
-				targetid: sign_up_mode?'signup': 'login',
-				title : sign_up_mode?'Signup Alert': 'Login Alert',				
-				//text: 'dkdkdk',
-				text: $state.context.error.message,
-				type:'error',										
-				notificationtype: 'alert',     
-				disableClose: false,        
-				//modaltype:'modal-no-action',  	
-				//comp:Modals				
-			});	
-			sign_up_mode ? signin_alert= myerror: login_alert = myerror;			
-			send('DONE');
-		} else if(['signedIn', 'signedOut'].some(value.matches)){
-			console.log("----------------sd3434$$$$$$$");
-			restFormh();
-			if(mymodal) {
-				console.log(mymodal);
-				let dd = mymodal.close();					
-				console.log(dd);
-				console.log("closed");
-				mymodal=null;
-			}
-		}else {	
-			console.log(value);
-			console.log(mymodal);
-			if(mymodal) {
-				mymodal.close();
-				mymodal=null;
-			}
-
-		}
-	});
 	
 	
-	let sessionConf = (val) => {
-		console.log("inside d");
-		console.log(val);
-		if (val.accept) {
-			send('LOGIN');
-		} else {
-			send('LOGOUT');
-		}
-	}
-
-	/*let pristine;
-	onMount(async() => {
-		var form = document.getElementById("loginform");
-		console.log(form);
-		//pristine = new Pristine(form);
-	
-	});*/
-
-
-	// we don't want to be explicit about signingIn state
-	$: displayLoginForm = ['signingIn', 'signedOut'].some($state.matches);
-	
-	let sign_up_mode = false;
 	$: container = 'container';
 	
 	function toggle_signup() {
+		console.log('test');
 		sign_up_mode=!sign_up_mode;
 		container = sign_up_mode?'container sign-up-mode':'container sign-in-mode';
 		//if(sign_up_mode) signupform.reset();
@@ -307,10 +252,10 @@ const { addNotification } = getNotificationsContext();
 		
 	}
 
-
-
 	function todel(){
 		console.log('kdjdf');
+		//authapi_services.signupApiwemail();
+		
 		let myerror = addNotification({
 				targetid:'login',
 				title : 'alert test',				
@@ -322,6 +267,7 @@ const { addNotification } = getNotificationsContext();
 				//modaltype:'modal-no-action',  	
 				//comp:Modals				
 			});	
+			
 	}
 
 
@@ -331,20 +277,25 @@ const { addNotification } = getNotificationsContext();
 <!---
 <button on:click={loginHandler}>nat</button>
 <button on:click={logoutHandler}>logout</button>
-	-->
+	
 	<p> I am in login</p>
 	{JSON.stringify($state.value)}
 	<p></p>
 	{JSON.stringify($state.context)}
 
-
+<p></p>
+{JSON.stringify($authStore)}
 
 <p>Login form</p>
 <prev>{JSON.stringify($loginstore)}</prev>
+<p></p>
+<prev>{JSON.stringify(logindata)}</prev>
 <p>Sign form</p>
 <prev>{JSON.stringify($signupstore)}</prev>
+<p></p>
+<prev>{JSON.stringify(signupdata)}</prev>
 
-
+-->
 
 <div class="flex items-center justify-center">
 

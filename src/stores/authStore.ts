@@ -1,9 +1,11 @@
 import { writable } from "svelte/store";
 
 const INITIAL_STORE = {
-    user: null,
     auth:null,
-    state: 'logout'
+    user: null,
+    stage: 'logout',
+    detail: null,
+    listener:null,
 };
 
 export const initAuthStore = (initialStore = INITIAL_STORE) => {

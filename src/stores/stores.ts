@@ -1,6 +1,6 @@
 
 //import { createErrorStore } from "./error";
-import { createAuthStore } from "../services/authservice1/authstore";
+//import { createAuthStore } from "../services/authservice/authstore";
 import { createSessionStore } from "./session";
 import { writable } from "svelte/store"
 import { initAuthStore } from './authStore';
