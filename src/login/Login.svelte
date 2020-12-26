@@ -4,7 +4,7 @@ import {formValidator} from '../common/formvalidators/formvalidator';
 import {onMount, onDestroy} from 'svelte';
 
 import { getNotificationsContext } from '../common/notifications';
-import { navigate } from "svelte-routing";
+//import { navigate } from "svelte-routing";
 
 const { addNotification } = getNotificationsContext();
 
@@ -15,12 +15,15 @@ import {authStore} from '../stores/stores';
 import {providertype} from '../services/authservice/authModals';
 
 
+//import Router, { push } from 'svelte-spa-router'
 
 	//import { initAuth} from '../services/authservice';
 	import Alerts from '../common/notifications/components/alerts/Alerts.svelte';
 	//import { fade } from 'svelte/transition';
 
 	let sign_up_mode = false;
+
+	//import Test from '../test/Test.svelte';
 
 	// Form Validator usuage starts
 	let mform
@@ -196,7 +199,8 @@ import {providertype} from '../services/authservice/authModals';
 				mymodal=null;
 			}
 			activateListener();
-			navigate("/dash", { replace: true });
+			//navigate("/dash", { replace: true });
+			push('/landing');
 		}
 				
 	});

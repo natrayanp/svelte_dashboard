@@ -1,6 +1,8 @@
 <script>
     import {sidemenuStore} from './sidemenustore';
-    import { navigate } from "svelte-routing";
+    import { goto } from '@roxi/routify'
+
+    //import { navigate } from "svelte-routing";
 
     export let menu;
     export let index;
@@ -14,7 +16,8 @@
         selected = n;
         console.log(menu);
         sidemenuStore.selectionUpdate(n);
-        navigate(menu.link, { replace: false });
+        //navigate(menu.link, { replace: false });
+        $goto(menu.link);
     }
 
     function openLink(index){

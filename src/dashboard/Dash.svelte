@@ -12,15 +12,15 @@ $: selected = null
 // link is false then it is header
 export const menus = [
 {
-    'name': '/dashboard',
+    'name': 'dashboard',
     'icon': 'fa-tachometer-alt',
     'link': false,
     'open': false,
     'chip': { 'value': 1, 'color': 'accent' },
     'sub': [
         {
-            'name': '/dashboard',
-            'link': '/dash/test',
+            'name': 'dashboard',
+            'link': './settings/test',
             'icon': 'fa-cog',
             'chip': false,
             'open': false,
@@ -255,7 +255,7 @@ $: selected = -1;
 </nav>
 <!-- Top NAV END-->
 
-<Sidemenu {menus} {sidenavopen}/>
+<Sidemenu {menus} {sidenavopen}><slot/></Sidemenu>
 
 <!-- SIDE NAV END-->
       <!--

@@ -1,6 +1,6 @@
 <script>
 
-import { Router, Route, Link } from "svelte-routing";
+//import { Router, Route, Link } from "svelte-routing";
 
     import Sidemenuitems from './Sidemenuitems.svelte';
     import {initSideMenuStore} from './sidemenustore';
@@ -59,10 +59,7 @@ import { Router, Route, Link } from "svelte-routing";
 <div class="px-16 py-4 text-gray-700 bg-white h-screen w-screen">
     <p>kdkdk</p>
     <!-- Content -->
-    <Router>
-        <Route path="test"> <Test/> </Route>
-        <Route path="genset"><Gensettings/></Route>
-     </Router>
+    <slot />
     
   </div>
 </div>

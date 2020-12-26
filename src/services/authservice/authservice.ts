@@ -38,6 +38,7 @@ export async function authInit(){
                 respdata = await http.post('signuptoken',{});   
                 console.log(respdata);
             } else if (redirfor === 'login'){
+                console.log('print logintoken');
                 respdata = await http.post('logintoken',{});
             }
         } catch(err) {

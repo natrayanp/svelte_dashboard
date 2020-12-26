@@ -3,10 +3,11 @@ import commonjs from '@rollup/plugin-commonjs';
 import resolve from '@rollup/plugin-node-resolve';
 import livereload from 'rollup-plugin-livereload';
 import { terser } from 'rollup-plugin-terser';
-import sveltePreprocess from 'svelte-preprocess';
 import typescript from '@rollup/plugin-typescript';
+import sveltePreprocess from 'svelte-preprocess';
 import css from 'rollup-plugin-css-only';
 //import { createBasicConfig } from '@open-wc/building-rollup';
+import { injectManifest } from 'rollup-plugin-workbox'
 
 const production = !process.env.ROLLUP_WATCH;
 /*
@@ -16,6 +17,9 @@ export default merge(baseConfig, {
   input: './index.html',
 });
 */
+
+const assetsDir = 'assets'
+
 
 function serve() {
 	let server;
@@ -42,9 +46,12 @@ export default {
 	input: 'src/main.ts',
 	output: {
 		sourcemap: true,
-		format: 'iife',
+		//format: 'iife',
+		format: 'esm',
 		name: 'app',
-		file: 'public/build/bundle.js'
+		//file: 'public/build/bundle.js'
+		dir:'public/build/',
+		chunkFileNames: '[name].js'
 	},
 	plugins: [
 		svelte({
@@ -72,7 +79,6 @@ export default {
 			sourceMap: !production,
 			inlineSources: !production
 		}),
-
 		
 		// In dev mode, call `npm run start` once
 		// the bundle has been generated
@@ -88,7 +94,15 @@ export default {
 
 		// If we're building for production (npm run build
 		// instead of npm run dev), minify
-		production && terser()
+		production && terser(),
+		injectManifest({
+            globDirectory: assetsDir,
+            globPatterns: ['**/*.{js,css,svg}', '__app.html'],
+            swSrc: `src/sw.js`,
+            swDest: `public/build/serviceworker.js`,
+            maximumFileSizeToCacheInBytes: 10000000, // 10 MB,
+            mode: 'production'
+        }),
 	],
 	watch: {
 		clearScreen: false

@@ -5,16 +5,17 @@
     "watch:tailwind": "postcss public/tailwind.css -o public/index.css -w",
     "build:tailwind": "postcss public/tailwind.css -o public/index.css",
     "watch:material": "postcss public/app.scss -o public/index1.css",
-    "build": "npm run build:tailwind && rollup -c",
-    "start": "sirv public",
+    "build": "npm run build:tailwind && routify -b && rollup -c",
+    "start": "sirv public --single",
     "serve": "serve public -p 80",
     "watch": "rollup -c -w",
-    "dev": "concurrently \"rollup -c -w\" \"npm run watch:tailwind\""
+    "dev": "concurrently \"routify\" \"rollup -c -w\" \"npm run watch:tailwind\""
   },
   "devDependencies": {
     "@rollup/plugin-commonjs": "^16.0.0",
     "@rollup/plugin-node-resolve": "^10.0.0",
     "@rollup/plugin-typescript": "^6.0.0",
+    "@roxi/routify": "^2.7.3",
     "@tsconfig/svelte": "^1.0.0",
     "autoprefixer": "^10.0.4",
     "concurrently": "^5.3.0",
@@ -37,11 +38,7 @@
   "dependencies": {
     "@open-wc/building-rollup": "^1.9.4",
     "@tailwindcss/forms": "^0.2.1",
-    "axios": "^0.21.0",
     "firebase": "^8.1.2",
-    "firebaseui": "^4.7.1",
-    "sirv-cli": "^1.0.0",
-    "svelte-routing": "^1.4.2",
-    "xstate": "^4.15.1"
+    "sirv-cli": "^1.0.0"
   }
 }
