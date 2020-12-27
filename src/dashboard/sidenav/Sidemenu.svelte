@@ -5,7 +5,7 @@
     import Sidemenuitems from './Sidemenuitems.svelte';
     import {initSideMenuStore} from './sidemenustore';
     import Test from '../../test/Test.svelte';
-    import Gensettings from '../../modules/general/settings/Gensettings.svelte';
+    import Gensettings from '../../modules/general/settings/Branch.svelte';
 
     export let menus;
     let selected= -1;    
@@ -22,13 +22,13 @@
 
 <!-- SIDE NAV END-->
 <transition name="slide">
-    <div class="md:flex flex-col md:flex-row md:min-h-screen w-full">
-        <div class="flex flex-col w-full md:w-72 text-gray-700 bg-white justify-center dark-mode:text-gray-200 dark-mode:bg-gray-800 flex-shrink-0" x-data={sidenavopen}>
+    <div class="flex flex-col md:flex-row md:min-h-screen md:flex-grow-1 w-full">
+        <div class="flex flex-col w-full md:min-h-screen md:w-72 text-gray-700 bg-white justify-center dark-mode:text-gray-200 dark-mode:bg-gray-800 flex-shrink-0" x-data={sidenavopen}>
           
         
 
 
-<nav class:block={sidenavopen} class:hidden={!sidenavopen} class="relative md:block md:pb-0 md:min-h-screen bg-white md:overflow-y-auto z-50 shadow-xl">                        
+<nav class:block={sidenavopen} class:hidden={!sidenavopen} class="relative md:block md:pb-0 flex flex-grow md:min-h-screen  bg-gray-50 md:overflow-y-auto z-50 shadow-xl">                        
     
     <div class = "flex flex-col items-center">
         <!-- User photo -->
@@ -56,8 +56,8 @@
 </nav>
 </div>
     
-<div class="px-16 py-4 text-gray-700 bg-white h-screen w-screen">
-    <p>kdkdk</p>
+<div class="px-16 pt-10 pb-10 text-gray-700 bg-gray-100 flex-col flex-grow w-screen">
+    
     <!-- Content -->
     <slot />
     

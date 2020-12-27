@@ -20,7 +20,7 @@ export const menus = [
     'sub': [
         {
             'name': 'dashboard',
-            'link': './settings/test',
+            'link': './settings/companysettings',
             'icon': 'fa-cog',
             'chip': false,
             'open': false,
@@ -208,7 +208,7 @@ $: selected = -1;
   </div>
 <!-- logo -->
 <!--img src="http://acmelogos.com/images/logo-1.svg" alt="ACME" width="120" class="text-white text-3xl font-bold "/-->
-<a href="#" class="text-white text-3xl font-bold p-3 ">WEB ZONE</a>
+<a href="#" class="text-white text-3xl font-bold p-5 ">WEB ZONE</a>
 
 <span class="flex-grow"></span>
 <!-- hamburger -->

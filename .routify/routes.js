@@ -1,11 +1,11 @@
 
 /**
  * @roxi/routify 2.7.3
- * File generated Sun Dec 27 2020 01:41:19 GMT+0800 (Singapore Standard Time)
+ * File generated Sun Dec 27 2020 23:26:28 GMT+0800 (Singapore Standard Time)
  */
 
 export const __version = "2.7.3"
-export const __timestamp = "2020-12-26T17:41:19.877Z"
+export const __timestamp = "2020-12-27T15:26:28.750Z"
 
 //buildRoutes
 import { buildClientTree } from "@roxi/routify/runtime/buildRoutes"
@@ -133,6 +133,58 @@ export const _tree = {
                 {
                   "isFile": true,
                   "isDir": false,
+                  "file": "branchsettings.svelte",
+                  "filepath": "/landing/[slug]/settings/branchsettings.svelte",
+                  "name": "branchsettings",
+                  "ext": "svelte",
+                  "badExt": false,
+                  "absolutePath": "/home/nirudhi/projects/svelte_dashboard/src/pages/landing/[slug]/settings/branchsettings.svelte",
+                  "importPath": "../src/pages/landing/[slug]/settings/branchsettings.svelte",
+                  "isLayout": false,
+                  "isReset": false,
+                  "isIndex": false,
+                  "isFallback": false,
+                  "isPage": true,
+                  "ownMeta": {},
+                  "meta": {
+                    "$$bundleId": "_landing__slug___layout_svelte.js",
+                    "recursive": true,
+                    "preload": false,
+                    "prerender": true
+                  },
+                  "path": "/landing/:slug/settings/branchsettings",
+                  "id": "_landing__slug_settings_branchsettings",
+                  "component": () => import('./_landing__slug___layout_svelte.js').then(m => m._landing__slug_settings_branchsettings)
+                },
+                {
+                  "isFile": true,
+                  "isDir": false,
+                  "file": "companysettings.svelte",
+                  "filepath": "/landing/[slug]/settings/companysettings.svelte",
+                  "name": "companysettings",
+                  "ext": "svelte",
+                  "badExt": false,
+                  "absolutePath": "/home/nirudhi/projects/svelte_dashboard/src/pages/landing/[slug]/settings/companysettings.svelte",
+                  "importPath": "../src/pages/landing/[slug]/settings/companysettings.svelte",
+                  "isLayout": false,
+                  "isReset": false,
+                  "isIndex": false,
+                  "isFallback": false,
+                  "isPage": true,
+                  "ownMeta": {},
+                  "meta": {
+                    "$$bundleId": "_landing__slug___layout_svelte.js",
+                    "recursive": true,
+                    "preload": false,
+                    "prerender": true
+                  },
+                  "path": "/landing/:slug/settings/companysettings",
+                  "id": "_landing__slug_settings_companysettings",
+                  "component": () => import('./_landing__slug___layout_svelte.js').then(m => m._landing__slug_settings_companysettings)
+                },
+                {
+                  "isFile": true,
+                  "isDir": false,
                   "file": "test.svelte",
                   "filepath": "/landing/[slug]/settings/test.svelte",
                   "name": "test",
@@ -155,6 +207,32 @@ export const _tree = {
                   "path": "/landing/:slug/settings/test",
                   "id": "_landing__slug_settings_test",
                   "component": () => import('./_landing__slug___layout_svelte.js').then(m => m._landing__slug_settings_test)
+                },
+                {
+                  "isFile": true,
+                  "isDir": false,
+                  "file": "usersettings.svelte",
+                  "filepath": "/landing/[slug]/settings/usersettings.svelte",
+                  "name": "usersettings",
+                  "ext": "svelte",
+                  "badExt": false,
+                  "absolutePath": "/home/nirudhi/projects/svelte_dashboard/src/pages/landing/[slug]/settings/usersettings.svelte",
+                  "importPath": "../src/pages/landing/[slug]/settings/usersettings.svelte",
+                  "isLayout": false,
+                  "isReset": false,
+                  "isIndex": false,
+                  "isFallback": false,
+                  "isPage": true,
+                  "ownMeta": {},
+                  "meta": {
+                    "$$bundleId": "_landing__slug___layout_svelte.js",
+                    "recursive": true,
+                    "preload": false,
+                    "prerender": true
+                  },
+                  "path": "/landing/:slug/settings/usersettings",
+                  "id": "_landing__slug_settings_usersettings",
+                  "component": () => import('./_landing__slug___layout_svelte.js').then(m => m._landing__slug_settings_usersettings)
                 }
               ],
               "isLayout": false,
