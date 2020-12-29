@@ -1,11 +1,11 @@
 
 /**
  * @roxi/routify 2.7.3
- * File generated Sun Dec 27 2020 23:26:28 GMT+0800 (Singapore Standard Time)
+ * File generated Wed Dec 30 2020 02:35:30 GMT+0800 (Singapore Standard Time)
  */
 
 export const __version = "2.7.3"
-export const __timestamp = "2020-12-27T15:26:28.750Z"
+export const __timestamp = "2020-12-29T18:35:30.819Z"
 
 //buildRoutes
 import { buildClientTree } from "@roxi/routify/runtime/buildRoutes"
@@ -207,6 +207,32 @@ export const _tree = {
                   "path": "/landing/:slug/settings/test",
                   "id": "_landing__slug_settings_test",
                   "component": () => import('./_landing__slug___layout_svelte.js').then(m => m._landing__slug_settings_test)
+                },
+                {
+                  "isFile": true,
+                  "isDir": false,
+                  "file": "userroles.svelte",
+                  "filepath": "/landing/[slug]/settings/userroles.svelte",
+                  "name": "userroles",
+                  "ext": "svelte",
+                  "badExt": false,
+                  "absolutePath": "/home/nirudhi/projects/svelte_dashboard/src/pages/landing/[slug]/settings/userroles.svelte",
+                  "importPath": "../src/pages/landing/[slug]/settings/userroles.svelte",
+                  "isLayout": false,
+                  "isReset": false,
+                  "isIndex": false,
+                  "isFallback": false,
+                  "isPage": true,
+                  "ownMeta": {},
+                  "meta": {
+                    "$$bundleId": "_landing__slug___layout_svelte.js",
+                    "recursive": true,
+                    "preload": false,
+                    "prerender": true
+                  },
+                  "path": "/landing/:slug/settings/userroles",
+                  "id": "_landing__slug_settings_userroles",
+                  "component": () => import('./_landing__slug___layout_svelte.js').then(m => m._landing__slug_settings_userroles)
                 },
                 {
                   "isFile": true,
