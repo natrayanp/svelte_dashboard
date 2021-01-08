@@ -32,7 +32,7 @@
 	emailverified: tokens.claims.email_verified,
 	token: tokens.token,
 	session:null
-});
+    });
 
 
 export const initAuth = (useRedirect = false) => {

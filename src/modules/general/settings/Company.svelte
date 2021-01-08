@@ -31,13 +31,6 @@ const dd = {
         entityid:null,
 }
 
-let dt1 = false;
-let dt2 = false;
-let my = true;
-
-function showtable() {
-    my= !my;
-}
 
 
 

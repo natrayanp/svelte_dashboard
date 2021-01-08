@@ -5,7 +5,7 @@ import {Alerts} from '../common/notifications'
 import { getNotificationsContext } from '../common/notifications';
 //import {push, pop, replace} from 'svelte-spa-router'
 //import {link} from 'svelte-spa-router'
-import {isActive, url} from '@roxi/routify'
+import {isActive, url} from '@roxi/routify';
 
 
 const { addNotification } = getNotificationsContext();

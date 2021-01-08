@@ -2,12 +2,13 @@
 
 //import Auth from './ Auth';
 import {initAuth} from './auth';
-import {HttpClient} from '../httpservice/HttpClient';
+//import {HttpClient} from '../httpservice/HttpClient';
 import {authStore} from '../../stores/stores';
 import {providertype} from './authModals';
+import { http } from '../../stores/services';
 
 let auth = null;
-let http = HttpClient();
+//let http = HttpClient();
 let session_chk = false;
 
 export async function authInit(){
@@ -37,6 +38,7 @@ export async function authInit(){
             if (redirfor === 'signup') {        
                 respdata = await http.post('signuptoken',{});   
                 console.log(respdata);
+                console.log(respdata);
             } else if (redirfor === 'login'){
                 console.log('print logintoken');
                 respdata = await http.post('logintoken',{});
@@ -48,10 +50,10 @@ export async function authInit(){
         }
         let st = null;
         (redirfor === 'signup')
-        if(respdata.error){
-            authStore.update(dd => ({...dd,stage:'redirect'+redirfor+'Fail',detail:respdata}));
-        } else {
+        if(respdata.success){
             authStore.update(dd => ({...dd,stage:'redirect'+redirfor+'Suc',detail:respdata}));
+        } else {
+            authStore.update(dd => ({...dd,stage:'redirect'+redirfor+'Fail',detail:respdata}));            
         }   
         if(redirfor === 'signup')  dosignout();        
         return respdata;
@@ -115,6 +117,7 @@ const signupWithEmail = async (data) => {
             respdata = await http.post('signupemail',{useremail:resdet.detail.message});              
         } else {
             respdata = await http.post('signuptoken',{});
+            console.log(respdata);
         }       
 
     } catch(err) {
@@ -124,10 +127,10 @@ const signupWithEmail = async (data) => {
         return err;
     }
     console.log(respdata);
-    if (respdata.error) {
-        authStore.update(dd => ({...dd,stage:'signupemailFail',detail:respdata}));
-    } else {
+    if (respdata.success) {
         authStore.update(dd => ({...dd,stage:'signupemailSuc',detail:respdata}));
+    } else {
+        authStore.update(dd => ({...dd,stage:'signupemailFail',detail:respdata}));        
     }
 
 }
@@ -152,7 +155,7 @@ export const loginWithEmail = async (data) => {
     }
     /*
     console.log(respdata);
-    if (respdata.error) {
+    if (respdata.success) {
         authStore.update(dd => ({...dd,stage:'loginemailFail',detail:respdata}));
     } else {
         authStore.update(dd => ({...dd,stage:'loginemailSuc',detail:respdata}));
@@ -204,10 +207,10 @@ const logintk = async() => {
         return err;
     }
 
-    if (respdata.error) {
-        authStore.update(dd => ({...dd,stage:'loginFail',detail:respdata}));
+    if (respdata.success) {
+        authStore.update(dd => ({...dd,stage:'loginSuc',detail:respdata}));        
     } else {
-        authStore.update(dd => ({...dd,stage:'loginSuc',detail:respdata}));
+        authStore.update(dd => ({...dd,stage:'loginFail',detail:respdata}));
     }
 }
 
@@ -216,6 +219,7 @@ const signtk = async() => {
     let respdata;
     try{
         respdata = await http.post('signuptoken',{});
+        console.log(respdata);
     } catch (err) {
         console.log(err);
         authStore.update(dd => ({...dd,stage:'signupFail'}));
@@ -223,10 +227,10 @@ const signtk = async() => {
         return err;
     }
 
-    if (respdata.error) {
-        authStore.update(dd => ({...dd,stage:'signupFail',detail:respdata}));
-    } else {
+    if (respdata.success) {
         authStore.update(dd => ({...dd,stage:'signupSuc',detail:respdata}));
+    } else {
+        authStore.update(dd => ({...dd,stage:'signupFail',detail:respdata}));        
     }
 }
 

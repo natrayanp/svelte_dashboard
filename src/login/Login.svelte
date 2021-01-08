@@ -7,6 +7,7 @@ import { getNotificationsContext } from '../common/notifications';
 //import { navigate } from "svelte-routing";
 
 const { addNotification } = getNotificationsContext();
+import { goto } from '@roxi/routify';
 
 
 //import {authapi_services} from '../services/authservice/authapi';
@@ -26,8 +27,8 @@ import {providertype} from '../services/authservice/authModals';
 	//import Test from '../test/Test.svelte';
 
 	// Form Validator usuage starts
-	let mform
-	let sform
+	let mform;
+	let sform;
 	let loginform;	
 	let loginstore;
 	let logindata;
@@ -181,7 +182,7 @@ import {providertype} from '../services/authservice/authModals';
 				mymodal.close();
 				mymodal=null;
 			}
-		} else if (['FBUsrCrFail','signupemailFail','signupemailSuc','signupFail','loginFail','FBUsrEmailFail','redirectloginFail','redirectsignupFail'].includes(val.stage)) {
+		} else if (['FBUsrCrFail','signupemailFail','signupemailSuc','signupFail','loginFail','FBUsrEmailFail','redirectloginFail','redirectsignupFail','redirectsignupSuc'].includes(val.stage)) {
 			console.log('close Modal & show alert');
 			if(mymodal) {
 				restFormh();
@@ -200,7 +201,16 @@ import {providertype} from '../services/authservice/authModals';
 			}
 			activateListener();
 			//navigate("/dash", { replace: true });
-			push('/landing');
+			//push('/landing');
+			if(val.detail.data[0].isurlcreated) {
+				authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data[0].sessionid),siteid:(val.detail.data[0].siteid)}));
+				//authStore.update(dd => ({...dd,siteid:(val.detail.data[0].siteid)}));
+				$goto('/landing');
+				console.log()
+			} else {
+				authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data[0].sessionid),siteid:(val.detail.data[0].siteid)}));
+				$goto('/landing/subdomain');
+			}			
 		}
 				
 	});

@@ -4,7 +4,10 @@ import {positions,notificationtype,modaltype} from './modals'
 
 
 const isNotificationValid = notification => { 
+  console.log(notification);
+  console.log(!notification);
   if (!notification ||  !notification.text || !notification.notificationtype) return false;
+  console.log("eksdksd");
   if (!notificationtype.includes(notification.notificationtype)) return false;
   if (typeof notification.title !== 'string' || typeof notification.text !== 'string') return false;
   if (((notification.notificationtype) === 'notification') && (!positions.includes(notification.position))) return false;

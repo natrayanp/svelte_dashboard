@@ -6,6 +6,8 @@ const INITIAL_STORE = {
     stage: 'logout',
     detail: null,
     listener:null,
+    session:null,
+    siteid:null
 };
 
 export const initAuthStore = (initialStore = INITIAL_STORE) => {

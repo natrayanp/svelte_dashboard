@@ -6,12 +6,14 @@
 	import Notifications from './common/notifications';
 	//import routes from './routes'
 	import { Router } from "@roxi/routify";
-    import { routes } from "../.routify/routes";
+	import { routes } from "../.routify/routes";
+	import { createAppServices } from "./stores/services";
 
 	
 	// Used for SSR. A falsy value is ignored by the Router.
 	//export let url = "";
 	onMount(async ()=>{
+		createAppServices();
 		//let tt = session;
 		//const res = await fetch(`https://jsonplaceholder.typicode.com/photos?_limit=20`);
 		//photos = await res.json();

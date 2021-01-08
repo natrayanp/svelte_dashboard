@@ -1,7 +1,8 @@
 export const apiurls = {
     // Common routes for all
     all_api_url:
-        'http://127.0.0.1:8000/v1/',
+        //'http://127.0.0.1:8000/v1/',
+        'http://127.0.0.1:3000/',
     // 'https://e294sbftrc.execute-api.ap-south-1.amazonaws.com/acdev',
     // Individual routes
     url_regis: 'http://127.0.0.1:8081',
@@ -47,6 +48,10 @@ export const environment = {
     url_auth_ologin: apiurls.all_api_url,
     endpt_auth_ologin : 'ologin'
     */
+   endpt_signuptoken:'auth/signuptoken',
+   endpt_logintoken:'auth/logintoken',
+   endpt_regisdomain:'auth/regisdomain',
+   endpt_getmenus:'auth/getmenus',
 };
 
 

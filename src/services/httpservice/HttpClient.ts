@@ -8,7 +8,8 @@ let tkn = null;
 export const HttpClient = () => {    
 
   const apiRequest = async (method, url, data?, opts={}) => {    
-    let myurl = apiurls.all_api_url + url;
+    console.log(url);
+    let myurl = apiurls.all_api_url + environment['endpt_' + url];
     let conf = {          
           method: method.toUpperCase(),          
           ...opts       
@@ -25,38 +26,54 @@ export const HttpClient = () => {
             tkn = authVal.user.token;
             hdrs = {...hdrs,'Authorization': 'Bearer '+tkn};                      
         }                
+        
+        if(authVal.user.session !== null) {
+          hdrs = {...hdrs, 'session': authVal.user.session};
+        }
+        hdrs = {...hdrs, 'Content-Type': 'application/json'};
+        
 
-        hdrs = {...hdrs, 'siteid':installation.siteid};
+        //hdrs = {...hdrs, 'siteid':installation.siteid};
         
         if (!environment.production){
           hdrs = {...hdrs, 'Access-Control-Allow-Origin': "*", 'Access-Control-Allow-Headers': "*"};
         }        
         conf['headers'] = hdrs;       
         console.log(JSON.stringify(conf));  
-
+       
+        let resp = await fetch(myurl,conf).catch(handleErr);
 
         
-        let resp = await fetch(myurl,conf).catch(handleErr);
+
 
         console.log(resp);
         let respdata = {};
         if(!resp.ok) {
           //console.log(resp);
+          console.log("inside ok");
           if(resp.status === 500){
             //To capture internal server errors from server
-            let respd = await resp.text();
-            respdata = {error: true, message: respd};  
+            console.log("inside ok true");
+            //let respd = await resp.text();
+            //respdata = {error: true, message: respd};  
+            let respd = await resp.json();
+            respdata = respd;
+            console.log(respd);
             console.log(respdata);
           } else {
+            console.log("inside ok false");
             let respd = await resp.json();
             console.log(respd);
-            respdata = respd['detail'];
+            //respdata = respd['detail'];
+            respdata = respd;
             console.log(respdata);  
           }
         } else {
+          console.log("inside else");
           let respd = await resp.json();
           console.log(respd);
-          respdata = respd['detail'];
+          //respdata = respd['detail'];
+          respdata = respd;
           console.log(respdata);
         }
         
