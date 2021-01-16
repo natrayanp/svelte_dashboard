@@ -4,12 +4,14 @@
     import { metatags } from '@roxi/routify';
     metatags.title = 'My Routify app';
     metatags.description = 'Description coming soon...';
+    import {authStore} from '../../../stores/stores';
 
 </script>
 
 <!-- routify:options bundle=true -->
 
 {$params.slug}
-<Dash >    
+
+<Dash menus={$authStore.activepack.subMenu} >    
     <slot/>
 </Dash>

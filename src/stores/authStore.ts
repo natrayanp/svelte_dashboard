@@ -7,7 +7,9 @@ const INITIAL_STORE = {
     detail: null,
     listener:null,
     session:null,
-    siteid:null
+    siteid:null,
+    menus:null,
+    activepack:null,
 };
 
 export const initAuthStore = (initialStore = INITIAL_STORE) => {

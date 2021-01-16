@@ -91,13 +91,18 @@ onDestroy(async () => {
   .m{
     position: fixed;
     top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .m1{
+    position: fixed;
+    top: 50%;       
   }
 
 </style>
 
-<div class="m">
+<div class="m md:m1">
   <Alerts targetid="sudo"/>
   {#if !pgtog}  
     <label for="url" class="block text-xl font-bold text-gray-700 pb-2">Choose your URL</label>

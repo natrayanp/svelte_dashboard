@@ -6,7 +6,7 @@
      */
     if ("serviceWorker" in navigator) {
       import("workbox-window").then(async ({ Workbox }) => {
-        const wb = new Workbox("build/serviceworker.js");
+        const wb = new Workbox("/build/serviceworker.js");
         console.log(wb);
         const registration = await wb.register();
         console.log(registration);

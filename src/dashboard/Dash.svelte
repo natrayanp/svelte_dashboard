@@ -8,7 +8,9 @@ let downclicks = true;
 let togg = true;
 //let selected;
 $: selected = null
+export let menus;
 
+/*
 // link is false then it is header
 export const menus = [
 {
@@ -154,6 +156,7 @@ export const menus = [
 },
 
 ];
+*/
 
 function toggle_sidenav() {
     sidenavopen = !sidenavopen;

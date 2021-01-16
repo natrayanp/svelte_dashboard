@@ -41,11 +41,11 @@
     <ul class="relative">
 
         <!-- This is the menu header -->
-        {#if menu.link === false}
+        {#if menu.link === null}
             <li>
                 <button type="button"  on:click={()=> openLink(index)} class="focus:bg-none border-none py-2 w-full flex items-center focus:outline-none focus-visible:underline" style = "padding-left: {(level==1? `0.75rem` : (1.6*level +`rem`))}">
 
-                    <i class="fas {menu.icon}"></i>
+                    <i class="{menu.icon}"></i>
             
                     <!-- Text - menu item text -->
                     <span class="ml-2 text-sm font-medium transition-all ease-out transition-medium">
@@ -72,13 +72,13 @@
             </li>
         {/if}
 
-        {#if menu.link !== false}
+        {#if menu.link !== null}
             <li>
                 <!-- Selection item Highlighter -->
                 <span  class:hidden={$sidemenuStore.selected !== index} class="absolute h-10 w-full bg-gray-100  py-2 px-10  rounded-lg shadow ease-out transition-transform transition-medium" style = "padding-left: {level*1.6}rem">
                 
                     
-                    <i class="fas {menu.icon} text-indigo-700"></i>
+                    <i class="{menu.icon} text-indigo-700"></i>
         
                     <!-- Text - menu item text -->
                     <span class="text-indigo-700 ml-2 text-sm font-medium transition-all ease-out transition-medium">
@@ -90,7 +90,7 @@
                 <!-- button is shown if it is not selected -->
                 <button type="button"  on:click={()=> changesel(index)} aria-selected= {$sidemenuStore.selected === index} 
                     class="focus:bg-none border-none py-2 px-10 w-full flex items-center focus:outline-none focus-visible:underline" style = "padding-left: {level*1.6}rem">
-                    <i class="fas {menu.icon}"></i>
+                    <i class="{menu.icon}"></i>
             
         
                     <!-- Text - menu item text -->
@@ -102,10 +102,10 @@
 
             </li>
         {/if}
-
-
-        {#if menu.sub && menu.open}
-            {#each menu.sub as menu,index1}
+        
+        {#if menu.subMenu && menu.open}
+            {#each menu.subMenu as menu,index1}
+        
                 <svelte:self {menu} index={index + '_' + index1} secondaryMenu={true} level={level+1}/>
             {/each}
         {/if}
