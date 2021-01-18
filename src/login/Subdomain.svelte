@@ -60,8 +60,9 @@ async function registerDomain() {
   }
   console.log($domainstore);
   console.log(domaindata);
-  const {domain}=domaindata;	
-  let respdata = await http.post('regisdomain',{siteid:domain}); 
+  const {domain}=domaindata;
+  let registype = 'subdomain';
+  let respdata = await http.post('regisdomain',{siteid:domain,registype:registype}); 
   console.log(respdata);
   if(!respdata.success) {
     //allAlerts({text:respdata.message,type:'success'});
