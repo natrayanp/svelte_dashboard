@@ -1,11 +1,11 @@
 
 /**
  * @roxi/routify 2.7.3
- * File generated Tue Jan 19 2021 10:52:25 GMT+0800 (Singapore Standard Time)
+ * File generated Wed Mar 17 2021 22:01:03 GMT+0800 (Singapore Standard Time)
  */
 
 export const __version = "2.7.3"
-export const __timestamp = "2021-01-19T02:52:25.797Z"
+export const __timestamp = "2021-03-17T14:01:03.793Z"
 
 //buildRoutes
 import { buildClientTree } from "@roxi/routify/runtime/buildRoutes"
@@ -174,6 +174,32 @@ export const _tree = {
             },
             {
               "isFile": true,
+              "isDir": false,
+              "file": "roles.svelte",
+              "filepath": "/landing/[slug]/roles.svelte",
+              "name": "roles",
+              "ext": "svelte",
+              "badExt": false,
+              "absolutePath": "/home/nirudhi/projects/svelte_dashboard/src/pages/landing/[slug]/roles.svelte",
+              "importPath": "../src/pages/landing/[slug]/roles.svelte",
+              "isLayout": false,
+              "isReset": false,
+              "isIndex": false,
+              "isFallback": false,
+              "isPage": true,
+              "ownMeta": {},
+              "meta": {
+                "$$bundleId": "_landing__slug___layout_svelte.js",
+                "recursive": true,
+                "preload": false,
+                "prerender": true
+              },
+              "path": "/landing/:slug/roles",
+              "id": "_landing__slug_roles",
+              "component": () => import('./_landing__slug___layout_svelte.js').then(m => m._landing__slug_roles)
+            },
+            {
+              "isFile": true,
               "isDir": true,
               "file": "_layout.svelte",
               "filepath": "/landing/[slug]/settings/_layout.svelte",
@@ -277,6 +303,32 @@ export const _tree = {
               "path": "/landing/:slug/settings",
               "id": "_landing__slug_settings__layout",
               "component": () => import('./_landing__slug___layout_svelte.js').then(m => m._landing__slug_settings__layout)
+            },
+            {
+              "isFile": true,
+              "isDir": false,
+              "file": "users.svelte",
+              "filepath": "/landing/[slug]/users.svelte",
+              "name": "users",
+              "ext": "svelte",
+              "badExt": false,
+              "absolutePath": "/home/nirudhi/projects/svelte_dashboard/src/pages/landing/[slug]/users.svelte",
+              "importPath": "../src/pages/landing/[slug]/users.svelte",
+              "isLayout": false,
+              "isReset": false,
+              "isIndex": false,
+              "isFallback": false,
+              "isPage": true,
+              "ownMeta": {},
+              "meta": {
+                "$$bundleId": "_landing__slug___layout_svelte.js",
+                "recursive": true,
+                "preload": false,
+                "prerender": true
+              },
+              "path": "/landing/:slug/users",
+              "id": "_landing__slug_users",
+              "component": () => import('./_landing__slug___layout_svelte.js').then(m => m._landing__slug_users)
             }
           ],
           "isLayout": true,
@@ -323,6 +375,31 @@ export const _tree = {
           "path": "/landing/index",
           "id": "_landing_index",
           "component": () => import('../src/pages/landing/index.svelte').then(m => m.default)
+        },
+        {
+          "isFile": true,
+          "isDir": false,
+          "file": "pricing.svelte",
+          "filepath": "/landing/pricing.svelte",
+          "name": "pricing",
+          "ext": "svelte",
+          "badExt": false,
+          "absolutePath": "/home/nirudhi/projects/svelte_dashboard/src/pages/landing/pricing.svelte",
+          "importPath": "../src/pages/landing/pricing.svelte",
+          "isLayout": false,
+          "isReset": false,
+          "isIndex": false,
+          "isFallback": false,
+          "isPage": true,
+          "ownMeta": {},
+          "meta": {
+            "recursive": true,
+            "preload": false,
+            "prerender": true
+          },
+          "path": "/landing/pricing",
+          "id": "_landing_pricing",
+          "component": () => import('../src/pages/landing/pricing.svelte').then(m => m.default)
         },
         {
           "isFile": true,

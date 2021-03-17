@@ -52,6 +52,7 @@ export const environment = {
    endpt_logintoken:'auth/logintoken',
    endpt_regisdomain:'auth/regisdomain',
    endpt_getmenus:'auth/getmenus',
+   endpt_getbranch:'auth/getbranch',
 };
 
 

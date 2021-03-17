@@ -1,4 +1,8 @@
 <script>
+  
+  import { http } from '../../../stores/services';
+
+  const promise = http.post('getbranch',{});     
 
 
 let dd = {

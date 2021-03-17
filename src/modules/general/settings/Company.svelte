@@ -1,5 +1,7 @@
 <script>
 
+import {formValidator} from '../../../common/formvalidators/formvalidator';
+import {onMount, onDestroy} from 'svelte';
 
 const dd = {
         companyId: null,
@@ -33,11 +35,38 @@ const dd = {
 
 let my = true;
 
+  let mform;	
+	let companyform;	
+	let companystore;
+	let companydata;
+	let companydata_init;	
+	$: companydata;
+	companydata_init = {email: '',password:''};
+	companydata = JSON.parse(JSON.stringify(companydata_init));
+	
+	companyform = formValidator(companydata);
+	companystore = companyform.data;	
+	$companystore = companydata;
+
+	console.log(companystore);	
+
+	const companyunsub = companystore.subscribe(value => {		
+		console.log(value)	;
+		companydata = value;		
+	});
+
+
+	onMount(async() => {		
+		mform = document.getElementById("companyform");		
+		companyform.initVal(mform);
+		
+	});
+
 
 </script>
 
 
-
+<!--
 <div class="flex flex-col" >
 
 
@@ -60,7 +89,7 @@ let my = true;
                 
                 <th on:click={()=> dt1=true} on:focusout={()=> dt1=false} scope="col" class="px-6 py-6 text-left text-xs font-medium text-black uppercase tracking-wider">
                     <span >Name</span>
-                <!--
+                -->              <!--
                     {#if !dt1}
                         <span>Name</span>
                     {:else}
@@ -82,13 +111,13 @@ let my = true;
                       </div>
                     {/if}
                 -->
-                </th>
+<!--                </th>
 
   
 
                 <th scope="col" on:click={()=> dt2=true} on:focusout={()=> dt2=false} class="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
                     <span>Address</span>
-                <!--
+    -->            <!--
                     {#if !dt2}
                     <span>Title</span>
                 {:else}
@@ -111,7 +140,7 @@ let my = true;
                 {/if}
             -->
 
-                </th>
+ <!--               </th>
   
 
                 <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-black uppercase tracking-wider">
@@ -203,10 +232,10 @@ let my = true;
               </tr>
 
 
-
+            -->
 
               <!-- More rows... -->
-            </tbody>
+  <!--          </tbody>
           </table>
         </div>
       </div>
@@ -214,6 +243,7 @@ let my = true;
 </div>
 
 <div class="py-10"></div>
+-->
 
 <div class="shadow rounded-lg flex flex-col flex-auto pb-7 bg-white">
     <div class="bg-blue-100 h-20 rounded-t-lg flex flex-row items-center px-7">
@@ -223,12 +253,12 @@ let my = true;
        <span class="flex w-5"></span>
       <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow">Cancel</button>      
     </div>
-    <form class="px-10 py-1 rounded w-full my-5 inputs space-y-6">
+    <form id="companyform" class="px-10 py-1 rounded w-full my-5 inputs space-y-6">
         <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-6 md:gap-x-10  gap-y-5 md:gap-y-0	">
 
             <div class="pristine-form-group md:col-start-1 md:col-span-3">				  
                 <label for="firstname">Name</label>
-                <input required 
+                <input  required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                         type = "text"
                         />
@@ -256,7 +286,13 @@ let my = true;
                 <label for="firstname">Category</label>
                         <select required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                        >dasdfasdf</select>
+                        >  
+                          <option>1</option>
+                          <option>2</option>
+                          <option>3</option>
+                          <option>4</option>
+                          <option>5</option>
+                        </select>
                         <div class="pristine-error-group"></div>
                     </div>
        
@@ -412,13 +448,6 @@ let my = true;
                         ></select>
                         <div class="pristine-error-group"></div>
                     </div>
-       
-
-
-
-
-
-
         </div>
     </form> 
 </div>

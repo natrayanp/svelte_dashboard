@@ -503,7 +503,139 @@ function dragStart(event, basket,groupid,subbasket,subbaskIndex,itemIndex,item) 
                                             </div>
                 </div>
 
-<!--                <div class="flex md:flex-row flex-col justify-around ">
+            </form> 
+
+          
+
+
+            <div class = "flex flex-col bg-white justify-center shadow rounded-lg p-3">
+
+              <div class = "flex flex-col md:flex-row flex-wrap bg-blue-100 justify-center gap-x-5 gap-y-5 shadow rounded-lg p-3">
+
+                  {#each $baskets.Availablemodules as basket, basketIndex (basket)} 
+                      <div class="shadow rounded-lg p-3  bg-gray-100 w-full md:w-5/12">
+
+                          <b class="m-3 ">{basket.name}</b>
+
+                          
+                          <ul
+                          class = "flex flex-col md:flex-row flex-wrap bg-red-100 justify-center gap-x-2 gap-y-2 shadow rounded-lg p-3 w-full"
+                        >
+                        {#if basket.submodules.length === 0}
+                          <div class ="h-52 flex-grow"> All Available Options are assigned </div>
+                        {/if}
+                          {#each basket.submodules as item, itemIndex (item)}
+                              <div animate:flip class="inline" >
+                                  <li   
+                                  class=" shadow rounded-lg bg-green-100 rounded-lg cursor-pointer hover:bg-yellow-200 border-2 p-3 w-64"                     
+                                    draggable={true}
+                                    on:dragstart={event => dragStart(event, "Availablemodules", basket.groupid, basket.name, basketIndex, itemIndex,item)}
+                                  >
+                                      <span class="flex flex-row items-center">  
+                                          {item.name}
+                                          <span class="flex flex-1 "></span>             
+                                          <div class="relative inline-block text-left"  on:click={(event)=>togglemenu(event, basketIndex, itemIndex)}>          
+                                            <i class="fas fa-ellipsis-v text-gray-300 hover:text-red-300"></i>
+                                            {#if $baskets.Availablemodules[basketIndex].submodules[itemIndex].menu}
+                                            <div class="origin-top-right absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
+                                              <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                                                <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" on:click|preventDefault={()=> pushRoleToAllBranch(basketIndex,item)}>To all Branhes</a>
+                                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">specific branch</a>
+                                              </div>
+                                            </div>
+                                            {/if}
+                                            </div>
+
+
+                                      </span>
+                                  </li>                        
+                              </div>
+                          {/each}
+                        </ul> 
+                          
+                      </div>
+                  {/each}
+          
+              </div>
+              <div>spacing bewtween</div>
+              <div class = "flex flex-col md:flex-row flex-wrap bg-blue-100 justify-center gap-x-5 gap-y-5 shadow rounded-lg p-3"
+                on:dragenter={() => hoveringOverBasket = "Selectedmodules"}
+                on:dragleave={() => null}
+                on:drop={event => drop(event,{groupid:"mygroup",basketname:"Selectedmodules"})}     
+                ondragover="return false"
+              >
+                {#if $baskets.Selectedmodules.length === 0}
+                <div class ="h-96 flex-grow">Nothing selected yet</div>
+              {/if}
+                  {#each $baskets.Selectedmodules as basket, basketIndex (basket)} 
+                      <div class="shadow rounded-lg p-3  bg-gray-100 w-full md:w-80">
+                        <div class="flex flex-row justify-center">
+                          <b class="m-3 ">{basket.name}</b>
+                          <span class="flex flex-1 "></span> 
+                          <span on:click={()=>removebranch(basket)}><i class="fas fa-trash-alt text-red-600 font-bold hover:text-red-300"></i></span>
+                        </div>
+                          
+                          <ul
+                          class = "flex flex-col md:flex-row flex-wrap bg-red-100 justify-center gap-x-2 gap-y-2 shadow rounded-lg p-3 w-72 h-60"
+                            on:dragenter={() => hoveringOverBasket = "Selectedmodules_"+basket.name}
+                            on:dragleave={() => hoveringOverBasket = null}
+                            on:drop|stopPropagation={event => drop(event, {groupid:"mygroup",basketname:"Selectedsubmod",basket})}
+                            ondragover="return false"
+                        >
+          
+                          {#each basket?.submodules as item, itemIndex (item)}
+                              <div animate:flip class="inline" >
+                                  <li   
+                                  class=" shadow rounded-lg bg-green-100 rounded-lg cursor-pointer hover:bg-yellow-200 border-2 p-3 w-64"                     
+                                    draggable={true}
+                                    on:dragstart={event => dragStart(event, basketIndex, itemIndex)}
+                                  >
+                                      <span class="flex flex-row items-center">  
+                                          {item.name}
+                                          <span class="flex flex-1 "></span>   
+                                          <span on:click={()=>removerole(basketIndex,itemIndex)}><i class="fas fa-trash-alt fa-xs text-red-400 hover:text-red-500"></i></span>
+                                      </span>
+                                  </li>                        
+                              </div>
+                          {/each}
+                        </ul> 
+                          
+                      </div>
+                  {/each}
+          
+              </div>
+          
+          
+          </div>
+
+
+
+
+
+
+
+
+          </div>
+          
+<!--
+          <div class="shadow rounded-lg  h-56  bg-white overflow-auto	">
+            <ul class="bg-white rounded shadow w-56 flex flex-row flex-grow">
+                
+                <li class="block px-2 py-0.5 active:bg-blue-100">sdf</li>
+                <li class="block px-2 py-0.5 active:bg-blue-100">sd</li>
+                <li class="block px-2 py-0.5 active:bg-blue-100">dfd</li>
+                <li class="block px-2 py-0.5 active:bg-blue-100">dfdf</li>
+
+
+            </ul>
+        <div>
+    </div>
+    <div>cccccc</div>
+    -->
+
+
+
+    <!--                <div class="flex md:flex-row flex-col justify-around ">
                 
                 <div class="flex xl:flex-row md:space-y-3 xl:space-y-0 flex-col justify-around ">
 
@@ -688,132 +820,3 @@ function dragStart(event, basket,groupid,subbasket,subbaskIndex,itemIndex,item) 
             
 
             <!--/div-->
-            </form> 
-
-          
-
-
-            <div class = "flex flex-col bg-white justify-center shadow rounded-lg p-3">
-
-              <div class = "flex flex-col md:flex-row flex-wrap bg-blue-100 justify-center gap-x-5 gap-y-5 shadow rounded-lg p-3">
-
-                  {#each $baskets.Availablemodules as basket, basketIndex (basket)} 
-                      <div class="shadow rounded-lg p-3  bg-gray-100 w-full md:w-5/12">
-
-                          <b class="m-3 ">{basket.name}</b>
-
-                          
-                          <ul
-                          class = "flex flex-col md:flex-row flex-wrap bg-red-100 justify-center gap-x-2 gap-y-2 shadow rounded-lg p-3 w-full"
-                        >
-                        {#if basket.submodules.length === 0}
-                          <div class ="h-52 flex-grow"> All Available Options are assigned </div>
-                        {/if}
-                          {#each basket.submodules as item, itemIndex (item)}
-                              <div animate:flip class="inline" >
-                                  <li   
-                                  class=" shadow rounded-lg bg-green-100 rounded-lg cursor-pointer hover:bg-yellow-200 border-2 p-3 w-64"                     
-                                    draggable={true}
-                                    on:dragstart={event => dragStart(event, "Availablemodules", basket.groupid, basket.name, basketIndex, itemIndex,item)}
-                                  >
-                                      <span class="flex flex-row items-center">  
-                                          {item.name}
-                                          <span class="flex flex-1 "></span>             
-                                          <div class="relative inline-block text-left"  on:click={(event)=>togglemenu(event, basketIndex, itemIndex)}>          
-                                            <i class="fas fa-ellipsis-v text-gray-300 hover:text-red-300"></i>
-                                            {#if $baskets.Availablemodules[basketIndex].submodules[itemIndex].menu}
-                                            <div class="origin-top-right absolute left-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5">
-                                              <div class="py-1" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                                                <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem" on:click|preventDefault={()=> pushRoleToAllBranch(basketIndex,item)}>To all Branhes</a>
-                                                <a href="#" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900" role="menuitem">specific branch</a>
-                                              </div>
-                                            </div>
-                                            {/if}
-                                            </div>
-
-
-                                      </span>
-                                  </li>                        
-                              </div>
-                          {/each}
-                        </ul> 
-                          
-                      </div>
-                  {/each}
-          
-              </div>
-              <div>spacing bewtween</div>
-              <div class = "flex flex-col md:flex-row flex-wrap bg-blue-100 justify-center gap-x-5 gap-y-5 shadow rounded-lg p-3"
-                on:dragenter={() => hoveringOverBasket = "Selectedmodules"}
-                on:dragleave={() => null}
-                on:drop={event => drop(event,{groupid:"mygroup",basketname:"Selectedmodules"})}     
-                ondragover="return false"
-              >
-                {#if $baskets.Selectedmodules.length === 0}
-                <div class ="h-96 flex-grow">Nothing selected yet</div>
-              {/if}
-                  {#each $baskets.Selectedmodules as basket, basketIndex (basket)} 
-                      <div class="shadow rounded-lg p-3  bg-gray-100 w-full md:w-80">
-                        <div class="flex flex-row justify-center">
-                          <b class="m-3 ">{basket.name}</b>
-                          <span class="flex flex-1 "></span> 
-                          <span on:click={()=>removebranch(basket)}><i class="fas fa-trash-alt text-red-600 font-bold hover:text-red-300"></i></span>
-                        </div>
-                          
-                          <ul
-                          class = "flex flex-col md:flex-row flex-wrap bg-red-100 justify-center gap-x-2 gap-y-2 shadow rounded-lg p-3 w-72 h-60"
-                            on:dragenter={() => hoveringOverBasket = "Selectedmodules_"+basket.name}
-                            on:dragleave={() => hoveringOverBasket = null}
-                            on:drop|stopPropagation={event => drop(event, {groupid:"mygroup",basketname:"Selectedsubmod",basket})}
-                            ondragover="return false"
-                        >
-          
-                          {#each basket?.submodules as item, itemIndex (item)}
-                              <div animate:flip class="inline" >
-                                  <li   
-                                  class=" shadow rounded-lg bg-green-100 rounded-lg cursor-pointer hover:bg-yellow-200 border-2 p-3 w-64"                     
-                                    draggable={true}
-                                    on:dragstart={event => dragStart(event, basketIndex, itemIndex)}
-                                  >
-                                      <span class="flex flex-row items-center">  
-                                          {item.name}
-                                          <span class="flex flex-1 "></span>   
-                                          <span on:click={()=>removerole(basketIndex,itemIndex)}><i class="fas fa-trash-alt fa-xs text-red-400 hover:text-red-500"></i></span>
-                                      </span>
-                                  </li>                        
-                              </div>
-                          {/each}
-                        </ul> 
-                          
-                      </div>
-                  {/each}
-          
-              </div>
-          
-          
-          </div>
-
-
-
-
-
-
-
-
-          </div>
-          
-<!--
-          <div class="shadow rounded-lg  h-56  bg-white overflow-auto	">
-            <ul class="bg-white rounded shadow w-56 flex flex-row flex-grow">
-                
-                <li class="block px-2 py-0.5 active:bg-blue-100">sdf</li>
-                <li class="block px-2 py-0.5 active:bg-blue-100">sd</li>
-                <li class="block px-2 py-0.5 active:bg-blue-100">dfd</li>
-                <li class="block px-2 py-0.5 active:bg-blue-100">dfdf</li>
-
-
-            </ul>
-        <div>
-    </div>
-    <div>cccccc</div>
-    -->

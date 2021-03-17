@@ -1,6 +1,7 @@
 [
   "/index",
   "/landing/index",
+  "/landing/pricing",
   "/landing/subdomain",
   "/login"
 ]
