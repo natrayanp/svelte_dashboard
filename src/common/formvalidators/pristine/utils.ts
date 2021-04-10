@@ -1,5 +1,6 @@
 export function findAncestor (el, cls) {
     console.log(el.parentElement);
+    console.log(cls);
     while ((el = el.parentElement) && !el.classList.contains(cls));
     console.log(el);
     return el;

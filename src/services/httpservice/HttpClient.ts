@@ -7,16 +7,23 @@ let tkn = null;
 
 export const HttpClient = () => {    
 
-  const apiRequest = async (method, url, data?, opts={}) => {    
+  const apiRequest = async (method, url, data?, opts={},formdata=false) => {    
     console.log(url);
     let myurl = apiurls.all_api_url + environment['endpt_' + url];
     let conf = {          
           method: method.toUpperCase(),          
           ...opts       
         };
-        
+        console.log(typeof(data));
         // Adding data to the request
-        if (['PUT', 'POST', 'DELETE' ,'PATCH'].includes(method.toUpperCase())) conf['body'] = JSON.stringify(data);
+        if (['PUT', 'POST', 'DELETE' ,'PATCH'].includes(method.toUpperCase())) {
+          if(formdata) {
+            conf['body'] = data;
+          } else {
+            conf['body'] = JSON.stringify(data);
+          }
+        } 
+        
         console.log(conf);
         // Adding Authtoken to the header        
         let hdrs = conf['headers'] ? conf['headers']:{};
@@ -30,7 +37,8 @@ export const HttpClient = () => {
         if(authVal.user.session !== null) {
           hdrs = {...hdrs, 'session': authVal.user.session};
         }
-        hdrs = {...hdrs, 'Content-Type': 'application/json'};
+       // hdrs = {...hdrs, 'Content-Type': 'application/json'};
+       
         
 
         //hdrs = {...hdrs, 'siteid':installation.siteid};
@@ -103,6 +111,7 @@ export const HttpClient = () => {
   
   // function to execute the http post request
   const post = (url, data, options?) => apiRequest("post", url, data, options={});
+  const postForm = (url, data, options?) => apiRequest("post", url, data, options={},true);
   
   // function to execute the http put request
   const put = (url, options?) => apiRequest("put", url, null, options={});
@@ -116,6 +125,7 @@ export const HttpClient = () => {
       get,
       delete: deleteRequest,
       post,
+      postForm,
       put,
       patch
   };

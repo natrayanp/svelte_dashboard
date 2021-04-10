@@ -2,46 +2,53 @@
 
 import {formValidator} from '../../../common/formvalidators/formvalidator';
 import {onMount, onDestroy} from 'svelte';
+import { http } from '../../../stores/services';
+
+
 
 const dd = {
         companyId: null,
-        companyName: null,
+        companyName: "Natrayan",
         companyShortName: null,
         companyCategory: null,
-        companyStatus: null,
-        companyDescription: null,
-        companyImageUrl: null,
+        
+        companyStatus: null,                
+        companyLogoUrl: null,
         companyLogo: null,
+
         companyIndustry: null,
         companyTaxID: null,
+        companyStartDate: null,
         companyAddLine1: null,
         companyAddLine2: null,
-        companyCity: null,
-        companyState: null,
         companyCountry: null,
+        companyCity: null,
+        companyState: null,        
         companyPinCode: null,
         companyPhone: null,
         companyFax: null,
         companyMobile: null,
-        companyWebsite: null,
         companyEmail: null,
-        companyStartDate: null,
+        companyWebsite: null,
         companyFiscalYear: null,
         companyTimeZone: null,
         companyBaseCurency:null,
         companysParent:null,
+
         entityid:null,
 }
 
-let my = true;
+  let  avatar, fileinput;
 
+  let my = true;
+  let btntxt;
   let mform;	
 	let companyform;	
 	let companystore;
 	let companydata;
 	let companydata_init;	
 	$: companydata;
-	companydata_init = {email: '',password:''};
+	companydata_init = dd;
 	companydata = JSON.parse(JSON.stringify(companydata_init));
 	
 	companyform = formValidator(companydata);
@@ -58,9 +65,45 @@ let my = true;
 
 	onMount(async() => {		
 		mform = document.getElementById("companyform");		
-		companyform.initVal(mform);
-		
+		companyform.initVal(mform);		
+    companyform.disable(mform);
+    btntxt = "Edit";
 	});
+
+  export async function companysave(){
+    if(btntxt === "Save") {
+      console.log(companydata);
+      toggle_btn_text();
+      companyform.disable(mform);
+      let formDatae = new FormData();
+      formDatae.append("file", avatar);
+      console.log(JSON.stringify(companydata));
+      formDatae.append("myjson", JSON.stringify(companydata));
+      respdata = await http.postForm('upload',formDatae);
+    } else {
+      toggle_btn_text();
+      companyform.enable(mform);
+    }
+    
+  }
+
+  function toggle_btn_text(){
+    (btntxt === "Edit")? btntxt = "Save" : btntxt = "Edit";
+  }
+
+
+
+	
+	const onFileSelected =(e)=>{
+            let image = e.target.files[0];    
+            let reader = new FileReader();
+            reader.readAsDataURL(image);
+            reader.onload = e => {
+                console.log('kdkdkkd');
+                 avatar = e.target.result;
+                 console.log(avatar);
+            };
+}
 
 
 </script>
@@ -249,7 +292,10 @@ let my = true;
     <div class="bg-blue-100 h-20 rounded-t-lg flex flex-row items-center px-7">
         <h2 class="text-2xl text-black text-gray-700 font-bold">Company Settings</h2>  
         <span class="flex-grow"></span>  
-       <button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow">Save</button>
+       <button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow" 
+       on:click|preventDefault={companysave}>
+         {btntxt}
+        </button>
        <span class="flex w-5"></span>
       <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow">Cancel</button>      
     </div>
@@ -257,35 +303,43 @@ let my = true;
         <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-6 md:gap-x-10  gap-y-5 md:gap-y-0	">
 
             <div class="pristine-form-group md:col-start-1 md:col-span-3">				  
-                <label for="firstname">Name</label>
+                <label for="companyname">Name</label>
                 <input  required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                         type = "text"
+                        bind:value={$companystore.companyName}
                         />
                 <div class="pristine-error-group"></div>
               </div>
 
               <div class="pristine-form-group md:col-start-4 md:col-span-3">				  
-                <label for="firstname">Short Name</label>
+                <label for="companyshortname">Short Name</label>
                         <input required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-                type = "text"
+                        type = "text"
+                        bind:value={$companystore.companyshortname}
                         />
                         <div class="pristine-error-group"></div>
                     </div>
        
        
-              <div class="md:row-span-3 md:col-start-7 md:col-span-3  place-self-center  justify-self-center w-full h-full border-2 border-gray-400 border-dashed md:order-none order-first">            
+              <div class="pristine-form-group md:row-span-3 md:col-start-7 md:col-span-3  place-self-center  justify-self-center w-full h-full border-2 border-gray-400 border-dashed md:order-none order-first">            
                   <div class="flex flex-col h-full  justify-center justify-self-center">
-                    <button class="self-center text-gray-500 text-4xl rounded-xl 	px-4">+</button>
-                    <h5 class="self-center text-gray-400 ">Add your company Logo</h5>                         
+                    {#if avatar}
+                    <img class="avatar" src="{avatar}" alt="d" />
+                    {/if}
+                    <button class="self-center text-gray-500 text-4xl rounded-xl px-4" on:click|preventDefault={()=>{fileinput.click();}}>+</button>                    
+                    <h5 class="self-center text-gray-400" on:click={()=>{fileinput.click();}}>Add your company Logo</h5>      
+                    <input style="display:none" type="file" accept=".jpg, .jpeg, .png" on:change={(e)=>onFileSelected(e)} bind:this={fileinput} >                   
                   </div>
+                  <div class="pristine-error-group"></div>
             </div>
        
               <div class="pristine-form-group md:col-start-1 md:col-span-3">				  
-                <label for="firstname">Category</label>
+                <label for="companyCategory">Category</label>
                         <select required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companyCategory}
                         >  
                           <option>1</option>
                           <option>2</option>
@@ -297,157 +351,191 @@ let my = true;
                     </div>
        
                 <div class="pristine-form-group md:col-start-4 md:col-span-3">				  
-                <label for="firstname">Industry</label>
+                <label for="companyIndustry">Industry</label>
                         <select required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companyIndustry}
                         >dasdfasdf</select>
                         <div class="pristine-error-group"></div>
                     </div>
        
                 <div class="pristine-form-group md:col-start-1 md:col-span-3">				  
-                <label for="firstname">Tax ID</label>
+                <label for="companyTaxID">Tax ID</label>
                         <input required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-                type = "text"
+                        type = "text"
+                        bind:value={$companystore.companyTaxID}
                         />
                         <div class="pristine-error-group"></div>
                     </div>
        
                 <div class="pristine-form-group md:col-start-4 md:col-span-3">				  
-                <label for="firstname">Start Date</label>
+                <label for="companyStartDate">Start Date</label>
                         <input required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-                type = "date"
+                        type = "date"
+                        bind:value={$companystore.companyStartDate}
                         />
                         <div class="pristine-error-group"></div>
                     </div>
        
                 <div class="pristine-form-group md:col-start-1 md:col-span-5">				  
-                <label for="firstname">Address Line 1</label>
+                <label for="companyAddLine1">Address Line 1</label>
                         <textarea required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-                type = "text"
+                        type = "text"
+                        bind:value={$companystore.companyAddLine1}
                         ></textarea>
                         <div class="pristine-error-group"></div>
                     </div>
        
               <div class="pristine-form-group md:col-start-6 md:col-span-4">				  
-                <label for="Addressline2">Address Line 2</label>
+                <label for="companyAddLine2">Address Line 2</label>
                         <textarea required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-                type = "text"
+                        type = "text"
+                        bind:value={$companystore.companyAddLine2}
                         ></textarea>
                         <div class="pristine-error-group"></div>
                     </div>
        
               
               <div class="pristine-form-group md:col-start-1 md:col-span-2 my-3">				  
-                <label for="Country">Country</label>
+                <label for="companyCountry">Country</label>
                         <select required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companyCountry}
                         >dasdfasdf</select>
                         <div class="pristine-error-group"></div>
                     </div>
        
               <div class="pristine-form-group md:col-start-3 md:col-span-3  my-3">				  
-                <label for="City">City</label>
+                <label for="companyCity">City</label>
                         <select required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companyCity}
                         >dasdfasdf</select>
                         <div class="pristine-error-group"></div>
                     </div>
        
               <div class="pristine-form-group md:col-start-6 md:col-span-3  my-3">				  
-                <label for="State">State</label>
+                <label for="companyState">State</label>
                         <select required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companyState}
                         >dasdfasdf</select>
                         <div class="pristine-error-group"></div>
                     </div>
        
                 <div class="pristine-form-group md:col-start-9 md:col-span-1  my-3">				  
-                <label for="firstname">Pin</label>
+                <label for="companyPinCode">Pin</label>
                         <input required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-                type = "text"
+                        type = "text"
+                        bind:value={$companystore.companyPinCode}
                         />
                         <div class="pristine-error-group"></div>
                     </div>
               
        
               <div class="pristine-form-group md:col-span-2">				  
-                <label for="Phone">Phone</label>
+                <label for="companyPhone">Phone</label>
                         <input type="text" required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companyPhone}
                         />
                         <div class="pristine-error-group"></div>
                     </div>
               <div class="pristine-form-group md:col-span-2">				  
-                <label for="Phone">Fax</label>
+                <label for="companyFax">Fax</label>
                         <input type="text" required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companyFax}
                         />
                         <div class="pristine-error-group"></div>
                     </div>
               
        
               <div class="pristine-form-group  md:col-span-2">				  
-                <label for="Phone">Mobile</label>
+                <label for="companyMobile">Mobile</label>
                         <input type="text" required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companyMobile}
                         />
                         <div class="pristine-error-group"></div>
                     </div>
        
               <div class="pristine-form-group  md:col-span-3">				  
-                <label for="Phone">email</label>
+                <label for="companyEmail">email</label>
                         <input type="text" required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companyEmail}
                         />
                         <div class="pristine-error-group"></div>
                     </div>
        
        
               <div class="pristine-form-group  md:col-span-4">				  
-                <label for="FiscalYear">Fiscal Year</label>
+                <label for="companyWebsite">Website</label>
+
                         <input type="text" required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companyWebsite}
                         />
                         <div class="pristine-error-group"></div>
-                    </div>
+                  </div>
        
        
               <div class="pristine-form-group  md:col-span-1">				  
-                <label for="Timezone">Timezone</label>
+                <label for="companyTimeZone">Timezone</label>
                         <input type="text" required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                        />
-                        <div class="pristine-error-group"></div>
-                    </div>
-       
-              <div class="pristine-form-group  md:col-span-1">				  
-                <label for="BaseCurrency">Currency</label>
-                        <input type="text" required 
-                        class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companyTimeZone}
                         />
                         <div class="pristine-error-group"></div>
                     </div>
        
               <div class="pristine-form-group  md:col-span-1">				  
-                <label for="Phone">Website</label>
+                <label for="companyBaseCurency">Currency</label>
                         <input type="text" required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companyBaseCurency}
+                        />
+                        <div class="pristine-error-group"></div>
+                    </div>
+       
+              <div class="pristine-form-group  md:col-span-1">				  
+                <label for="companyFiscalYear">Fiscal Year</label>
+                        <input type="text" required 
+                        class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companyFiscalYear}
                         />
                         <div class="pristine-error-group"></div>
                     </div>
        
               <div class="pristine-form-group  md:col-span-2">				  
-                <label for="Phone">Paren Company</label>
+                <label for="companysParent">Paren Company</label>
                         <select type="text" required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                        bind:value={$companystore.companysParent}
                         ></select>
                         <div class="pristine-error-group"></div>
                     </div>
         </div>
     </form> 
 </div>
+
+
+<style>
+  	.upload{
+		display:flex;
+	height:50px;
+		width:50px;
+		cursor:pointer;
+	}
+
+  .avatar{
+		height:200px;
+		width:200px;
+	}
+</style>
