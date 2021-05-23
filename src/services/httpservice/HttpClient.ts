@@ -41,7 +41,7 @@ export const HttpClient = () => {
        
         
 
-        //hdrs = {...hdrs, 'siteid':installation.siteid};
+        hdrs = {...hdrs, 'siteid':installation.siteid};
         
         if (!environment.production){
           hdrs = {...hdrs, 'Access-Control-Allow-Origin': "*", 'Access-Control-Allow-Headers': "*"};

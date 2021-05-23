@@ -2,7 +2,7 @@ export const apiurls = {
     // Common routes for all
     all_api_url:
         //'http://127.0.0.1:8000/v1/',
-        'http://127.0.0.1:3000/',
+        'http://127.0.0.1:8080/',
     // 'https://e294sbftrc.execute-api.ap-south-1.amazonaws.com/acdev',
     // Individual routes
     url_regis: 'http://127.0.0.1:8081',
