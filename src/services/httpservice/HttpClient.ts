@@ -65,6 +65,7 @@ export const HttpClient = () => {
             //let respd = await resp.text();
             //respdata = {error: true, message: respd};  
             let respd = await resp.json();
+            console.log(respd);
             respdata = respd;
             console.log(respd);
             console.log(respdata);
@@ -84,7 +85,7 @@ export const HttpClient = () => {
           respdata = respd;
           console.log(respdata);
         }
-        
+        console.log(respdata);
         return respdata;
   };
 

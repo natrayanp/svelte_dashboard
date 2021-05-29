@@ -138,7 +138,7 @@ import {providertype} from '../services/authservice/authModals';
 				targetid: sign_up_mode?'signup': 'login',
 				title : sign_up_mode?'Signup Alert': 'Login Alert',				
 				//text: 'dkdkdk',
-				text: val.detail.message,
+				text: val.detail.data.message,
 				type:val.detail.error?'error': 'success',										
 				notificationtype: 'alert',     
 				disableClose: false,        

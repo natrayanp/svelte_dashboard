@@ -38,7 +38,7 @@ export async function authInit(){
             if (redirfor === 'signup') {        
                 respdata = await http.post('signuptoken',{});   
                 console.log(respdata);
-                console.log(respdata);
+                console.log(respdata.status === 'SUCCESS');
             } else if (redirfor === 'login'){
                 console.log('print logintoken');
                 respdata = await http.post('logintoken',{});
@@ -50,7 +50,7 @@ export async function authInit(){
         }
         let st = null;
         (redirfor === 'signup')
-        if(respdata.success){
+        if(respdata.status === 'SUCCESS'){
             authStore.update(dd => ({...dd,stage:'redirect'+redirfor+'Suc',detail:respdata}));
         } else {
             authStore.update(dd => ({...dd,stage:'redirect'+redirfor+'Fail',detail:respdata}));            

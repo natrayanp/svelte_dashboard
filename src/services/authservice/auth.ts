@@ -111,6 +111,8 @@ export const initAuth = (useRedirect = false) => {
         const provider = getSigninProvider(prov);
         return new Promise(async (resolve,reject) => {
             try{
+                console.log("ima here kdkdie __________________--------------");
+                console.log(useRedirect);                
                 if(useRedirect) {                    
                     try{
                         let myStorage = window.sessionStorage;
