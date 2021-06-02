@@ -49,7 +49,8 @@ export async function authInit(){
             return err;
         }
         let st = null;
-        (redirfor === 'signup')
+        console.log(redirfor === 'signup')
+        console.log(respdata.status)
         if(respdata.status === 'SUCCESS'){
             authStore.update(dd => ({...dd,stage:'redirect'+redirfor+'Suc',detail:respdata}));
         } else {
@@ -206,8 +207,9 @@ const logintk = async() => {
         dosignout();
         return err;
     }
-
-    if (respdata.success) {
+    
+    //if (respdata.success) {
+    if(respdata.status === 'SUCCESS'){
         authStore.update(dd => ({...dd,stage:'loginSuc',detail:respdata}));        
     } else {
         authStore.update(dd => ({...dd,stage:'loginFail',detail:respdata}));

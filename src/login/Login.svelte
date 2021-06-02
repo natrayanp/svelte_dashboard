@@ -9,6 +9,8 @@ import { getNotificationsContext } from '../common/notifications';
 const { addNotification } = getNotificationsContext();
 import { goto } from '@roxi/routify';
 
+import {installation as ins} from '../environment/production';
+
 
 //import {authapi_services} from '../services/authservice/authapi';
 import {authInit,signupHandler,dosignout,sessionexist,providerlogin,activateListener} from '../services/authservice/authservice';
@@ -202,15 +204,21 @@ import {providertype} from '../services/authservice/authModals';
 			activateListener();
 			//navigate("/dash", { replace: true });
 			//push('/landing');
-			if(val.detail.data[0].isurlcreated) {
-				authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data[0].sessionid),siteid:(val.detail.data[0].siteid)}));
+			//if(val.detail.data[0].isurlcreated) {
+				console.log(val)
+			
+			if(val.detail.data.havedomain) {
+				//authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:(val.detail.data[0].siteid)}));
+				authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid}));
 				//authStore.update(dd => ({...dd,siteid:(val.detail.data[0].siteid)}));
 				$goto('/landing');
 				console.log()
 			} else {
-				authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data[0].sessionid),siteid:(val.detail.data[0].siteid)}));
+				//authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data[0].sessionid),siteid:(val.detail.data[0].siteid)}));
+				authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid}));				
 				$goto('/landing/subdomain');
-			}			
+			}	
+	
 		}
 				
 	});
