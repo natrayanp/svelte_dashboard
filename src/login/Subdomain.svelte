@@ -68,12 +68,21 @@ async function registerDomain() {
   
   let respdata = await http.post('regisdomain',{siteid:domain,registype:registype}); 
   console.log(respdata);
-  if(!respdata.success) {
-    //allAlerts({text:respdata.message,type:'success'});
-    $goto('/login');
+  console.log(respdata.status);
+  console.log(respdata.status === "SUCCESS");
+  console.log(!(respdata.status === "SUCCESS"));
+  if(!(respdata.status === "SUCCESS")) {
+    //allAlerts({text:respdata.data.message,type:'success'});
+    console.log("inside error")
+        let s = allAlerts({text:respdata.data.message,type:'error'});    
+    if(mymodal) {			
+				mymodal.close();
+				mymodal=null;
+			}
+    //$goto('/login');
   } else {    
     pgtog = true;
-    let s = allAlerts({text:respdata.message,type:'success'});    
+    let s = allAlerts({text:respdata.data.message,type:'success'});    
     if(mymodal) {			
 				mymodal.close();
 				mymodal=null;

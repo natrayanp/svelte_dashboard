@@ -207,7 +207,7 @@ import {providertype} from '../services/authservice/authModals';
 			//if(val.detail.data[0].isurlcreated) {
 				console.log(val)
 			
-			if(val.detail.data.havedomain) {
+			/*if(val.detail.data.havedomain) {			
 				//authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:(val.detail.data[0].siteid)}));
 				authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid}));
 				//authStore.update(dd => ({...dd,siteid:(val.detail.data[0].siteid)}));
@@ -217,7 +217,30 @@ import {providertype} from '../services/authservice/authModals';
 				//authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data[0].sessionid),siteid:(val.detail.data[0].siteid)}));
 				authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid}));				
 				$goto('/landing/subdomain');
-			}	
+			}*/
+			
+			switch (val.detail.data.nextaction){
+				case 'LANDING':
+					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,detail:val.detail.data}));
+					$goto('/landing');
+					break;
+				case 'DOMAINREGIS':
+					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,detail:val.detail.data}));	
+					$goto('/landing/subdomain');			
+					break;
+				case 'ADDPACKS':
+					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,detail:val.detail.data}));	
+					$goto('/landing/pricing');	
+					break;
+				case 'ADDCOMPANY':
+					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,detail:val.detail.data}));	
+					$goto('/landing/dd/companysettings');	
+					break;
+				case 'ADDBRANCH':
+					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,detail:val.detail.data}));	
+					$goto('/landing/branchsettings');
+					break;					
+			}
 	
 		}
 				

@@ -6,7 +6,7 @@
     "build:tailwind": "postcss public/tailwind.css -o public/index.css",
     "watch:material": "postcss public/app.scss -o public/index1.css",
     "build": "npm run build:tailwind && routify -b && rollup -c",
-    "start": "sirv public --single",
+    "start": "sirv public --single --host",
     "serve": "serve public -p 80",
     "watch": "rollup -c -w",
     "dev": "concurrently \"routify\" \"rollup -c -w\" \"npm run watch:tailwind\""

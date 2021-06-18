@@ -4,7 +4,7 @@ const INITIAL_STORE = {
     auth:null,
     user: null,
     stage: 'logout',
-    detail: null,
+    detail: null,   //This will be overritten
     listener:null,
     session:null,
     siteid:null,

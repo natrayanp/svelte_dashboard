@@ -7,7 +7,7 @@
 
     async function get_modules(){
         let dd = await http.post('getmenus',{});        
-        let m = dd.data[0].menus;  
+        let m = dd.data.menus;  
         console.log(m);      
         authStore.update(dd => ({...dd,menus:m}));  
         return m;
@@ -25,12 +25,15 @@
 <p>inside landing</p>
 <div class="md:flex content-center justify-evenly flex-wrap -mx-2 p-3 space-y-5 md:space-y-0">
 
-
+<!--
 {#await get_modules()}
     <p>Loading menu......</p>
 {:then packs}
 
-    {#each packs as pack,i}
+    {#each authStore.data as pack,i}
+-->
+{#each $authStore.detail.menu as pack,i}
+{#if pack.type === 'module'}
     <div class="md:flex md:w-1/2 lg:w-1/3 px-2 py-2">
 
     <div class="md:flex-1 rounded shadow-lg bg-white border-b border-r border-grey-dark">
@@ -78,14 +81,14 @@
         </div>
       </div-->
         
-
+{/if}
     {/each}
 
     <!--
     <a href={$url('./POS')}>POS</a>
     <a href={$url('./SETTINGS')}>SETTINGS</a>
     -->
-{/await}
+<!--{/await}-->
 
 
 
