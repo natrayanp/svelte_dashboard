@@ -5,6 +5,7 @@
     import {authStore} from '../stores/stores';
     import { http } from '../stores/services';
 
+
     async function get_modules(){
         let dd = await http.post('getmenus',{});        
         let m = dd.data.menus;  
@@ -15,6 +16,8 @@
 
     async function navi(pack) {
         console.log('insidenavi');
+        console.log(pack);
+        
         await authStore.update(dd => ({...dd,activepack:pack}));          
         $goto(pack.link);
     }
@@ -29,11 +32,9 @@
 {#await get_modules()}
     <p>Loading menu......</p>
 {:then packs}
-
-    {#each authStore.data as pack,i}
 -->
-{#each $authStore.detail.menu as pack,i}
-{#if pack.type === 'module'}
+    {#each $authStore.menus as pack,i}
+
     <div class="md:flex md:w-1/2 lg:w-1/3 px-2 py-2">
 
     <div class="md:flex-1 rounded shadow-lg bg-white border-b border-r border-grey-dark">
@@ -81,7 +82,6 @@
         </div>
       </div-->
         
-{/if}
     {/each}
 
     <!--
@@ -95,3 +95,4 @@
   
   </div>
 
+  

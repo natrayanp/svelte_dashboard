@@ -1,3 +1,26 @@
+<script>
+
+import { http } from './../stores/services';
+import { goto } from '@roxi/routify';
+import {onMount} from 'svelte';
+
+onMount(async() => {		
+
+  let respdata = await http.post('getalllan',{}); 
+  console.log(respdata);
+		
+	});
+
+async function registerPlan(planid) {
+    let respdata = await http.post('setplan',{planid:'PLANID1'}); 
+    //console.log(respdata);
+    $goto('/login');
+				
+    
+}
+
+</script>
+
 <div class="container m-auto">
   <div class="flex flex-wrap items-center justify-center w-full text-center">
     <!-- basic plan -->
@@ -14,7 +37,8 @@
           <p>Feature of the plan</p>
           <p>Another feature plan feature</p>
           <p>Yet another plan feature</p>
-          <button class="px-5 py-2 mt-5 uppercase rounded bg-white text-blue-700 font-semibold hover:bg-blue-900 hover:text-white">
+          <button class="px-5 py-2 mt-5 uppercase rounded bg-white text-blue-700 font-semibold hover:bg-blue-900 hover:text-white" 
+          on:click={()=>registerPlan('PLANID1')}>
             Get Started
           </button>
         </div>            

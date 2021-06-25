@@ -103,8 +103,8 @@
             </li>
         {/if}
         
-        {#if menu.subMenu && menu.open}
-            {#each menu.subMenu as menu,index1}
+        {#if menu.submenu && menu.open}
+            {#each menu.submenu as menu,index1}
         
                 <svelte:self {menu} index={index + '_' + index1} secondaryMenu={true} level={level+1}/>
             {/each}

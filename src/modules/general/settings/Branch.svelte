@@ -32,7 +32,17 @@ let dd = {
   
   let dt1 = false;
   let dt2 = false;
+  let myc = "hidden";
+
+  function toggle_visibility(){ 
+    console.log(myc);
+  if (myc === "hidden") {
+    myc = "visible"
+  } else {
+    myc = "hidden"
+  }
   
+  }
   
   
   </script>
@@ -166,8 +176,14 @@ let dd = {
                 Admin
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <a href="#" class="text-red-600 hover:text-red-900 mr-5"><i class="far fa-trash-alt fa-lg"/></a>
+                <a href="#" class="text-red-600 hover:text-red-900 mr-5" on:click={toggle_visibility}><i class="far fa-trash-alt fa-lg"/></a>
                 <a href="#" class="text-green-600 hover:text-green-900"><i class="far fa-edit fa-lg"/></a>
+              </td>
+            </tr>
+
+            <tr class = {myc}>
+              <td colspan="6" headers="Col2">
+                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent bibendum, lorem vel tincidunt imperdiet, nibh elit laoreet felis, a bibendum nisl tortor non orci. Donec pretium fermentum felis, quis aliquet est rutrum ut. Integer quis massa ut lacus viverra pharetra in eu lacus. Aliquam tempus odio adipiscing diam pellentesque rhoncus. Curabitur a bibendum est. Mauris vehicula cursus risus id luctus. Curabitur accumsan venenatis nibh, non egestas ipsum vulputate ac. Vivamus consectetur dolor sit amet enim aliquet eu scelerisque ipsum hendrerit. Donec lobortis suscipit vestibulum. Nullam luctus pellentesque risus in ullamcorper. Nam neque nunc, mattis vitae ornare ut, feugiat a erat. Ut tempus iaculis augue vel pellentesque.</p>
               </td>
             </tr>
 

@@ -53,7 +53,8 @@ export const environment = {
    endpt_regisdomain:'auth/regisdomain',
    endpt_getmenus:'auth/getmenus',
    endpt_getbranch:'auth/getbranch',
-   endpt_upload:'entity/upload'
+   endpt_upload:'entity/upload',
+   endpt_setplan:'auth/regisplan',
 };
 
 

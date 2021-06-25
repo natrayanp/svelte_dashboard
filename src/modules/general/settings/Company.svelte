@@ -3,6 +3,8 @@
 import {formValidator} from '../../../common/formvalidators/formvalidator';
 import {onMount, onDestroy} from 'svelte';
 import { http } from '../../../stores/services';
+import { Accordion, AccordionItem } from "../../../common/accordion/index";
+
 
 
 
@@ -38,7 +40,42 @@ const dd = {
         entityid:null,
 }
 
-  let  avatar, fileinput;
+
+
+const dd1 = {
+        companyId: null,
+        companyName: "Ananthi",
+        companyShortName: null,
+        companyCategory: null,
+        
+        companyStatus: null,                
+        companyLogoUrl: null,
+        companyLogo: null,
+
+        companyIndustry: null,
+        companyTaxID: null,
+        companyStartDate: null,
+        companyAddLine1: null,
+        companyAddLine2: null,
+        companyCountry: null,
+        companyCity: null,
+        companyState: null,        
+        companyPinCode: null,
+        companyPhone: null,
+        companyFax: null,
+        companyMobile: null,
+        companyEmail: null,
+        companyWebsite: null,
+        companyFiscalYear: null,
+        companyTimeZone: null,
+        companyBaseCurency:null,
+        companysParent:null,
+
+        entityid:null,
+}
+
+
+let  avatar, fileinput;
 
   let my = true;
   let btntxt;
@@ -63,7 +100,8 @@ const dd = {
 	});
 
 
-	onMount(async() => {		
+	onMount(async() => {	
+    $companystore = dd1;	
 		mform = document.getElementById("companyform");		
 		companyform.initVal(mform);		
     companyform.disable(mform);
@@ -302,7 +340,9 @@ const dd = {
     <form id="companyform" class="px-10 py-1 rounded w-full my-5 inputs space-y-6">
         <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-6 md:gap-x-10  gap-y-5 md:gap-y-0	">
 
+
             <div class="pristine-form-group md:col-start-1 md:col-span-3">				  
+              
                 <label for="companyname">Name</label>
                 <input  required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
@@ -524,6 +564,8 @@ const dd = {
         </div>
     </form> 
 </div>
+
+
 
 
 <style>

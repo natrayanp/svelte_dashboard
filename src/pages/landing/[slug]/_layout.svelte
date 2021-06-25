@@ -12,6 +12,6 @@
 
 {$params.slug}
 
-<Dash menus={$authStore.activepack.subMenu} >    
+<Dash menus={$authStore.activepack.submenu} >    
     <slot/>
 </Dash>

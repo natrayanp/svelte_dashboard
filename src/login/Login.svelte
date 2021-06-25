@@ -221,7 +221,7 @@ import {providertype} from '../services/authservice/authModals';
 			
 			switch (val.detail.data.nextaction){
 				case 'LANDING':
-					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,detail:val.detail.data}));
+					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,menus:val.detail.data.menu}));
 					$goto('/landing');
 					break;
 				case 'DOMAINREGIS':
@@ -233,11 +233,12 @@ import {providertype} from '../services/authservice/authModals';
 					$goto('/landing/pricing');	
 					break;
 				case 'ADDCOMPANY':
-					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,detail:val.detail.data}));	
-					$goto('/landing/dd/companysettings');	
+					console.log(val.detail.data.menu[0].submenu);
+					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,menus:val.detail.data.menu,activepack:val.detail.data.menu[0]}));				
+					$goto('./landing/companysettings');	
 					break;
 				case 'ADDBRANCH':
-					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,detail:val.detail.data}));	
+					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,menus:val.detail.data.menu,activepack:val.detail.data.menu[0]}));
 					$goto('/landing/branchsettings');
 					break;					
 			}

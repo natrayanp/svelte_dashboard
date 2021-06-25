@@ -5,6 +5,8 @@ import { http } from './../stores/services';
 import { getNotificationsContext } from '../common/notifications';
 import Alerts from '../common/notifications/components/alerts/Alerts.svelte';
 import { goto } from '@roxi/routify';
+import { Tabs, TabList, TabPanel, Tab } from '../common/tabs/tab';
+
 
 const { addNotification } = getNotificationsContext();
 
@@ -115,8 +117,20 @@ onDestroy(async () => {
   }
 
 </style>
+<div class="w-1/2 mx-auto mt-4  rounded">
 
-<div class="m md:m1">
+<Tabs>
+  <TabList>
+    <Tab>Register Company</Tab>
+    <Tab>User Enrolment</Tab>
+
+  </TabList>
+  <TabPanel>
+
+
+
+
+<div >
   <Alerts targetid="sudo"/>
   {#if !pgtog}  
 
@@ -181,3 +195,14 @@ onDestroy(async () => {
     <p>Please login with your URL now to start the journey</p>
   {/if}
   </div>
+
+</TabPanel>
+<TabPanel>
+  <h2>First panel</h2>
+</TabPanel>
+
+
+
+
+</Tabs>
+</div>
