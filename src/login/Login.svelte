@@ -235,6 +235,7 @@ import {providertype} from '../services/authservice/authModals';
 				case 'ADDCOMPANY':
 					console.log(val.detail.data.menu[0].submenu);
 					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,menus:val.detail.data.menu,activepack:val.detail.data.menu[0]}));				
+					sessionStorage.setItem('cpyfirst', true);
 					$goto('./landing/companysettings');	
 					break;
 				case 'ADDBRANCH':

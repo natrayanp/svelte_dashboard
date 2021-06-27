@@ -34,8 +34,9 @@ let dd = {
   let dt2 = false;
   let myc = "hidden";
 
-  function toggle_visibility(){ 
+  function toggle_svisibility(){ 
     console.log(myc);
+ 
   if (myc === "hidden") {
     myc = "visible"
   } else {
@@ -176,7 +177,7 @@ let dd = {
                 Admin
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <a href="#" class="text-red-600 hover:text-red-900 mr-5" on:click={toggle_visibility}><i class="far fa-trash-alt fa-lg"/></a>
+                <a href="#" class="text-red-600 hover:text-red-900 mr-5" on:click={toggle_svisibility} ><i class="far fa-trash-alt fa-lg" /></a>
                 <a href="#" class="text-green-600 hover:text-green-900"><i class="far fa-edit fa-lg"/></a>
               </td>
             </tr>
