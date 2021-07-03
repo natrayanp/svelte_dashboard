@@ -6,6 +6,43 @@
     import { Accordion, AccordionItem } from "../../../common/accordion/index";
     import { createEventDispatcher } from 'svelte';
 
+    
+    import { getNotificationsContext } from '../../../common/notifications';
+const { addNotification } = getNotificationsContext();
+
+
+const dd = {
+        companyId: null,
+        companyName: "Natrayan",
+        companyShortName: null,
+        companyCategory: null,
+        
+        companyStatus: null,                
+        companyLogoUrl: null,
+        companyLogo: null,
+
+        companyIndustry: null,
+        companyTaxID: null,
+        companyStartDate: null,
+        companyAddLine1: null,
+        companyAddLine2: null,
+        companyCountry: null,
+        companyCity: null,
+        companyState: null,        
+        companyPinCode: null,
+        companyPhone: null,
+        companyFax: null,
+        companyMobile: null,
+        companyEmail: null,
+        companyWebsite: null,
+        companyFiscalYear: null,
+        companyTimeZone: null,
+        companyBaseCurency:null,
+        companysParent:null,
+
+        entityid:null,
+}
+
     /*
     let data    = {
         companyId: null,
@@ -41,16 +78,20 @@
 
     
     let  avatar, fileinput;
-    
+    let mymodal = null;
+
       let btntxt;
       let mform;	
 
         let companyform;	
         let companystore;
         let companydata;
+
         export let companydata_init;	
+        export let refdata;
         export let mode = 'display';
         export let firstvisit = false;
+
         $: companydata;
         //companydata_init=data;
          console.log(companydata_init);
@@ -67,8 +108,32 @@
             companydata = value;		
         });
     
+        const loginprogressmodal = () => {
+		return addNotification({
+				title : 'Checking your account',
+				text: 'hi i am custom notification why it cant be sol long so i can test it before using it' ,
+				notificationtype: 'modal',            
+				modaltype:'modal-loading',  	
+        //comp : Circularprogress,				
+			});
+	}
     
         onMount(async() => {	
+          console.log("_____________-going inside onmount 232-____________________")  ;
+          mymodal =loginprogressmodal();  
+          let respdata;
+          if(mode === 'edit' && (refdata === {} || companydata_init.length < 1)) {
+            respdata = await http.get('getcompany'); 
+            refdata = respdata.data.refdata;            
+            
+            if(respdata.data.company.length == 0 ) {
+              companydata_init = dd;
+            } else {
+              companydata_init = respdata.data.company[0];
+            }
+
+          } 
+
             console.log("inside onmoung");
             $companystore = companydata_init;	
             mform = document.getElementById("companyform");		
@@ -78,6 +143,9 @@
             } else {
                 btntxt = "Save";
             }
+            mymodal.close();
+  mymodal=null;
+            
         });
     
       export async function companysave(){
@@ -190,11 +258,21 @@
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
                             bind:value={$companystore.companyCategory}
                             >  
+                              <!--
+                            {#each questions as question}
+                            <option value={question}>
+                              {question.text}
+                            </option>
+                          {/each}
+
+
+                          
                               <option>1</option>
                               <option>2</option>
                               <option>3</option>
                               <option>4</option>
                               <option>5</option>
+                            -->
                             </select>
                             <div class="pristine-error-group"></div>
                         </div>

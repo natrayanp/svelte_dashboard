@@ -16,7 +16,8 @@ const notificationtype =[
 const modaltype = [
   'modal-no-action',
   'modal-accept',
-  'modal-accept-reject'
+  'modal-accept-reject',
+  'modal-loading'
 ];
 
 /* Return data for different modal types

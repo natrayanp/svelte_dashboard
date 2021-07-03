@@ -6,41 +6,10 @@ import { http } from '../../../stores/services';
 import { Accordion, AccordionItem } from "../../../common/accordion/index";
 import Companydetails from './Companydetails.svelte';
 
+import Alerts from '../../../common/notifications/components/alerts/Alerts.svelte';
+
 import { getNotificationsContext } from '../../../common/notifications';
 const { addNotification } = getNotificationsContext();
-
-
-const dd = {
-        companyId: null,
-        companyName: "Natrayan",
-        companyShortName: null,
-        companyCategory: null,
-        
-        companyStatus: null,                
-        companyLogoUrl: null,
-        companyLogo: null,
-
-        companyIndustry: null,
-        companyTaxID: null,
-        companyStartDate: null,
-        companyAddLine1: null,
-        companyAddLine2: null,
-        companyCountry: null,
-        companyCity: null,
-        companyState: null,        
-        companyPinCode: null,
-        companyPhone: null,
-        companyFax: null,
-        companyMobile: null,
-        companyEmail: null,
-        companyWebsite: null,
-        companyFiscalYear: null,
-        companyTimeZone: null,
-        companyBaseCurency:null,
-        companysParent:null,
-
-        entityid:null,
-}
 
 
 
@@ -79,13 +48,15 @@ const dd1 = {
 
   let dt2 = false 
   let dt1 = false
-
+  let refdata = {};
+  let compdata = [];
 	
 let mymod = 'display';
 let myc = "hidden";
+let mymodal = null;
 
 //sessionStorage.setItem('myWork', 'Developer');
-const firstvisit = sessionStorage.getItem('cpyfirst');
+let firstvisit = sessionStorage.getItem('cpyfirst');
 sessionStorage.removeItem('cpyfirst');
 
 
@@ -94,9 +65,8 @@ const loginprogressmodal = () => {
 				title : 'Checking your account',
 				text: 'hi i am custom notification why it cant be sol long so i can test it before using it' ,
 				notificationtype: 'modal',            
-				//modaltype:'modal-no-action',  	
-        comp : 'circularprogress',
-				//comp:Modals				
+				modaltype:'modal-loading',  	
+        //comp : Circularprogress,				
 			});
 	}
 
@@ -120,22 +90,57 @@ function toggle_viewdetail(){
     myc = "hidden";
   }
 
-function handleresult() {
-  mymod = 'display';
-  myc = "hidden";
+  async function handleresult() {
+  console.log(handleresult);
+  await getCompany();
+   if (compdata.length <= 0) {    
+    let s = allAlerts({tgt:"sudo1",text:"No company setup exists. Please save company",type:'error'});    
+  } else {
+    mymod = 'display';
+    myc = "hidden";
+  }
 }
 
 
-onMount(async() => { 
-  //loginprogressmodal();  
-  let respdata = await http.get('getcompany'); 
-  console.log(respdata);
-    
+onMount(async() => {   
+    await getCompany();
+    //if (compdata.length <= 0) toggle_edit();
   });
+
+  const getCompany = async() => {
+    mymodal =loginprogressmodal();  
+    let respdata = await http.get('getcompany'); 
+    compdata = respdata.data.company; 
+    refdata = respdata.data.refdata; 
+    if (compdata.length <= 0) {
+      firstvisit = true;
+      toggle_edit();
+    }
+    mymodal.close();
+    mymodal=null;
+  };
+
+
+  const allAlerts = (val) => {
+    console.log(val);
+		return addNotification({
+				targetid: val.tgt,
+				title : 'Alert',				
+				//text: 'dkdkdk',
+				text: val.text,
+				type:val.type,								
+				notificationtype: 'alert',     
+				disableClose: false,        
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});	
+	}
+
+  
 
 </script>
 
-
+<Alerts targetid="sudo"/>
 {#if mymod !== 'edit'}
 <div class="flex flex-col" >
 
@@ -270,7 +275,7 @@ onMount(async() => {
 
               <tr class = {myc}>
                 <td colspan="6" headers="Col2">
-                  <Companydetails companydata_init ={dd} mode = {mymod} />
+                  <Companydetails companydata_init ={compdata} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod} />
                 </td>
               </tr>
 
@@ -286,7 +291,8 @@ onMount(async() => {
 {/if}
 
 {#if mymod ==='edit'}
-<Companydetails companydata_init={dd} mode = {mymod} firstvisit = {firstvisit} on:editresult= {handleresult}/>
+<Alerts targetid="sudo1"/>
+<Companydetails companydata_init={compdata} mode = {mymod} firstvisit = {firstvisit} on:editresult= {handleresult}/>
 {/if}
 
 

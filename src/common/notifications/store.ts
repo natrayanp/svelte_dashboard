@@ -6,15 +6,14 @@ import {positions,notificationtype,modaltype} from './modals'
 const isNotificationValid = notification => { 
   console.log(notification);
   console.log(!notification);
-  if (!notification ||  !notification.text || !notification.notificationtype) return false;
-  console.log("eksdksd");
-  if (!notificationtype.includes(notification.notificationtype)) return false;
-  if (typeof notification.title !== 'string' || typeof notification.text !== 'string') return false;
-  if (((notification.notificationtype) === 'notification') && (!positions.includes(notification.position))) return false;
-  if (((notification.notificationtype) === 'modal') && (notification.position)) return false;  
-  if (((notification.notificationtype) === 'modal') && (!modaltype.includes(notification.modaltype))) return false;
+  if (!notification ||  !notification.text || !notification.notificationtype) return {"res":false,"reason":"not a valid notification"};  
+  if (!notificationtype.includes(notification.notificationtype)) return {"res":false,"reason":"Invalid notification type"};  
+  if (typeof notification.title !== 'string' || typeof notification.text !== 'string') return {"res":false,"reason":"not a valid notification title or text"};  
+  if (((notification.notificationtype) === 'notification') && (!positions.includes(notification.position))) return {"res":false,"reason":"not a valid position for notification"};  
+  if (((notification.notificationtype) === 'modal') && (notification.position)) return {"res":false,"reason":"Have position for modal"};  
+  if (((notification.notificationtype) === 'modal') && (!modaltype.includes(notification.modaltype))) return {"res":false,"reason":"Invalid modal type"};  
   
-  return true;  
+  return {"res":true,"reason":"al validation pass"}; 
 };
 
 class Deferred {
@@ -37,8 +36,10 @@ function variableChk(val) {
 
 
 const addNotification = (notification, update) => {
-
-  if (!isNotificationValid(notification)) throw new Error('Notification object is not valid'); 
+  let s = isNotificationValid(notification);
+  if (!s.res) {
+    throw new Error(s.reason); 
+  } 
   
   console.log(notification.hasbackdrop);
   

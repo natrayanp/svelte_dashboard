@@ -266,6 +266,7 @@ export const initAuth = (useRedirect = false) => {
               unsubscribe();
               //return auth ? resolve(auth) : reject();
               console.log(userCred);
+              console.log("_________________user token expired ___________________")
               if(userCred) {                
                     dd = await fbSuccessHandle('FBAuthChkSuc',userCred);
                     resolve(dd);

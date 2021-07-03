@@ -50,6 +50,8 @@
 
   import Modal from './modals/Modal.svelte';
   import DefaultModal from './modals/DefaultModal.svelte';
+  import Circularprogress from './modals/Circularprogress.svelte';
+
   
 
   import context from '../context';
@@ -77,7 +79,9 @@
   function seleselectmynct(n) {
     console.log(n);
     if(n.comp) return n.comp;
+    if(n.modaltype === 'modal-loading') return Circularprogress;
     if(['modal-no-action','modal-accept-reject'].some((ele)=> ele===n.modaltype)) return DefaultModal;
+    
   }
 
 </script>
