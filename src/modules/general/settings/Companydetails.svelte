@@ -13,7 +13,7 @@ const { addNotification } = getNotificationsContext();
 
 const dd = {
         companyId: null,
-        companyName: "Natrayan",
+        companyName: null,
         companyShortName: null,
         companyCategory: null,
         
@@ -39,7 +39,7 @@ const dd = {
         companyTimeZone: null,
         companyBaseCurency:null,
         companysParent:null,
-
+        companyFiscalYear:null,
         entityid:null,
 }
 
@@ -91,17 +91,27 @@ const dd = {
         export let refdata;
         export let mode = 'display';
         export let firstvisit = false;
+        
+        let myc = [];
+        let mys = [];
+        $: states = mys;
+        $: citys = myc;
+        if (!refdata.country) {
+          refdata.country = [];
+          mys = [];
+          myc  = [];
+        }
+
+        // This is required as the data is loaded only after onmount
+        if (!refdata.induscat)  refdata.induscat = [];
+        if (!refdata.industype) refdata.industype = [];
+        if (!refdata.compcat) refdata.compcat = [];
 
         $: companydata;
-        //companydata_init=data;
-         console.log(companydata_init);
-        companydata = JSON.parse(JSON.stringify(companydata_init));
-        
+        companydata = JSON.parse(JSON.stringify(companydata_init));        
         companyform = formValidator(companydata);
         companystore = companyform.data;	
         $companystore = companydata;
-    
-        console.log(companystore);	
     
         const companyunsub = companystore.subscribe(value => {		
             console.log(value)	;
@@ -120,32 +130,73 @@ const dd = {
     
         onMount(async() => {	
           console.log("_____________-going inside onmount 232-____________________")  ;
+          console.log(mode);
           mymodal =loginprogressmodal();  
           let respdata;
+
+          // This is edit mode
           if(mode === 'edit' && (refdata === {} || companydata_init.length < 1)) {
+            console.log("inside onmoung inner before get");
             respdata = await http.get('getcompany'); 
             refdata = respdata.data.refdata;            
-            
+            console.log("inside onmoung inner after get");
+
             if(respdata.data.company.length == 0 ) {
               companydata_init = dd;
+              console.log("inside onmoung inner if");
             } else {
               companydata_init = respdata.data.company[0];
+              console.log("inside onmoung inner else");
             }
+            
+          } else if( companydata_init.length > 0) {
+            companydata_init = companydata_init[0];
+            if (companydata_init.companyFiscalYear.Int) companydata_init.companyFiscalYear = companydata_init.companyFiscalYear.Int;
+            if (companydata_init.companyPinCode.Int) companydata_init.companyPinCode = companydata_init.companyPinCode.Int;
+          }
 
-          } 
+          $companystore = companydata_init;	
 
-            console.log("inside onmoung");
-            $companystore = companydata_init;	
-            mform = document.getElementById("companyform");		
-            companyform.initVal(mform);		
+          console.log("init the dorp down values");
+                // Populate the default values for the dropdown    
+                console.log(JSON.stringify(companydata));
+
+                if (typeof companydata.companyCountry === 'string' || companydata.companyCountry instanceof String) {
+                  $companystore.companyCountry = getvalue('companyCountry',companydata.companyCountry);    
+                } else {
+                  $companystore.companyCountry = companydata.companyCountry;    
+                }                
+                console.log(JSON.stringify(companydata));
+                let mys = companydata.companyState;
+                let myc = companydata.companyCity;
+                countryselect();        
+                console.log(JSON.stringify(companydata));   
+                console.log(myc);
+                if (typeof mys === 'string' || mys instanceof String) { 
+                    $companystore.companyState = getvalue('companyState', mys);
+                } else {
+                    $companystore.companyState = mys;
+                }
+               stateselect();      
+               if (typeof myc === 'string' || myc instanceof String) {          
+                $companystore.companyCity = getvalue('companyCity', myc);
+               } else {
+                    $companystore.companyCity = myc;
+                }
+                $companystore.companyCategory=getvalue('companyCategory',companydata.companyCategory);                
+                $companystore.companyIndustry =   getvalue('companyIndustry',companydata.companyIndustry);
+
+                mform = document.getElementById("companyform");		
+            companyform.initVal(mform);	
+	
             if(mode === 'display') {
                 companyform.disable(mform);
             } else {
-                btntxt = "Save";
+              companyform.enable(mform);
+              btntxt = "Save";
             }
             mymodal.close();
-  mymodal=null;
-            
+            mymodal=null;            
         });
     
       export async function companysave(){
@@ -154,9 +205,17 @@ const dd = {
           //toggle_btn_text();
           companyform.disable(mform);
           let formDatae = new FormData();
-          formDatae.append("file", avatar);
           console.log(JSON.stringify(companydata));
-          formDatae.append("myjson", JSON.stringify(companydata));
+
+          companydata.companyCountry = companydata.companyCountry.refvalue;
+          companydata.companyState = companydata.companyState.refvalue;
+          companydata.companyCity = companydata.companyCity.refvalue;          
+          companydata.companyCategory = companydata.companyCategory.refvalue;
+          companydata.companyIndustry = companydata.companyIndustry.refvalue;
+          
+          if (!companydata.companyCity === undefined) companydata.companyCity = ""; 
+          formDatae.append("text_field", JSON.stringify(companydata));
+          formDatae.append("file_field", avatar);
           respdata = await http.postForm('upload',formDatae);
         } else {
           toggle_btn_text();
@@ -190,8 +249,106 @@ const dd = {
 		//Dispatch the favorite event with object data
 		dispatch('editresult');
 	}
+
+  
+
+  function countryselect() {
+    console.log($companystore.companyCountry);
+    console.log($companystore.companyCountry.submenu);
+    if($companystore.companyCountry.submenu) {
+      console.log("@@#$@#@#@#@#@#@#@#@#@#");
+      states = $companystore.companyCountry.submenu;      
+    } else {
+      console.log("@@#$@#@#@#@#@#@#@#@#@#    NUILL");
+      states = [];      
+    }
+    citys = [];
+    console.log(states.length);
+    if(states.length > 0) {
+      if(states[0].submenu) {
+        citys = states[0].submenu;    
+      } 
+    }
+
+    //Reset the previously selected values
+    $companystore.companyState = '';
+    $companystore.companyCity = '';  
+  }
+
+
+  function stateselect() {
+    console.log("------State change start------");
+    console.log($companystore.companyState);
+    if($companystore.companyState.submenu) {
+      citys = $companystore.companyState.submenu;
+    } else {
+      citys = [];
+    }
+
+    //Reset the previously selected values
+    $companystore.companyCity = '';
+    console.log("------State change End------");
+  }
     
+  let selecteds;
     
+/*
+  function testchange(){
+    console.log("in test");
+
+                $companystore.companyCategory=getvalue('companyCategory','Food');
+
+  }
+*/
+
+function getvalue(type,matchstr) {  
+  switch(type) {
+  case 'companyCategory':    
+    return match (refdata.compcat,matchstr);    
+  case 'companyIndustry':    
+    return match (refdata.industype,matchstr);    
+  case 'companyCountry':    
+    return match (refdata.country,matchstr);  
+  case 'companyState':    
+    if ($companystore.companyCountry.submenu !== undefined) {
+      return match ($companystore.companyCountry.submenu,matchstr); 
+    } else {
+      return {}
+    }
+  case 'companyCity':  
+    if ($companystore.companyState.submenu !== undefined) {  
+    return match ($companystore.companyState.submenu,matchstr); 
+    } else {
+      return {}
+    }
+  
+    default:
+    return dd;  
+    // code block
+  
+ 
+}
+}
+
+
+function match (arrval,matchstr) {
+  let dds = {};
+  console.log(arrval);
+  console.log(matchstr);
+  if (arrval!=[]) {
+    arrval.forEach( x => {
+        console.log(x);
+        console.log(x.refvalue === matchstr);
+        if (x.refvalue === matchstr) dds = x;
+      });
+    }  
+    console.log(dds);
+  return dds;
+}
+
+
+
+
     </script>
     
     
@@ -212,6 +369,7 @@ const dd = {
            <span class="flex w-5"></span>
           <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow" on:click={sendcardaction}>Cancel</button>  
           {/if}    
+          
         </div>
     {/if}
         <form id="companyform" class="px-10 py-1 rounded w-full my-5 inputs space-y-6">
@@ -234,7 +392,7 @@ const dd = {
                             <input required 
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                             type = "text"
-                            bind:value={$companystore.companyshortname}
+                            bind:value={$companystore.companyShortName}
                             />
                             <div class="pristine-error-group"></div>
                         </div>
@@ -256,16 +414,15 @@ const dd = {
                     <label for="companyCategory">Category</label>
                             <select required 
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                            bind:value={$companystore.companyCategory}
-                            >  
-                              <!--
-                            {#each questions as question}
-                            <option value={question}>
-                              {question.text}
-                            </option>
-                          {/each}
+                            bind:value={$companystore.companyCategory}>  
+                            {#each refdata.compcat as indusca}
+                              <option value={indusca}>
+                                {indusca.refvalue}
+                              </option>
+                            {/each}
 
 
+     <!--
                           
                               <option>1</option>
                               <option>2</option>
@@ -282,7 +439,15 @@ const dd = {
                             <select required 
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
                             bind:value={$companystore.companyIndustry}
-                            >dasdfasdf</select>
+                            >
+                          
+                            {#each refdata.industype as industyp}
+                            <option value={industyp}>
+                              {industyp.refvalue}
+                            </option>
+                           {/each}
+
+                          </select>
                             <div class="pristine-error-group"></div>
                         </div>
            
@@ -329,30 +494,53 @@ const dd = {
                   
                   <div class="pristine-form-group md:col-start-1 md:col-span-2 my-3">				  
                     <label for="companyCountry">Country</label>
+                            <!-- svelte-ignore a11y-no-onchange -->
                             <select required 
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                            bind:value={$companystore.companyCountry}
-                            >dasdfasdf</select>
+                            bind:value={$companystore.companyCountry} on:change={()=>countryselect()}
+                            >
+                            {#each refdata.country as country}
+                            <option value={country}>
+                              {country.refvalue}
+                            </option>
+                          {/each}
+                        </select>
                             <div class="pristine-error-group"></div>
                         </div>
+                        <div class="pristine-form-group md:col-start-3 md:col-span-3  my-3">				  
+                          <label for="companyState">State</label>
+                                  <!-- svelte-ignore a11y-no-onchange -->
+                                  <select required 
+                                  class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                                  bind:value={$companystore.companyState}  on:change={stateselect}
+                                  >
+                    
+                                  {#each states as state}
+                                  <option value={state}>
+                                    {state.refvalue}
+                                  </option>
+                                {/each}
+                    
+                                </select>
+                                  <div class="pristine-error-group"></div>
+                              </div>
            
-                  <div class="pristine-form-group md:col-start-3 md:col-span-3  my-3">				  
+                  <div class="pristine-form-group md:col-start-6 md:col-span-3  my-3">				  
                     <label for="companyCity">City</label>
                             <select required 
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
                             bind:value={$companystore.companyCity}
-                            >dasdfasdf</select>
+                            >
+                            {#each citys as city}
+                            <option value={city}>
+                              {city.refvalue}
+                            </option>
+                          {/each}
+                            /select>
                             <div class="pristine-error-group"></div>
                         </div>
            
-                  <div class="pristine-form-group md:col-start-6 md:col-span-3  my-3">				  
-                    <label for="companyState">State</label>
-                            <select required 
-                            class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                            bind:value={$companystore.companyState}
-                            >dasdfasdf</select>
-                            <div class="pristine-error-group"></div>
-                        </div>
+
            
                     <div class="pristine-form-group md:col-start-9 md:col-span-1  my-3">				  
                     <label for="companyPinCode">Pin</label>

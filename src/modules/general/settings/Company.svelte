@@ -108,6 +108,7 @@ onMount(async() => {
   });
 
   const getCompany = async() => {
+    console.log("inside onmoung inner if");
     mymodal =loginprogressmodal();  
     let respdata = await http.get('getcompany'); 
     compdata = respdata.data.company; 
@@ -272,13 +273,16 @@ onMount(async() => {
               
            
 
-
-              <tr class = {myc}>
+              {#if myc ==='visible'}
+              <!--tr class = {myc}-->
+              <tr>
                 <td colspan="6" headers="Col2">
-                  <Companydetails companydata_init ={compdata} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod} />
+                  
+                    <Companydetails companydata_init ={compdata} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod} />
+                  
                 </td>
               </tr>
-
+              {/if}
          
 
               <!-- More rows... -->
@@ -292,7 +296,7 @@ onMount(async() => {
 
 {#if mymod ==='edit'}
 <Alerts targetid="sudo1"/>
-<Companydetails companydata_init={compdata} mode = {mymod} firstvisit = {firstvisit} on:editresult= {handleresult}/>
+<Companydetails companydata_init={compdata} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod} on:editresult= {handleresult}/>
 {/if}
 
 
