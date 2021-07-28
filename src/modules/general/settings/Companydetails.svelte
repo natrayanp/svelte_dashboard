@@ -160,31 +160,47 @@ const dd = {
           console.log("init the dorp down values");
                 // Populate the default values for the dropdown    
                 console.log(JSON.stringify(companydata));
+                if (companydata.companyId != null) {
+                    if (typeof companydata.companyCountry === 'string' || companydata.companyCountry instanceof String) {
+                      $companystore.companyCountry = getvalue('companyCountry',companydata.companyCountry);    
+                    } else {
+                      $companystore.companyCountry = companydata.companyCountry;    
+                    }                
+                    console.log(JSON.stringify(companydata));
+                    let mys = companydata.companyState;
+                    let myc = companydata.companyCity;
 
-                if (typeof companydata.companyCountry === 'string' || companydata.companyCountry instanceof String) {
-                  $companystore.companyCountry = getvalue('companyCountry',companydata.companyCountry);    
-                } else {
-                  $companystore.companyCountry = companydata.companyCountry;    
-                }                
-                console.log(JSON.stringify(companydata));
-                let mys = companydata.companyState;
-                let myc = companydata.companyCity;
-                countryselect();        
-                console.log(JSON.stringify(companydata));   
-                console.log(myc);
-                if (typeof mys === 'string' || mys instanceof String) { 
-                    $companystore.companyState = getvalue('companyState', mys);
-                } else {
-                    $companystore.companyState = mys;
+                
+                    countryselect();        
+                    console.log(JSON.stringify(companydata));   
+                    console.log(myc);
+                    if (typeof mys === 'string' || mys instanceof String) { 
+                        $companystore.companyState = getvalue('companyState', mys);
+                    } else {
+                        $companystore.companyState = mys;
+                    }
+                  stateselect();      
+                  if (typeof myc === 'string' || myc instanceof String) {          
+                    $companystore.companyCity = getvalue('companyCity', myc);
+                  } else {
+                        $companystore.companyCity = myc;
+                    }                
+                    if (typeof companydata.companyCategory === 'string' || companydata.companyCategory instanceof String) {          
+                      $companystore.companyCategory=getvalue('companyCategory',companydata.companyCategory);  
+                  } else {
+                    $companystore.companyCategory = companydata.companyCategory;
+                    }  
+
+                    if (typeof companydata.companyIndustry === 'string' || companydata.companyIndustry instanceof String) {          
+                      $companystore.companyIndustry =   getvalue('companyIndustry',companydata.companyIndustry); 
+                  } else {
+                    $companystore.companyIndustry=companydata.companyIndustry;
+                    }  
+                                  
+                   
+
+
                 }
-               stateselect();      
-               if (typeof myc === 'string' || myc instanceof String) {          
-                $companystore.companyCity = getvalue('companyCity', myc);
-               } else {
-                    $companystore.companyCity = myc;
-                }
-                $companystore.companyCategory=getvalue('companyCategory',companydata.companyCategory);                
-                $companystore.companyIndustry =   getvalue('companyIndustry',companydata.companyIndustry);
 
                 mform = document.getElementById("companyform");		
             companyform.initVal(mform);	
@@ -212,10 +228,15 @@ const dd = {
           companydata.companyCity = companydata.companyCity.refvalue;          
           companydata.companyCategory = companydata.companyCategory.refvalue;
           companydata.companyIndustry = companydata.companyIndustry.refvalue;
+          //companydata.companyPinCode = Number(companydata.companyPinCode);
+          //companydata.companyFiscalYear = Number(companydata.companyFiscalYear); 
+
           
           if (!companydata.companyCity === undefined) companydata.companyCity = ""; 
           formDatae.append("text_field", JSON.stringify(companydata));
+          formDatae.append("text_action",JSON.stringify({"optype": firstvisit?"save":"update"}))
           formDatae.append("file_field", avatar);
+ 
           respdata = await http.postForm('upload',formDatae);
         } else {
           toggle_btn_text();
