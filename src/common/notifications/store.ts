@@ -4,8 +4,8 @@ import {positions,notificationtype,modaltype} from './modals'
 
 
 const isNotificationValid = notification => { 
-  console.log(notification);
-  console.log(!notification);
+  //console.log(notification);
+  //console.log(!notification);
   if (!notification ||  !notification.text || !notification.notificationtype) return {"res":false,"reason":"not a valid notification"};  
   if (!notificationtype.includes(notification.notificationtype)) return {"res":false,"reason":"Invalid notification type"};  
   if (typeof notification.title !== 'string' || typeof notification.text !== 'string') return {"res":false,"reason":"not a valid notification title or text"};  
@@ -41,7 +41,7 @@ const addNotification = (notification, update) => {
     throw new Error(s.reason); 
   } 
   
-  console.log(notification.hasbackdrop);
+  //console.log(notification.hasbackdrop);
   
   //Enrich Notification
   (variableChk(notification.disableClose)) ? notification['disableClose'] = true : notification['disableClose'] = notification.disableClose;
@@ -53,7 +53,7 @@ const addNotification = (notification, update) => {
   notification['id'] = new Date().getTime();
   
   //Enrich Notification
-  console.log(notification.hasbackdrop);
+  //console.log(notification.hasbackdrop);
   
   let notobj   = notification;
   
@@ -65,7 +65,7 @@ const addNotification = (notification, update) => {
     ...rest
   } = notification;
   
-  console.log(JSON.stringify(notification));
+  //console.log(JSON.stringify(notification));
   
   let mypromise = new Deferred();
 
@@ -77,7 +77,7 @@ const addNotification = (notification, update) => {
     public close(data=null){removeNotification(this,data,update);}    
   };
 
-  console.log(notification.id);
+  //console.log(notification.id);
   let myobj = new retObj(id, notobj, mypromise.promise);
   
   //If Alert, remove the existing alert and show the last one
@@ -93,8 +93,8 @@ const addNotification = (notification, update) => {
       notifications = notifications.filter( n => (!((n.notificationtype === notification.notificationtype) && (n.id !== notification.id))));     
     }  
     }
-    /*console.log(JSON.stringify(notifications));
-    console.log(JSON.stringify({
+    /*//console.log(JSON.stringify(notifications));
+    //console.log(JSON.stringify({
       id,
       removeAfter,
       myobj,
@@ -117,20 +117,20 @@ const addNotification = (notification, update) => {
 };
 
 const removeNotification = (notiobj,data=null,update) => {  
-  console.log(notiobj);
+  //console.log(notiobj);
   let ncpy ;
   let cc;
   update((notifications) => {    
-    console.log(JSON.stringify(notifications));
+   // //console.log(JSON.stringify(notifications));
     ncpy = notifications.filter(n => n.id === notiobj.id);
     cc = notifications.filter(n => n.id !== notiobj.id);
     return cc;
   });  
-  console.log(JSON.stringify(ncpy));
-  console.log(console.log(JSON.stringify(cc)));
+  //console.log(JSON.stringify(ncpy));
+  //console.log(//console.log(JSON.stringify(cc)));
   if(ncpy.length){
       let mobj = ncpy[0];
-      console.log(mobj);
+      //console.log(mobj);
 
       if(mobj.notificationtype === 'modal') {
         mobj.mypromise.resolve(data);

@@ -1,7 +1,8 @@
 
-import { authVal } from "../../stores/stores";
-
 import {apiurls,noAuthToken_endpt,installation, environment} from '../../environment/production';
+import {authInit,signupHandler,dosignout,sessionexist,providerlogin,activateListener} from '../../services/authservice/authservice';
+import {masterStore,authVal} from '../../stores/stores';
+import { goto } from '@roxi/routify';
 
 let tkn = null; 
 
@@ -34,8 +35,10 @@ export const HttpClient = () => {
             hdrs = {...hdrs,'Authorization': 'Bearer '+tkn};                      
         }                
         
-        if(authVal.user.session !== null) {
-          hdrs = {...hdrs, 'session': authVal.user.session};
+        console.log(authVal.session);
+        console.log(authVal.session !== undefined);
+        if(authVal.session !== null && authVal.session !== undefined) {
+          hdrs = {...hdrs, 'session': authVal.session};
         }
        // hdrs = {...hdrs, 'Content-Type': 'application/json'};
        
@@ -56,6 +59,7 @@ export const HttpClient = () => {
 
         console.log(resp);
         let respdata = {};
+        
         if(!resp.ok) {
           //console.log(resp);
           console.log("inside ok");
@@ -85,7 +89,15 @@ export const HttpClient = () => {
           respdata = respd;
           console.log(respdata);
         }
-        console.log(respdata);
+        console.log(respdata);        
+        
+        if(['AUTH-FAIL','SESSION-INVALID'].includes(respdata.slugcode)) {          
+          await dosignout();
+          masterStore.resetAll();
+         // $goto('/landing');
+        }
+
+
         return respdata;
   };
 

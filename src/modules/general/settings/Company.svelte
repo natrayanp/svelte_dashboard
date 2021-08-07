@@ -3,14 +3,16 @@
 import {formValidator} from '../../../common/formvalidators/formvalidator';
 import {onMount, onDestroy} from 'svelte';
 import { http } from '../../../stores/services';
+
 import { Accordion, AccordionItem } from "../../../common/accordion/index";
 import Companydetails from './Companydetails.svelte';
 
 import Alerts from '../../../common/notifications/components/alerts/Alerts.svelte';
 
+import { entityStore,enityVal } from "../../../stores/stores";
+
 import { getNotificationsContext } from '../../../common/notifications';
 const { addNotification } = getNotificationsContext();
-
 
 
 const dd1 = {
@@ -58,6 +60,8 @@ let mymodal = null;
 //sessionStorage.setItem('myWork', 'Developer');
 let firstvisit = sessionStorage.getItem('cpyfirst');
 sessionStorage.removeItem('cpyfirst');
+if(firstvisit == null) firstvisit = false;
+
 
 
 const loginprogressmodal = () => {
@@ -90,9 +94,14 @@ function toggle_viewdetail(){
     myc = "hidden";
   }
 
-  async function handleresult() {
-  console.log(handleresult);
-  await getCompany();
+  async function handleresult(event) {
+  console.log(event.detail.action);  
+  if (event.detail.action === "save") {
+    await getCompany(true);
+  } else {
+    await getCompany(false);
+  }
+
    if (compdata.length <= 0) {    
     let s = allAlerts({tgt:"sudo1",text:"No company setup exists. Please save company",type:'error'});    
   } else {
@@ -102,23 +111,65 @@ function toggle_viewdetail(){
 }
 
 
-onMount(async() => {   
-    await getCompany();
+onMount(async() => {  
+  console.log("going to onmount");
+      await getCompany();
+ 
     //if (compdata.length <= 0) toggle_edit();
   });
 
-  const getCompany = async() => {
-    console.log("inside onmoung inner if");
+  onDestroy(async() => {
+    if(mymodal) {
+      mymodal.close();
+      mymodal=null;
+    }
+  })
+
+  const getCompany = async(goforfetch = false) => {
+    console.log("inside getCompany inner if");
+    console.log(JSON.stringify(enityVal));
     mymodal =loginprogressmodal();  
-    let respdata = await http.get('getcompany'); 
-    compdata = respdata.data.company; 
-    refdata = respdata.data.refdata; 
+    let respdata;
+    console.log(enityVal);
+    console.log(enityVal.company);
+    console.log( JSON.stringify(enityVal.company.length) === 0); 
+    if(!goforfetch) {
+      if (enityVal.company.length === 0 || JSON.stringify(enityVal.refdata) === JSON.stringify({})) {
+        goforfetch = true;  
+      } 
+    }    
+
+    if(goforfetch) {
+      respdata = await http.get('getcompany'); 
+      console.log(JSON.stringify(respdata));
+      console.log("after getcompany set store start"); 
+      console.log(respdata.data.company.length);
+      if(respdata.data.company.length > 0) {
+        entityStore.setCompany(JSON.parse(JSON.stringify(respdata.data.company))); 
+      } else {
+        entityStore.setCompany([]); 
+      }
+      
+      entityStore.setRef(JSON.parse(JSON.stringify(respdata.data.refdata))); 
+      console.log("after getcompany set store end");
+    }        
+
+    console.log(JSON.stringify(enityVal.company));
+    
+    compdata=JSON.parse(JSON.stringify(enityVal.company.slice()));   
+    console.log(enityVal.company) ;
+    console.log(compdata) ;
+    refdata = JSON.parse(JSON.stringify(enityVal.refdata));  
+
     if (compdata.length <= 0) {
       firstvisit = true;
       toggle_edit();
+    }else {
+      firstvisit = false;
     }
     mymodal.close();
     mymodal=null;
+    console.log("inside onmoung inner if end of getcompany");
   };
 
 
@@ -263,9 +314,10 @@ onMount(async() => {
                   Admin
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  <a href="#" class="text-red-600 hover:text-red-900 mr-5"><i class="far fa-trash-alt fa-lg"/></a>
+                  <!--a href="#" class="text-red-600 hover:text-red-900 mr-5"><i class="far fa-trash-alt fa-lg"/></a-->
+                  <a href="#" class="text-green-600 hover:text-red-900 mr-5" on:click={toggle_viewdetail}><i class="far fa-eye fa-lg"/></a>
                   <a href="#" class="text-green-600 hover:text-green-900 mr-4" on:click={()=>toggle_edit()}><i class="far fa-edit fa-lg"/></a>
-                  <a href="#" class="text-green-600 hover:text-green-900" on:click={toggle_viewdetail}><i class="far fa-eye fa-lg"/></a>
+                  <!--a href="#" class="text-green-600 hover:text-green-900" ><i class="far fa-eye fa-lg"/></a-->
                 </td>
               </tr>
   

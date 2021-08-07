@@ -1,6 +1,7 @@
 import { readable, writable } from 'svelte/store';
 import Pristine from './pristine/pristine';
-import  read_write_form  from './formdiasable';
+import  read_write_form from './formdiasable';
+import { disable_enable_elements } from './formdiasable';
 
 export const formValidator = (fieldconf) => {
 
@@ -35,6 +36,9 @@ export const formValidator = (fieldconf) => {
   
   let disableform = (form) => read_write_form(form);
   let enableform = (form) => read_write_form(form,false);
+
+  let disableelement =(elementarray) => disable_enable_elements(elementarray);
+  let enableelement =(elementarray) => disable_enable_elements(elementarray,false);
   
   console.log("---------------");
   console.log(fieldconf);
@@ -49,6 +53,8 @@ export const formValidator = (fieldconf) => {
     initVal:initValidator,
     disable: disableform,
     enable: enableform,
+    eleenable: enableelement,
+    eledisable: disableelement,
    // isValInit:isValInit,
     refreshFields:refreshFields,
   };

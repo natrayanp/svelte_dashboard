@@ -2,6 +2,7 @@
 import {authStore} from '../stores/stores';
 import Sidemenu from './sidenav/Sidemenu.svelte';
 
+
 let sidenavopen = false;
 let topnavopen = false;
 let downclicks = true;

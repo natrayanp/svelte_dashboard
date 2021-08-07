@@ -5,6 +5,7 @@
     metatags.title = 'My Routify app';
     metatags.description = 'Description coming soon...';
     import {authStore} from '../../../stores/stores';
+    
 
 </script>
 

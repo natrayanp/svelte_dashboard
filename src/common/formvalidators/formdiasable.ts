@@ -12,7 +12,7 @@ export default function read_write_form(form: any,disable=true) {
   }
   
   // Disables or enables a collection of form-elements.
-  function disable_enable_elements(elements,disable=true) {
+  export function disable_enable_elements(elements,disable=true) {
     var length = elements.length;
     while(length--) {
       elements[length].disabled = disable;

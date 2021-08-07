@@ -5,8 +5,9 @@
     import { http } from '../../../stores/services';
     import { Accordion, AccordionItem } from "../../../common/accordion/index";
     import { createEventDispatcher } from 'svelte';
+    import { entityStore,enityVal } from "../../../stores/stores";
+    import { goto } from '@roxi/routify';
 
-    
     import { getNotificationsContext } from '../../../common/notifications';
 const { addNotification } = getNotificationsContext();
 
@@ -76,7 +77,7 @@ const dd = {
         entityid:null,
 }*/
 
-    
+    console.log("+++++++++++++++++ start company details ++++++++++++++++++++++");
     let  avatar, fileinput;
     let mymodal = null;
 
@@ -108,7 +109,11 @@ const dd = {
         if (!refdata.compcat) refdata.compcat = [];
 
         $: companydata;
-        companydata = JSON.parse(JSON.stringify(companydata_init));        
+        console.log(companydata_init);
+        if(companydata_init.isArray && companydata_init.length > 0 ) {  
+          companydata = JSON.parse(JSON.stringify(companydata_init[0]));
+        } 
+        companydata = dd;
         companyform = formValidator(companydata);
         companystore = companyform.data;	
         $companystore = companydata;
@@ -128,35 +133,30 @@ const dd = {
 			});
 	}
     
+  console.log("+++++++++++++++++ END company details ++++++++++++++++++++++");
+
         onMount(async() => {	
           console.log("_____________-going inside onmount 232-____________________")  ;
           console.log(mode);
-          mymodal =loginprogressmodal();  
-          let respdata;
+          //mymodal =loginprogressmodal(); 
+
+       
 
           // This is edit mode
-          if(mode === 'edit' && (refdata === {} || companydata_init.length < 1)) {
+          if(mode === 'edit' && (JSON.stringify(refdata) === JSON.stringify({}) || companydata_init.length < 1)) {
             console.log("inside onmoung inner before get");
-            respdata = await http.get('getcompany'); 
-            refdata = respdata.data.refdata;            
-            console.log("inside onmoung inner after get");
-
-            if(respdata.data.company.length == 0 ) {
-              companydata_init = dd;
-              console.log("inside onmoung inner if");
-            } else {
-              companydata_init = respdata.data.company[0];
-              console.log("inside onmoung inner else");
-            }
-            
+            await getCompany1(); 
+            console.log("inside onmoung inner after get");            
           } else if( companydata_init.length > 0) {
+            console.log("else if( companydata_init.length > 0)");
+            console.log(companydata_init);
             companydata_init = companydata_init[0];
-            if (companydata_init.companyFiscalYear.Int) companydata_init.companyFiscalYear = companydata_init.companyFiscalYear.Int;
-            if (companydata_init.companyPinCode.Int) companydata_init.companyPinCode = companydata_init.companyPinCode.Int;
           }
 
-          $companystore = companydata_init;	
+          //if (companydata_init.companyFiscalYear.Int) companydata_init.companyFiscalYear = companydata_init.companyFiscalYear.Int;
+          //if (companydata_init.companyPinCode.Int) companydata_init.companyPinCode = companydata_init.companyPinCode.Int;
 
+          $companystore = companydata_init;	
           console.log("init the dorp down values");
                 // Populate the default values for the dropdown    
                 console.log(JSON.stringify(companydata));
@@ -196,9 +196,7 @@ const dd = {
                   } else {
                     $companystore.companyIndustry=companydata.companyIndustry;
                     }  
-                                  
-                   
-
+                                 
 
                 }
 
@@ -208,14 +206,17 @@ const dd = {
             if(mode === 'display') {
                 companyform.disable(mform);
             } else {
-              companyform.enable(mform);
+              companyform.enable(mform);              
+              if(!firstvisit) companyform.eledisable([document.getElementById("cpyname")]);	              
               btntxt = "Save";
             }
-            mymodal.close();
-            mymodal=null;            
-        });
-    
+           //mymodal.close();
+           //mymodal=null;            
+        });   
+        
+
       export async function companysave(){
+        let respdata;
         if(btntxt === "Save") {
           console.log(companydata);
           //toggle_btn_text();
@@ -238,6 +239,7 @@ const dd = {
           formDatae.append("file_field", avatar);
  
           respdata = await http.postForm('upload',formDatae);
+          sendcardaction("save");
         } else {
           toggle_btn_text();
           companyform.enable(mform);
@@ -266,9 +268,15 @@ const dd = {
 
     const dispatch = createEventDispatcher();
 
-    const sendcardaction = () => {		
+    const sendcardaction = (btnpressed) => {		
+      if(firstvisit) {
+        $goto('/landing');
+        return;
+      }  
 		//Dispatch the favorite event with object data
-		dispatch('editresult');
+		dispatch('editresult',{
+			action: btnpressed
+		});
 	}
 
   
@@ -369,13 +377,42 @@ function match (arrval,matchstr) {
 
 
 
+const getCompany1 = async() => {
+  console.log("inside onmoung inner if companydetails");  
+  console.log("inside onmoung inner if companydetails");
+    console.log(JSON.stringify(enityVal));
+    mymodal =loginprogressmodal();  
+    let respdata;
+
+    if(enityVal.company.length === 0 || JSON.stringify(enityVal.refdata) === JSON.stringify({})) {
+      console.log("after getcompany set store start detail"); 
+      respdata = await http.get('getcompany'); 
+
+      entityStore.setCompany(JSON.parse(JSON.stringify(respdata.data.company))); 
+      entityStore.setRef(JSON.parse(JSON.stringify(respdata.data.refdata))); 
+           
+      console.log("after getcompany set store end details");
+    }
+    
+    if(enityVal.company.length <1) {
+      companydata_init = dd;      
+    } else {
+      companydata_init = JSON.parse(JSON.stringify(enityVal.company[0]));      
+    }
+    refdata = JSON.parse(JSON.stringify(enityVal.refdata)); 
+
+    mymodal.close();
+    mymodal=null;
+    console.log("inside onmoung inner if end of getcompany companydetails");
+  };
+
 
     </script>
     
     
     
       
-    
+    {firstvisit}
     
     <div class="shadow rounded-lg flex flex-col flex-auto pb-7 bg-white">
     {#if mode !== 'display'}
@@ -388,7 +425,7 @@ function match (arrval,matchstr) {
             </button>
             {#if !firstvisit}
            <span class="flex w-5"></span>
-          <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow" on:click={sendcardaction}>Cancel</button>  
+          <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow" on:click={()=>sendcardaction('cancel')}>Cancel</button>  
           {/if}    
           
         </div>
@@ -400,9 +437,10 @@ function match (arrval,matchstr) {
                 <div class="pristine-form-group md:col-start-1 md:col-span-3">				  
                   
                     <label for="companyname">Name</label>
-                    <input  required 
+                    <input  required
+                            id="cpyname"  
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-                            type = "text"
+                            type = "text"    
                             bind:value={$companystore.companyName}
                             />
                     <div class="pristine-error-group"></div>

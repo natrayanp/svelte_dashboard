@@ -221,25 +221,52 @@ import {providertype} from '../services/authservice/authModals';
 			
 			switch (val.detail.data.nextaction){
 				case 'LANDING':
-					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,menus:val.detail.data.menu}));
+					
+					authStore.update(dd => ({...dd,
+											  	stage:'done',
+											  	session:(val.detail.session),
+											  	siteid:ins.siteid,
+											  	menus:val.detail.data.menu,
+											  	activepack:val.detail.data.menu[0],
+												allcompany: val.detail.company,
+												allbranch:val.detail.branch,}));  
 					$goto('/landing');
 					break;
 				case 'DOMAINREGIS':
-					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,detail:val.detail.data}));	
+					authStore.update(dd => ({...dd,
+												stage:'done',
+												session:(val.detail.session),
+												siteid:ins.siteid,
+												detail:val.detail.data}));	
 					$goto('/landing/subdomain');			
 					break;
 				case 'ADDPACKS':
-					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,detail:val.detail.data}));	
+					authStore.update(dd => ({...dd,
+												stage:'done',
+												session:(val.detail.session),
+												siteid:ins.siteid,
+												detail:val.detail.data}));	
 					$goto('/landing/pricing');	
 					break;
 				case 'ADDCOMPANY':
 					console.log(val.detail.data.menu[0].submenu);
-					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,menus:val.detail.data.menu,activepack:val.detail.data.menu[0]}));				
+					authStore.update(dd => ({...dd,
+												stage:'done',
+												session:(val.detail.session),
+												siteid:ins.siteid,
+												menus:val.detail.data.menu,
+												activepack:val.detail.data.menu[0]}));				
 					sessionStorage.setItem('cpyfirst', true);
 					$goto('./landing/companysettings');	
 					break;
 				case 'ADDBRANCH':
-					authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid,menus:val.detail.data.menu,activepack:val.detail.data.menu[0]}));
+					authStore.update(dd => ({...dd,
+												stage:'done',
+												session:(val.detail.session),
+												siteid:ins.siteid,
+												menus:val.detail.data.menu,
+												activepack:val.detail.data.menu[0],
+												allcompany: val.detail.company}));
 					$goto('/landing/branchsettings');
 					break;					
 			}
