@@ -52,10 +52,11 @@ export const environment = {
    endpt_logintoken:'auth/logintoken',
    endpt_regisdomain:'auth/regisdomain',
    endpt_getmenus:'auth/getmenus',
-   endpt_getbranch:'auth/getbranch',
+   //endpt_getbranch:'auth/getbranch',
    endpt_upload:'auth/savecompany',
    endpt_setplan:'auth/regisplan',  
    endpt_getcompany:'auth/getcompany',
+   endpt_getbranch:'auth/getbranch',   
 };
 
 

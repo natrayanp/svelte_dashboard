@@ -15,6 +15,10 @@ import { getNotificationsContext } from '../../../common/notifications';
 const { addNotification } = getNotificationsContext();
 
 
+export let entityslugpass;
+
+
+
 const dd1 = {
         companyId: null,
         companyName: "Ananthi",
@@ -48,6 +52,7 @@ const dd1 = {
 }
 
 
+
   let dt2 = false 
   let dt1 = false
   let refdata = {};
@@ -56,12 +61,13 @@ const dd1 = {
 let mymod = 'display';
 let myc = "hidden";
 let mymodal = null;
+let pagefor = ""
+
 
 //sessionStorage.setItem('myWork', 'Developer');
 let firstvisit = sessionStorage.getItem('cpyfirst');
 sessionStorage.removeItem('cpyfirst');
 if(firstvisit == null) firstvisit = false;
-
 
 
 const loginprogressmodal = () => {
@@ -90,9 +96,7 @@ function toggle_viewdetail(){
 }
 
   function toggle_edit() {
-    mymod="edit"
-    if(compdata.length <= 0)  mymod="new";
-    if(firstvisit)  mymod="new";
+    mymod = 'edit';
     myc = "hidden";
   }
 
@@ -114,8 +118,14 @@ function toggle_viewdetail(){
 
 
 onMount(async() => {  
+
+
   console.log("going to onmount");
+  if(entityslugpass === "Company Settings") {
       await getCompany();
+  } else {
+    await getBranch();
+  }
  
     //if (compdata.length <= 0) toggle_edit();
   });
@@ -175,6 +185,22 @@ onMount(async() => {
   };
 
 
+  const getBranch = async(goforfetch = false) => {
+    let respdata;
+    mymodal =loginprogressmodal();
+    if(!goforfetch) {
+      if (enityVal.branch.length === 0 || JSON.stringify(enityVal.refdata) === JSON.stringify({})) {
+        goforfetch = true;  
+      } 
+    }  
+    if(goforfetch) {
+      respdata = await http.get('getcompany'); 
+      console.log(JSON.stringify(respdata));
+    }
+    mymodal.close();
+    mymodal=null;
+  }
+
   const allAlerts = (val) => {
     console.log(val);
 		return addNotification({
@@ -190,9 +216,9 @@ onMount(async() => {
 			});	
 	}
 
-  
-
 </script>
+
+{entityslugpass + "    kkdkkd"}
 
 <Alerts targetid="sudo"/>
 {#if mymod !== 'edit'}
@@ -206,7 +232,7 @@ onMount(async() => {
           <table class="min-w-full divide-y divide-gray-200">
             <caption class="bg-blue-100 rounded-t-lg divide-y divide-gray-300">                                
                 <div class="flex md:flex-row flex-col items-center md:h-20 px-7">
-                  <h2 class="text-2xl  text-gray-700 font-bold">Company Settings</h2>
+                  <h2 class="text-2xl  text-gray-700 font-bold">{entityslugpass}</h2>
                   <span class = "flex px-7"></span>
                   <!--button class=" flex bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md">Add New</button-->      
                   <span class = "flex flex-grow"></span>                         

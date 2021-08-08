@@ -1,9 +1,19 @@
-<script>
-  
-  import { http } from '../../../stores/services';
 
-  const promise = http.post('getbranch',{});     
+  <script>
 
+import {formValidator} from '../../../common/formvalidators/formvalidator';
+import {onMount, onDestroy} from 'svelte';
+import { http } from '../../../stores/services';
+
+import { Accordion, AccordionItem } from "../../../common/accordion/index";
+import Branchdetails from './Branchdetails.svelte';
+
+import Alerts from '../../../common/notifications/components/alerts/Alerts.svelte';
+
+import { entityStore,enityVal } from "../../../stores/stores";
+
+import { getNotificationsContext } from '../../../common/notifications';
+const { addNotification } = getNotificationsContext();
 
 let dd = {
             companyId: null,
@@ -29,24 +39,154 @@ let dd = {
             branchStartDate: null,
             entityId: null,
         };
-  
-  let dt1 = false;
-  let dt2 = false;
-  let myc = "hidden";
 
-  function toggle_svisibility(){ 
-    console.log(myc);
- 
+
+  let dt2 = false 
+  let dt1 = false
+  let refdata = {};
+  let brndata = [];
+	
+let mymod = 'display';
+let myc = "hidden";
+let mymodal = null;
+
+
+let firstvisit = sessionStorage.getItem('brnfirst');
+sessionStorage.removeItem('brnfirst');
+if(firstvisit == null) firstvisit = false;
+
+const brnfetchprogressmodal = () => {
+		return addNotification({
+				title : 'Checking your account',
+				text: 'hi i am custom notification why it cant be sol long so i can test it before using it' ,
+				notificationtype: 'modal',            
+				modaltype:'modal-loading',  	
+        //comp : Circularprogress,				
+			});
+	}
+
+
+if (firstvisit){
+  toggle_edit();
+} 
+
+
+function toggle_viewdetail(){ 
   if (myc === "hidden") {
-    myc = "visible"
+    myc = "visible";
   } else {
-    myc = "hidden"
+    myc = "hidden";
   }
-  
+  mymod ='display';
+}
+
+  function toggle_edit() {
+    mymod="edit"
+    if(brndata.length <= 0)  mymod="new";
+    if(firstvisit)  mymod="new";
+    myc = "hidden";
   }
+
+  async function handleresult(event) {
+  console.log(event.detail.action);  
+  if (event.detail.action === "save") {
+    await getBranch(true);
+  } else {
+    await getBranch(false);
+  }
+
+   if (brndata.length <= 0) {    
+    let s = allAlerts({tgt:"sudo1",text:"No Branch setup exists. Please save Branch",type:'error'});    
+  } else {
+    mymod = 'display';
+    myc = "hidden";
+  }
+}
+
+
+onMount(async() => {  
+  console.log("going to onmount");
+      await getBranch();
+ 
+    //if (brndata.length <= 0) toggle_edit();
+  });
+
+  onDestroy(async() => {
+    if(mymodal) {
+      mymodal.close();
+      mymodal=null;
+    }
+  })
+
+  const getBranch = async(goforfetch = false) => {
+    console.log("inside getBranch inner if");
+    console.log(JSON.stringify(enityVal));
+    mymodal =brnfetchprogressmodal();  
+    let respdata;
+    console.log(enityVal);
+    console.log(enityVal.branch);
+    console.log( JSON.stringify(enityVal.branch.length) === 0); 
+    if(!goforfetch) {
+      if (enityVal.branch.length === 0 || JSON.stringify(enityVal.refdata) === JSON.stringify({})) {
+        goforfetch = true;  
+      } 
+    }    
+
+    if(goforfetch) {
+      respdata = await http.get('getbranch'); 
+      console.log(JSON.stringify(respdata));
+      console.log("after getBranch set store start"); 
+      console.log(respdata.data.branch.length);
+      if(respdata.data.branch.length > 0) {
+        entityStore.setBranch(JSON.parse(JSON.stringify(respdata.data.branch))); 
+      } else {
+        entityStore.setBranch([]); 
+      }
+      
+      entityStore.setRef(JSON.parse(JSON.stringify(respdata.data.refdata))); 
+      console.log("after getBranch set store end");
+    }        
+
+    console.log(JSON.stringify(enityVal.branch));
+    
+    brndata=JSON.parse(JSON.stringify(enityVal.branch.slice()));   
+    console.log(enityVal.branch) ;
+    console.log(brndata) ;
+    refdata = JSON.parse(JSON.stringify(enityVal.refdata));  
+
+    if (brndata.length <= 0) {
+      firstvisit = true;
+      toggle_edit();
+    }else {
+      firstvisit = false;
+    }
+    mymodal.close();
+    mymodal=null;
+    console.log("inside onmoung inner if end of getBranch");
+  };
+
+
+  const allAlerts = (val) => {
+    console.log(val);
+		return addNotification({
+				targetid: val.tgt,
+				title : 'Alert',				
+				//text: 'dkdkdk',
+				text: val.text,
+				type:val.type,								
+				notificationtype: 'alert',     
+				disableClose: false,        
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});	
+	}
+
   
-  
-  </script>
+
+</script>
+
+<Alerts targetid="sudo"/>
+{#if !(['edit','new'].includes(mymod))}
 
 <div class="flex flex-col" >
 
@@ -177,16 +317,23 @@ let dd = {
                 Admin
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <a href="#" class="text-red-600 hover:text-red-900 mr-5" on:click={toggle_svisibility} ><i class="far fa-trash-alt fa-lg" /></a>
-                <a href="#" class="text-green-600 hover:text-green-900"><i class="far fa-edit fa-lg"/></a>
+                <a href="#" class="text-green-600 hover:text-red-900 mr-5" on:click={toggle_viewdetail}><i class="far fa-eye fa-lg"/></a>
+                <a href="#" class="text-green-600 hover:text-green-900 mr-4" on:click={()=>toggle_edit()}><i class="far fa-edit fa-lg"/></a>
               </td>
             </tr>
 
-            <tr class = {myc}>
-              <td colspan="6" headers="Col2">
+
+            {#if myc ==='visible'}
+            <!--tr class = {myc}-->              
+            <tr>
+            <td colspan="6" headers="Col2">
                 <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent bibendum, lorem vel tincidunt imperdiet, nibh elit laoreet felis, a bibendum nisl tortor non orci. Donec pretium fermentum felis, quis aliquet est rutrum ut. Integer quis massa ut lacus viverra pharetra in eu lacus. Aliquam tempus odio adipiscing diam pellentesque rhoncus. Curabitur a bibendum est. Mauris vehicula cursus risus id luctus. Curabitur accumsan venenatis nibh, non egestas ipsum vulputate ac. Vivamus consectetur dolor sit amet enim aliquet eu scelerisque ipsum hendrerit. Donec lobortis suscipit vestibulum. Nullam luctus pellentesque risus in ullamcorper. Nam neque nunc, mattis vitae ornare ut, feugiat a erat. Ut tempus iaculis augue vel pellentesque.</p>
+                <Branchdetails branchdata_init ={brndata} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod} />
               </td>
             </tr>
+
+
+            {/if}
 
             <!-- More rows... -->
           </tbody>
@@ -195,195 +342,13 @@ let dd = {
     </div>
   </div>
 </div>
+{/if}
 
-<div class="py-10"></div>
-
-    
-<div class="shadow rounded-lg flex flex-col  bg-white">
-  <div class="bg-blue-100 h-20 rounded-t-lg flex flex-row items-center px-7">
-      <h2 class="text-2xl text-black text-gray-700 font-bold">New Branch</h2>  
-      <span class="flex-grow"></span>  
-     <button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md">Save</button>
-     <span class="flex w-5"></span>
-    <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow-md">Cancel</button>      
-  </div>
-  <form class="px-10 py-1 rounded w-full my-5 inputs space-y-6">
-      <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-6 md:gap-x-10  gap-y-5 md:gap-y-0	">
-
-          <div class="pristine-form-group md:col-start-1 md:col-span-3">				  
-              <label for="companyname">Company Name</label>
-              <input required disabled
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-                      type = "text"
-                      />
-              <div class="pristine-error-group"></div>
-            </div>
-
-            <div class="pristine-form-group md:col-start-4 md:col-span-3">				  
-              <label for="branchname">Branch Name</label>
-                      <input required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-              type = "text"
-                      />
-                      <div class="pristine-error-group"></div>
-                  </div>
-     
-            <div class="pristine-form-group md:col-start-7 md:col-span-3">				  
-              <label for="branchname">Branch Short Name</label>
-                      <input required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-              type = "text"
-                      />
-                      <div class="pristine-error-group"></div>
-                  </div>
+<!--div class="py-10"></div-->
 
 
-     
-            <div class="pristine-form-group md:col-start-1 md:col-span-3">				  
-              <label for="firstname">Branch Category</label>
-                      <select required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                      >dasdfasdf</select>
-                      <div class="pristine-error-group"></div>
-                  </div>
-     
-              <div class="pristine-form-group md:col-start-4 md:col-span-3">				  
-              <label for="status">Status</label>
-                      <select required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                      >dasdfasdf</select>
-                      <div class="pristine-error-group"></div>
-                  </div>
+{#if mymod ==='edit' || mymod ==='new'}
+<Alerts targetid="sudo1"/>
+  <Branchdetails branchdata_init ={brndata} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod} />
+{/if}
 
-              <div class="pristine-form-group md:col-start-7 md:col-span-3">				  
-              <label for="firstname">Start Date</label>
-                      <input required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-              type = "date"
-                      />
-                      <div class="pristine-error-group"></div>
-                  </div>
-
-
-              <div class="pristine-form-group md:col-start-1 md:col-span-5">				  
-              <label for="firstname">Address Line 1</label>
-                      <textarea required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-              type = "text"
-                      ></textarea>
-                      <div class="pristine-error-group"></div>
-                  </div>
-     
-            <div class="pristine-form-group md:col-start-6 md:col-span-4">				  
-              <label for="Addressline2">Address Line 2</label>
-                      <textarea required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-              type = "text"
-                      ></textarea>
-                      <div class="pristine-error-group"></div>
-                  </div>
-
-            <div class="pristine-form-group md:col-start-1 md:col-span-2 my-3">				  
-              <label for="Country">Country</label>
-                      <select required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                      >dasdfasdf</select>
-                      <div class="pristine-error-group"></div>
-                  </div>
-     
-            <div class="pristine-form-group md:col-start-3 md:col-span-3  my-3">				  
-              <label for="City">City</label>
-                      <select required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                      >dasdfasdf</select>
-                      <div class="pristine-error-group"></div>
-                  </div>
-     
-            <div class="pristine-form-group md:col-start-6 md:col-span-3  my-3">				  
-              <label for="State">State</label>
-                      <select required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                      >dasdfasdf</select>
-                      <div class="pristine-error-group"></div>
-                  </div>
-     
-              <div class="pristine-form-group md:col-start-9 md:col-span-1  my-3">				  
-              <label for="firstname">Pin</label>
-                      <input required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-              type = "text"
-                      />
-                      <div class="pristine-error-group"></div>
-                  </div>
-            
-
-
- 
-     
-
-     
-            
-     
-            <div class="pristine-form-group md:col-span-2">				  
-              <label for="Phone">Phone</label>
-                      <input type="text" required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                      />
-                      <div class="pristine-error-group"></div>
-                  </div>
-            <div class="pristine-form-group md:col-span-2">				  
-              <label for="Phone">Fax</label>
-                      <input type="text" required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                      />
-                      <div class="pristine-error-group"></div>
-                  </div>
-            
-     
-            <div class="pristine-form-group  md:col-span-2">				  
-              <label for="Phone">Mobile</label>
-                      <input type="text" required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                      />
-                      <div class="pristine-error-group"></div>
-                  </div>
-     
-            <div class="pristine-form-group  md:col-span-3">				  
-              <label for="Phone">email</label>
-                      <input type="text" required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                      />
-                      <div class="pristine-error-group"></div>
-                  </div>
-     
-     
-              <div class="pristine-form-group md:col-start-1 md:col-span-3">				  
-              <label for="firstname">Tax ID</label>
-                      <input required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-              type = "text"
-                      />
-                      <div class="pristine-error-group"></div>
-                  </div>
-     
-     
-            <div class="pristine-form-group  md:col-span-1">				  
-              <label for="Timezone">Timezone</label>
-                      <input type="text" required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                      />
-                      <div class="pristine-error-group"></div>
-                  </div>
-     
-     
-            <div class="pristine-form-group  md:col-span-3">				  
-              <label for="Phone">Website</label>
-                      <input type="text" required 
-                      class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                      />
-                      <div class="pristine-error-group"></div>
-                  </div>     
-
-      </div>
-  </form> 
-</div>

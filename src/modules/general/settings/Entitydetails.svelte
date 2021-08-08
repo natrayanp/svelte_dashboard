@@ -92,7 +92,6 @@ const dd = {
         export let refdata;
         export let mode = 'display';
         export let firstvisit = false;
-
         
         let myc = [];
         let mys = [];
@@ -208,9 +207,8 @@ const dd = {
                 companyform.disable(mform);
             } else {
               companyform.enable(mform);              
-              if(mode === "edit") companyform.eledisable([document.getElementById("cpyname")]);	              
+              if(!firstvisit) companyform.eledisable([document.getElementById("cpyname")]);	              
               btntxt = "Save";
-              if (mode === "edit") btntxt = "Update";
             }
            //mymodal.close();
            //mymodal=null;            
@@ -237,7 +235,7 @@ const dd = {
           
           if (!companydata.companyCity === undefined) companydata.companyCity = ""; 
           formDatae.append("text_field", JSON.stringify(companydata));
-          formDatae.append("text_action",JSON.stringify({"optype": btntxt}))
+          formDatae.append("text_action",JSON.stringify({"optype": firstvisit?"save":"update"}))
           formDatae.append("file_field", avatar);
  
           respdata = await http.postForm('upload',formDatae);
@@ -419,8 +417,7 @@ const getCompany1 = async() => {
     <div class="shadow rounded-lg flex flex-col flex-auto pb-7 bg-white">
     {#if mode !== 'display'}
         <div class="bg-blue-100 h-20 rounded-t-lg flex flex-row items-center px-7">
-            <h2 class="text-2xl text-black text-gray-700 font-bold">{btntxt==="Save"?"Add New ":btntxt+" " } Company</h2>  
-            
+            <h2 class="text-2xl text-black text-gray-700 font-bold">Company Settings</h2>  
             <span class="flex-grow"></span>  
            <button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow" 
            on:click|preventDefault={companysave}>

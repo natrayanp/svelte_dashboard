@@ -267,6 +267,7 @@ import {providertype} from '../services/authservice/authModals';
 												menus:val.detail.data.menu,
 												activepack:val.detail.data.menu[0],
 												allcompany: val.detail.company}));
+					sessionStorage.setItem('brnfirst', true);
 					$goto('/landing/branchsettings');
 					break;					
 			}
