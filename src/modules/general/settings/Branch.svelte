@@ -15,30 +15,6 @@ import { entityStore,enityVal } from "../../../stores/stores";
 import { getNotificationsContext } from '../../../common/notifications';
 const { addNotification } = getNotificationsContext();
 
-let dd = {
-            companyId: null,
-            companyname: null,        
-            branchId: null,
-            branchName: null,
-            branchShortName: null,
-            branchCategory: null,
-            branchStatus: null,
-            branchDescription: null,
-            branchImageUrl: null,
-            branchAddLine1: null,
-            branchAddLine2: null,
-            branchCity: null,
-            branchState: null,
-            branchCountry: null,
-            branchPinCode: null,
-            branchPhone: null,
-            branchFax: null,
-            branchMobile: null,
-            branchWebsite: null,
-            branchEmail: null,
-            branchStartDate: null,
-            entityId: null,
-        };
 
 
   let dt2 = false 
@@ -148,6 +124,7 @@ onMount(async() => {
     }        
 
     console.log(JSON.stringify(enityVal.branch));
+    console.log(JSON.stringify(enityVal.refdata));
     
     brndata=JSON.parse(JSON.stringify(enityVal.branch.slice()));   
     console.log(enityVal.branch) ;
@@ -157,6 +134,7 @@ onMount(async() => {
     if (brndata.length <= 0) {
       firstvisit = true;
       toggle_edit();
+      
     }else {
       firstvisit = false;
     }

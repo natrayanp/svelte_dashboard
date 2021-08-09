@@ -219,7 +219,8 @@ const dd = {
 
       export async function companysave(){
         let respdata;
-        if(btntxt === "Save") {
+        console.log(btntxt);
+        if(["Save","Update"].includes(btntxt)) {
           console.log(companydata);
           //toggle_btn_text();
           companyform.disable(mform);

@@ -14,7 +14,7 @@ import {installation as ins} from '../environment/production';
 
 //import {authapi_services} from '../services/authservice/authapi';
 import {authInit,signupHandler,dosignout,sessionexist,providerlogin,activateListener} from '../services/authservice/authservice';
-import {authStore} from '../stores/stores';
+import {authStore, authVal} from '../stores/stores';
 import {providertype} from '../services/authservice/authModals';
 
 
@@ -22,6 +22,7 @@ import {providertype} from '../services/authservice/authModals';
 
 	//import { initAuth} from '../services/authservice';
 	import Alerts from '../common/notifications/components/alerts/Alerts.svelte';
+import { get } from 'svelte/store';
 	//import { fade } from 'svelte/transition';
 
 	let sign_up_mode = false;
@@ -150,7 +151,7 @@ import {providertype} from '../services/authservice/authModals';
 	}
 
 	let mymodal = null;
-	const unsub = authStore.subscribe(val => { 
+	const unsub =  authStore.subscribe(async val => { 
 		console.log(val);
 		if(['redirectchkstart','FBUsrEmailStart','FBUsrCrStart','FBloginStart','FBLogoutStart','FBredirectStart','FBAuthChkStart'].includes(val.stage)) {
 			console.log('Open only Modal');
@@ -218,18 +219,20 @@ import {providertype} from '../services/authservice/authModals';
 				authStore.update(dd => ({...dd,stage:'done',session:(val.detail.data.sessionid),siteid:ins.siteid}));				
 				$goto('/landing/subdomain');
 			}*/
-			
-			switch (val.detail.data.nextaction){
-				case 'LANDING':
-					
+			console.log(val.detail.data.nextaction);
+			console.log(val.detail);
+			switch (val.detail.data.nextaction){				
+				case 'LANDING':					
 					authStore.update(dd => ({...dd,
 											  	stage:'done',
 											  	session:(val.detail.session),
 											  	siteid:ins.siteid,
 											  	menus:val.detail.data.menu,
 											  	activepack:val.detail.data.menu[0],
-												allcompany: val.detail.company,
-												allbranch:val.detail.branch,}));  
+												allcompany: val.detail.data.company,
+												activecompany: getactiveEntity(val.detail.data.company),
+												allbranch:val.detail.data.branch,
+												activebranch: getactiveEntity(val.detail.data.branch),}));  
 					$goto('/landing');
 					break;
 				case 'DOMAINREGIS':
@@ -260,13 +263,15 @@ import {providertype} from '../services/authservice/authModals';
 					$goto('./landing/companysettings');	
 					break;
 				case 'ADDBRANCH':
-					authStore.update(dd => ({...dd,
+					await authStore.update(dd => ({...dd,
 												stage:'done',
-												session:(val.detail.session),
+												session:val.detail.session,
 												siteid:ins.siteid,
 												menus:val.detail.data.menu,
 												activepack:val.detail.data.menu[0],
-												allcompany: val.detail.company}));
+												allcompany: val.detail.data.company,
+												activecompany: getactiveEntity(val.detail.data.company),}));
+					console.log(authVal);
 					sessionStorage.setItem('brnfirst', true);
 					$goto('/landing/branchsettings');
 					break;					
@@ -344,6 +349,18 @@ import {providertype} from '../services/authservice/authModals';
 			});	
 			
 	}
+
+
+function getactiveEntity(entityArray) {
+	console.log(entityArray);
+	let activeentity;
+	entityArray.forEach(ele => {
+		if(ele.isdefault === "Y"){
+			activeentity = ele;
+		}
+	});
+	return activeentity;
+}
 
 
 </script>
