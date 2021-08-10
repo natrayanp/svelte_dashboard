@@ -58,7 +58,7 @@ export const HttpClient = () => {
 
 
         console.log(resp);
-        let respdata = {};
+        let respdata = {};  
         
         if(!resp.ok) {
           //console.log(resp);
@@ -83,7 +83,13 @@ export const HttpClient = () => {
           }
         } else {
           console.log("inside else");
-          let respd = await resp.json();
+          let dd = resp.clone();
+          console.log(resp.body);
+          let respd = await resp.json().catch(async e => {
+            console.log(e);
+            console.log(await dd.text());
+          })
+
           console.log(respd);
           //respdata = respd['detail'];
           respdata = respd;

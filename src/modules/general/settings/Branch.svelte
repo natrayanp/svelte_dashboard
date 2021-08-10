@@ -327,6 +327,6 @@ onMount(async() => {
 
 {#if mymod ==='edit' || mymod ==='new'}
 <Alerts targetid="sudo1"/>
-  <Branchdetails branchdata_init ={brndata} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod} />
+  <Branchdetails branchdata_init ={brndata} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod}  on:editresult= {handleresult}/>
 {/if}
 

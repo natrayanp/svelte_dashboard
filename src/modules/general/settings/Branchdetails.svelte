@@ -34,6 +34,7 @@ const dd = {
             branchWebsite: null,
             branchEmail: null,
             branchStartDate: null,
+            isdefault: 'Y',
             entityId: null,
         };
         
@@ -48,6 +49,8 @@ const dd = {
         let branchform;	
         let branchstore;
         let branchdata;
+        let yes = true;
+
 
         export let branchdata_init;	
         export let refdata;
@@ -155,6 +158,8 @@ const dd = {
                         $branchstore.branchCity = myc;
                     }               
                
+                  branchdata.branchState === 'Y'?yes =true:yes =false;                  
+                  $branchstore.isdefault =  yes?'Y':'N';
                 }
 
               console.log("forming form");
@@ -200,7 +205,12 @@ const dd = {
           formDatae.append("file_field", avatar);
           */
           //respdata = await http.postForm('upload',formDatae);
-          respdata = await http.post('branchsave',branchdata);
+
+          let senddata = {'optype': btntxt,'branchdata':branchdata}
+
+          console.log(senddata);
+          respdata = await http.post('branchsave',senddata);
+          console.log(respdata);
           sendcardaction("save");
         } else {
           //toggle_btn_text();
@@ -312,10 +322,25 @@ function match (arrval,matchstr) {
     console.log(dds);
   return dds;
 }
+
+
+function checkchange(e) {
+  
+  $branchstore.isdefault = e.target.checked?'Y':'N';
+
+  if(e.target.checked) {
+    //Check there are no other default branches exists    
+  } else {
+    // Before removing ensure we have other branches as default
+  }
+}
+
+
+
     </script>
     
     
-    
+    {yes}
     
 <div class="shadow rounded-lg flex flex-col  bg-white">
     {#if mode !== 'display'}
@@ -349,6 +374,15 @@ function match (arrval,matchstr) {
                         bind:value={$branchstore.companyName}
                         />
                 <div class="pristine-error-group"></div>
+              </div>
+
+
+              <div class="pristine-form-group md:col-start-8 md:col-span-4">				
+              <label for="default">Default Branch?</label>
+                <input type=checkbox bind:checked={yes} on:change= {e=>checkchange(e)}>   
+                {yes?'Yes':'No'}
+                <div class="pristine-error-group"></div>                 
+                
               </div>
   
               <div class="pristine-form-group md:col-start-1 md:col-span-5">				  
@@ -421,7 +455,7 @@ function match (arrval,matchstr) {
                         <div class="pristine-error-group"></div>
                     </div>
   
-              <div class="pristine-form-group md:col-start-1 md:col-span-5 my-3">				  
+              <div class="pristine-form-group md:col-start-1 md:col-span-3 my-3">				  
                 <label for="Country">Country</label>
                         <select required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
@@ -438,7 +472,7 @@ function match (arrval,matchstr) {
        
 
        
-              <div class="pristine-form-group md:col-start-6 md:col-span-5  my-3">				  
+              <div class="pristine-form-group md:col-start-4 md:col-span-3  my-3">				  
                 <label for="State">State</label>
                         <select required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
@@ -454,7 +488,7 @@ function match (arrval,matchstr) {
                         <div class="pristine-error-group"></div>
                     </div>
 
-                    <div class="pristine-form-group md:col-start-1 md:col-span-5  my-3">				  
+                    <div class="pristine-form-group md:col-start-7 md:col-span-3  my-3">				  
                       <label for="City">City</label>
                               <select required 
                               class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
@@ -469,7 +503,7 @@ function match (arrval,matchstr) {
                               <div class="pristine-error-group"></div>
                           </div>
        
-                <div class="pristine-form-group md:col-start-6 md:col-span-5  my-3">				  
+                <div class="pristine-form-group md:col-start-1 md:col-span-3  my-3">				  
                 <label for="firstname">Pin</label>
                         <input required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
@@ -487,7 +521,7 @@ function match (arrval,matchstr) {
        
               
        
-              <div class="pristine-form-group md:col-span-5">				  
+              <div class="pristine-form-group  md:col-start-1 md:col-span-3">				  
                 <label for="Phone">Phone</label>
                         <input  required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
@@ -496,21 +530,21 @@ function match (arrval,matchstr) {
                         />
                         <div class="pristine-error-group"></div>
                     </div>
-              <div class="pristine-form-group md:col-span-5">				  
+              <div class="pristine-form-group md:col-start-4 md:col-span-3">				  
                 <label for="Phone">Fax</label>
                         <input type="text" required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                        bind:value={$branchstore.companyFax}
+                        bind:value={$branchstore.branchFax}
                         />
                         <div class="pristine-error-group"></div>
                     </div>
               
        
-              <div class="pristine-form-group  md:col-span-5">				  
+              <div class="pristine-form-group md:col-start-7 md:col-span-3">				  
                 <label for="Phone">Mobile</label>
                         <input type="text" required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                        bind:value={$branchstore.companyMobile}
+                        bind:value={$branchstore.branchMobile}
                         />
                         <div class="pristine-error-group"></div>
                     </div>
@@ -519,7 +553,7 @@ function match (arrval,matchstr) {
                 <label for="Phone">email</label>
                         <input type="text" required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                        bind:value={$branchstore.companyEmail}
+                        bind:value={$branchstore.branchEmail}
                         />
                         <div class="pristine-error-group"></div>
                     </div>
@@ -549,12 +583,12 @@ function match (arrval,matchstr) {
                 <label for="Phone">Website</label>
                         <input type="text" required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                        bind:value={$branchstore.companyWebsite}
+                        bind:value={$branchstore.branchWebsite}
                         />
                         <div class="pristine-error-group"></div>
                     </div>     
 
-                    <div class="pristine-form-group md:col-start-6 md:col-span-3">				  
+                    <div class="pristine-form-group md:col-start-1 md:col-span-3">				  
                       <label for="firstname">Start Date</label>
                               <input required 
                               class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
