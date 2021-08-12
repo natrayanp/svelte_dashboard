@@ -50,6 +50,7 @@ const dd = {
         let branchstore;
         let branchdata;
         let yes = true;
+        let respdata;
 
 
         export let branchdata_init;	
@@ -174,14 +175,14 @@ const dd = {
               btntxt = "Save";
               if (mode === "edit") btntxt = "Update";
             }
-
+            console.log(JSON.stringify(enityVal));
            //mymodal.close();
            //mymodal=null;            
         });   
         
 
       export async function branchsave(){
-        let respdata;
+        
         if(["Save","Update"].includes(btntxt)) {
           console.log(branchdata);
           //toggle_btn_text();
@@ -209,9 +210,12 @@ const dd = {
           let senddata = {'optype': btntxt,'branchdata':branchdata}
 
           console.log(senddata);
-          respdata = await http.post('branchsave',senddata);
+          respdata = await http.post('branchsave',senddata).catch(e=>{
+            //TODO Error handling
+            console.error(e);
+          });
           console.log(respdata);
-          sendcardaction("save");
+          sendcardaction();
         } else {
           //toggle_btn_text();
           branchform.enable(mform);
@@ -225,10 +229,17 @@ const dd = {
     
     const dispatch = createEventDispatcher();
 
-    const sendcardaction = (btnpressed) => {
-		dispatch('editresult',{
-			action: btnpressed
-		});
+    const sendcardaction = async (btnpressed) => {
+      if(['Save','Update'].includes(btnpressed)) {
+        console.log(respdata);
+        await authStore.update(dd => ({...dd,
+												allbranch:respdata.detail.data.branch,
+												activebranch: getactiveEntity(respdata.detail.data.branch),})); 
+
+        }
+		  dispatch('editresult',{
+		  	action: btnpressed
+		  });
 	}
 
   

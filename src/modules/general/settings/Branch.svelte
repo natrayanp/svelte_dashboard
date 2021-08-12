@@ -13,6 +13,7 @@ import Alerts from '../../../common/notifications/components/alerts/Alerts.svelt
 import { entityStore,enityVal } from "../../../stores/stores";
 
 import { getNotificationsContext } from '../../../common/notifications';
+import { prevent_default } from 'svelte/internal';
 const { addNotification } = getNotificationsContext();
 
 
@@ -21,6 +22,7 @@ const { addNotification } = getNotificationsContext();
   let dt1 = false
   let refdata = {};
   let brndata = [];
+  let datatosend = [];
 	
 let mymod = 'display';
 let myc = "hidden";
@@ -56,22 +58,21 @@ function toggle_viewdetail(){
   mymod ='display';
 }
 
-  function toggle_edit() {
+  function toggle_edit(branchdata={}) {
     mymod="edit"
+    datatosend = [];
     if(brndata.length <= 0)  mymod="new";
+    if(JSON.stringify(branchdata)=== JSON.stringify({})) mymod = 'new';
     if(firstvisit)  mymod="new";
-    myc = "hidden";
+    myc = "hidden";    
+    if(JSON.stringify(branchdata) !== JSON.stringify({})) datatosend.push(branchdata);    
   }
 
   async function handleresult(event) {
   console.log(event.detail.action);  
-  if (event.detail.action === "save") {
-    await getBranch(true);
-  } else {
-    await getBranch(false);
-  }
+  if (['Save','Update'].includes(event.detail.action)) await getBranch();
 
-   if (brndata.length <= 0) {    
+  if (brndata.length <= 0) {    
     let s = allAlerts({tgt:"sudo1",text:"No Branch setup exists. Please save Branch",type:'error'});    
   } else {
     mymod = 'display';
@@ -177,7 +178,7 @@ onMount(async() => {
             <div class="flex md:flex-row flex-col items-center md:h-20 px-7">
               <h2 class="text-2xl  text-gray-700 font-bold">Branch Settings</h2>
               <span class = "flex px-7"></span>
-              <button class=" flex bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md">Add New</button>      
+              <button class=" flex bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md" on:click|preventDefault={()=>toggle_edit()}>Add New</button>      
               <span class = "flex flex-grow"></span>                         
               <select  
               class="flex mt-0 w-full md:w-56  px-2 py-1.5 bg-white rounded-2xl border-0 border-b-2 border-white-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			                                          
@@ -261,6 +262,8 @@ onMount(async() => {
               </th>
             </tr>
           </thead>
+          {#each brndata as brndat}
+
           <tbody class="bg-white divide-y divide-gray-200">
             <tr>
               <td class="px-6 py-4 whitespace-nowrap">
@@ -270,33 +273,35 @@ onMount(async() => {
                   </div>
                   <div class="ml-4">
                     <div class="text-sm font-medium text-gray-900">
-                      Jane Cooper
+                      {brndat.branchName}
                     </div>
                     <div class="text-sm text-gray-500">
-                      jane.cooper@example.com
+                      {brndat.branchEmail}
                     </div>
                   </div>
                 </div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">Regional Paradigm Technician</div>
-                <div class="text-sm text-gray-500">Optimization</div>
+                <div class="text-sm text-gray-900">{brndat.companyName}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
-                <div class="text-sm text-gray-900">Regional Paradigm Technician</div>
-                <div class="text-sm text-gray-500">Optimization</div>
+                <div class="text-sm text-gray-900">{brndat.branchAddLine1}</div>
+                <div class="text-sm text-gray-500">{brndat.branchAddLine2}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap">
                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                  Active
+                  {brndat.branchStatus}
                 </span>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                Admin
+                <div class="text-sm text-gray-900">{brndat.branchPhone}</div>
+                <div class="text-sm text-gray-900">{brndat.branchMobile}</div>
+                <div class="text-sm text-gray-900">{brndat.branchFax}</div>
+                <div class="text-sm text-gray-900">{brndat.branchWebsite}</div>
               </td>
               <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <a href="#" class="text-green-600 hover:text-red-900 mr-5" on:click={toggle_viewdetail}><i class="far fa-eye fa-lg"/></a>
-                <a href="#" class="text-green-600 hover:text-green-900 mr-4" on:click={()=>toggle_edit()}><i class="far fa-edit fa-lg"/></a>
+                <a href="#" class="text-green-600 hover:text-red-900 mr-5" on:click|preventDefault={()=>toggle_viewdetail(brndat)}><i class="far fa-eye fa-lg"/></a>
+                <a href="#" class="text-green-600 hover:text-green-900 mr-4" on:click|preventDefault={()=>toggle_edit(brndat)}><i class="far fa-edit fa-lg"/></a>
               </td>
             </tr>
 
@@ -305,7 +310,6 @@ onMount(async() => {
             <!--tr class = {myc}-->              
             <tr>
             <td colspan="6" headers="Col2">
-                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent bibendum, lorem vel tincidunt imperdiet, nibh elit laoreet felis, a bibendum nisl tortor non orci. Donec pretium fermentum felis, quis aliquet est rutrum ut. Integer quis massa ut lacus viverra pharetra in eu lacus. Aliquam tempus odio adipiscing diam pellentesque rhoncus. Curabitur a bibendum est. Mauris vehicula cursus risus id luctus. Curabitur accumsan venenatis nibh, non egestas ipsum vulputate ac. Vivamus consectetur dolor sit amet enim aliquet eu scelerisque ipsum hendrerit. Donec lobortis suscipit vestibulum. Nullam luctus pellentesque risus in ullamcorper. Nam neque nunc, mattis vitae ornare ut, feugiat a erat. Ut tempus iaculis augue vel pellentesque.</p>
                 <Branchdetails branchdata_init ={brndata} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod} />
               </td>
             </tr>
@@ -315,6 +319,7 @@ onMount(async() => {
 
             <!-- More rows... -->
           </tbody>
+          {/each}
         </table>
       </div>
     </div>
@@ -327,6 +332,6 @@ onMount(async() => {
 
 {#if mymod ==='edit' || mymod ==='new'}
 <Alerts targetid="sudo1"/>
-  <Branchdetails branchdata_init ={brndata} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod}  on:editresult= {handleresult}/>
+  <Branchdetails branchdata_init ={datatosend} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod}  on:editresult= {handleresult}/>
 {/if}
 

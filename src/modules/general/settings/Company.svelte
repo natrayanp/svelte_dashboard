@@ -12,6 +12,7 @@ import Alerts from '../../../common/notifications/components/alerts/Alerts.svelt
 import { entityStore,enityVal } from "../../../stores/stores";
 
 import { getNotificationsContext } from '../../../common/notifications';
+import { each } from 'svelte/internal';
 const { addNotification } = getNotificationsContext();
 
 
@@ -98,12 +99,9 @@ function toggle_viewdetail(){
 
   async function handleresult(event) {
   console.log(event.detail.action);  
-  if (event.detail.action === "save") {
-    await getCompany(true);
-  } else {
-    await getCompany(false);
-  }
+  if (['Save','Update'].includes(event.detail.action)) await getCompany();
 
+  
    if (compdata.length <= 0) {    
     let s = allAlerts({tgt:"sudo1",text:"No company setup exists. Please save company",type:'error'});    
   } else {
@@ -285,6 +283,8 @@ onMount(async() => {
                 </th>
               </tr>
             </thead>
+
+            {#each compdata as compdat}
             <tbody class="bg-white divide-y divide-gray-200">
               <tr>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -294,26 +294,28 @@ onMount(async() => {
                     </div>
                     <div class="ml-4">
                       <div class="text-sm font-medium text-gray-900">
-                        Jane Cooper
+                        {compdat.companyName}
                       </div>
                       <div class="text-sm text-gray-500">
-                        jane.cooper@example.com
+                        {compdat.companyEmail}
                       </div>
                     </div>
                   </div>
                 </td>
 
                 <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">Regional Paradigm Technician</div>
-                  <div class="text-sm text-gray-500">Optimization</div>
+                  <div class="text-sm text-gray-900">{compdat.companyAddLine1}</div>
+                  <div class="text-sm text-gray-500">{compdat.companyAddLine2}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
                   <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">
-                    Active
+                    {compdat.companyStatus}
                   </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                  Admin
+                  <div class="text-sm text-gray-900">{compdat.companyPhone}</div>
+                  <div class="text-sm text-gray-900">{compdat.companyMobile}</div>
+                  <div class="text-sm text-gray-900">{compdat.companyFax}</div>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                   <!--a href="#" class="text-red-600 hover:text-red-900 mr-5"><i class="far fa-trash-alt fa-lg"/></a-->
@@ -341,6 +343,7 @@ onMount(async() => {
 
               <!-- More rows... -->
           </tbody>
+          {/each}
           </table>
         </div>
       </div>

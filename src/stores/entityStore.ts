@@ -41,7 +41,7 @@ const { subscribe, set, update } = store;
       return self  //!\\ this is important! Don't forget it
     }),
     setBranch: value => update(self => {
-      self.company = value.slice();
+      self.branch = value.slice();
       // self.branch =  value
       return self
     }),

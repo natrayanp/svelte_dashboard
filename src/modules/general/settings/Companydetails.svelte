@@ -242,7 +242,7 @@ const dd = {
           formDatae.append("file_field", avatar);
  
           respdata = await http.postForm('upload',formDatae);
-          sendcardaction("save");
+          sendcardaction();
         } else {
           toggle_btn_text();
           companyform.enable(mform);
@@ -271,11 +271,18 @@ const dd = {
 
     const dispatch = createEventDispatcher();
 
-    const sendcardaction = (btnpressed) => {		
+    const sendcardaction = async (btnpressed) => {		
       if(firstvisit) {
         $goto('/landing');
         return;
       }  
+      if(['Save','Update'].includes(btnpressed)) {
+        console.log(respdata);
+        await authStore.update(dd => ({...dd,
+                        allcompany: respdata.detail.data.company,
+												activecompany: getactiveEntity(respdata.detail.data.company),})); 
+
+        }
 		//Dispatch the favorite event with object data
 		dispatch('editresult',{
 			action: btnpressed
