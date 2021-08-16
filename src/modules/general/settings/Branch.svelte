@@ -49,13 +49,15 @@ if (firstvisit){
 } 
 
 
-function toggle_viewdetail(){ 
+function toggle_viewdetail(branchdata={}){ 
+  datatosend = [];
   if (myc === "hidden") {
     myc = "visible";
   } else {
     myc = "hidden";
   }
   mymod ='display';
+  if(JSON.stringify(branchdata) !== JSON.stringify({})) datatosend.push(branchdata);    
 }
 
   function toggle_edit(branchdata={}) {
@@ -306,7 +308,7 @@ onMount(async() => {
             </tr>
 
 
-            {#if myc ==='visible'}
+            {#if myc ==='visible' && datatosend[0].branchId === brndat.branchId }
             <!--tr class = {myc}-->              
             <tr>
             <td colspan="6" headers="Col2">
