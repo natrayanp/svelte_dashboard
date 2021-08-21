@@ -5,7 +5,7 @@
     import { http } from '../../../stores/services';
     import { Accordion, AccordionItem } from "../../../common/accordion/index";
     import { createEventDispatcher } from 'svelte';
-    import { entityStore,enityVal } from "../../../stores/stores";
+    import { entityStore,enityVal,authStore } from "../../../stores/stores";
     import { goto } from '@roxi/routify';
 
     import { getNotificationsContext } from '../../../common/notifications';
@@ -87,6 +87,7 @@ const dd = {
         let companyform;	
         let companystore;
         let companydata;
+        let respdata;
 
         export let companydata_init;	
         export let refdata;
@@ -144,18 +145,18 @@ const dd = {
        
 
           // This is edit mode
-          if(mode === 'edit' && (JSON.stringify(refdata) === JSON.stringify({}) || companydata_init.length < 1)) {
-            console.log("inside onmoung inner before get");
-            await getCompany1(); 
+          if (companydata_init.length != 1) {
+            console.log("select company to load");
+          } else if(JSON.stringify(refdata) === JSON.stringify({})) {
+            console.log("Refdata load error");
+            //await getCompany1(); 
             console.log("inside onmoung inner after get");            
-          } else if( companydata_init.length > 0) {
-            console.log("else if( companydata_init.length > 0)");
+          } else if( companydata_init.length ===  1) {
+            console.log("else if( companydata_init.length === 1)");
             console.log(companydata_init);
             companydata_init = companydata_init[0];
+            companydata_init.companyStartDate = new Date(companydata_init.companyStartDate).toLocaleDateString('en-CA');
           }
-
-          //if (companydata_init.companyFiscalYear.Int) companydata_init.companyFiscalYear = companydata_init.companyFiscalYear.Int;
-          //if (companydata_init.companyPinCode.Int) companydata_init.companyPinCode = companydata_init.companyPinCode.Int;
 
           $companystore = companydata_init;	
           console.log("init the dorp down values");
@@ -218,7 +219,7 @@ const dd = {
         
 
       export async function companysave(){
-        let respdata;
+        
         console.log(btntxt);
         if(["Save","Update"].includes(btntxt)) {
           console.log(companydata);
@@ -232,28 +233,40 @@ const dd = {
           companydata.companyCity = companydata.companyCity.refvalue;          
           companydata.companyCategory = companydata.companyCategory.refvalue;
           companydata.companyIndustry = companydata.companyIndustry.refvalue;
+          companydata.companyStartDate = new Date(companydata.companyStartDate).toISOString();
           //companydata.companyPinCode = Number(companydata.companyPinCode);
           //companydata.companyFiscalYear = Number(companydata.companyFiscalYear); 
-
           
           if (!companydata.companyCity === undefined) companydata.companyCity = ""; 
           formDatae.append("text_field", JSON.stringify(companydata));
           formDatae.append("text_action",JSON.stringify({"optype": btntxt}))
           formDatae.append("file_field", avatar);
  
-          respdata = await http.postForm('upload',formDatae);
-          sendcardaction();
+          respdata = await http.postForm('upload',formDatae).catch(e=>{
+            //TODO Error handling
+            console.error(e);
+          });
+          console.log(respdata);
+          if(respdata.data.company.length == 1 ) {
+            respdata.data.company[0].companyStartDate = 
+            await authStore.setCompany(JSON.parse(JSON.stringify(respdata.data.company[0])));
+          } else {
+          //TODO: Throw error
+          } 
+
+          console.log(respdata);
+          sendcardaction(btntxt);
         } else {
-          toggle_btn_text();
+          //toggle_btn_text();
           companyform.enable(mform);
         }
         
       }
-    
+    /*
       function toggle_btn_text(){
-        (btntxt === "Edit")? btntxt = "Save" : btntxt = "Edit";
+        (btntxt === "Edit")? btntxt = "Save" : btntxt = "Update";
       }
-    
+    */
       let dt2 = false 
       let dt1 = false
     
@@ -273,15 +286,11 @@ const dd = {
 
     const sendcardaction = async (btnpressed) => {		
       if(firstvisit) {
-        $goto('/landing');
+        $goto('/login');
         return;
       }  
       if(['Save','Update'].includes(btnpressed)) {
         console.log(respdata);
-        await authStore.update(dd => ({...dd,
-                        allcompany: respdata.detail.data.company,
-												activecompany: getactiveEntity(respdata.detail.data.company),})); 
-
         }
 		//Dispatch the favorite event with object data
 		dispatch('editresult',{
@@ -386,7 +395,7 @@ function match (arrval,matchstr) {
 }
 
 
-
+/*
 const getCompany1 = async() => {
   console.log("inside onmoung inner if companydetails");  
   console.log("inside onmoung inner if companydetails");
@@ -415,7 +424,7 @@ const getCompany1 = async() => {
     mymodal=null;
     console.log("inside onmoung inner if end of getcompany companydetails");
   };
-
+*/
 
     </script>
     
@@ -429,15 +438,18 @@ const getCompany1 = async() => {
         <div class="bg-blue-100 h-20 rounded-t-lg flex flex-row items-center px-7">
             <h2 class="text-2xl text-black text-gray-700 font-bold">{btntxt==="Save"?"Add New ":btntxt+" " } Company</h2>  
             
+
             <span class="flex-grow"></span>  
+            {#if !firstvisit}
+            <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow" on:click={()=>sendcardaction('cancel')}>Cancel</button>  
+            {/if}    
+
+           <span class="flex w-5"></span>
            <button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow" 
            on:click|preventDefault={companysave}>
              {btntxt}
             </button>
-            {#if !firstvisit}
-           <span class="flex w-5"></span>
-          <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow" on:click={()=>sendcardaction('cancel')}>Cancel</button>  
-          {/if}    
+          
           
         </div>
     {/if}
@@ -538,6 +550,7 @@ const getCompany1 = async() => {
                             type = "date"
                             bind:value={$companystore.companyStartDate}
                             />
+                            {$companystore.companyStartDate}
                             <div class="pristine-error-group"></div>
                         </div>
            

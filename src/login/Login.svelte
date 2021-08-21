@@ -221,22 +221,45 @@ import { get } from 'svelte/store';
 			}*/
 			console.log(val.detail.data.nextaction);
 			console.log(val.detail);
-			switch (val.detail.data.nextaction){				
-				case 'LANDING':					
-					authStore.update(dd => ({...dd,
+			let acpaccp = val.detail.data.menu.CpyLvlTreeforCpy.filter(x => {
+															   if (x.Entityid === val.detail.data.menu.ActiveCompany.companyId) {
+																	return x;
+															   }															  
+														   });
+
+					let acpacbr = val.detail.data.menu.BrnLvlTreeforCpy.filter(x => {					   										
+					   										if (x.Entityid === val.detail.data.menu.ActiveBranch.branchId) {
+																return x;
+					   										}					   										
+														});
+														
+														console.log(acpaccp);
+														console.log(acpacbr);
+			switch (val.detail.data.nextaction){		
+				case 'LANDING':		
+
+
+					await authStore.update(dd => ({...dd,
 											  	stage:'done',
 											  	session:(val.detail.session),
 											  	siteid:ins.siteid,
-											  	menus:val.detail.data.menu,
-											  	activepack:val.detail.data.menu[0],
-												allcompany: val.detail.data.company,
-												activecompany: getactiveEntity(val.detail.data.company),
-												allbranch:val.detail.data.branch,
-												activebranch: getactiveEntity(val.detail.data.branch),}));  
+											  	allentity:val.detail.data.menu.EntityLst,
+												activeentity: val.detail.data.menu.ActiveEntity,
+												allcompany: val.detail.data.menu.CompanyLst,
+												activecompany: val.detail.data.menu.ActiveCompany,
+												allbranch:val.detail.data.menu.BranchLst,
+												activebranch: val.detail.data.menu.ActiveBranch,
+												allpack:{"companylevel":val.detail.data.menu.CpyLvlTreeforCpy,
+												  		 "branchlevel":val.detail.data.menu.BrnLvlTreeforCpy},
+												activepack:{"companylevel":acpaccp[0].EntityTree,
+												  			"branchlevel":acpacbr[0].EntityTree},
+
+											}));  
+											console.log(JSON.stringify(authVal));
 					$goto('/landing');
 					break;
 				case 'DOMAINREGIS':
-					authStore.update(dd => ({...dd,
+				await authStore.update(dd => ({...dd,
 												stage:'done',
 												session:(val.detail.session),
 												siteid:ins.siteid,
@@ -244,7 +267,7 @@ import { get } from 'svelte/store';
 					$goto('/landing/subdomain');			
 					break;
 				case 'ADDPACKS':
-					authStore.update(dd => ({...dd,
+				await authStore.update(dd => ({...dd,
 												stage:'done',
 												session:(val.detail.session),
 												siteid:ins.siteid,
@@ -253,7 +276,7 @@ import { get } from 'svelte/store';
 					break;
 				case 'ADDCOMPANY':
 					console.log(val.detail.data.menu[0].submenu);
-					authStore.update(dd => ({...dd,
+					await authStore.update(dd => ({...dd,
 												stage:'done',
 												session:(val.detail.session),
 												siteid:ins.siteid,
@@ -266,11 +289,15 @@ import { get } from 'svelte/store';
 					await authStore.update(dd => ({...dd,
 												stage:'done',
 												session:val.detail.session,
-												siteid:ins.siteid,
-												menus:val.detail.data.menu,
-												activepack:val.detail.data.menu[0],
-												allcompany: val.detail.data.company,
-												activecompany: getactiveEntity(val.detail.data.company),}));
+												siteid:ins.siteid,											
+												allcompany: val.detail.data.menu.CompanyLst,
+												activecompany: val.detail.data.menu.ActiveCompany,
+												allpack:{"companylevel":val.detail.data.menu.CpyLvlTreeforCpy,
+												  		 "branchlevel":val.detail.data.menu.BrnLvlTreeforCpy},
+												activepack:{"companylevel":acpaccp[0].EntityTree,
+												  			"branchlevel":[]},
+												selectedpack:acpaccp[0].EntityTree[0],
+											}));
 					console.log(authVal);
 					sessionStorage.setItem('brnfirst', true);
 					$goto('/landing/branchsettings');

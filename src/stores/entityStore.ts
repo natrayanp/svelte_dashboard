@@ -2,8 +2,10 @@ import { writable, get } from 'svelte/store'
 
 const INITIAL_ENT_STORE = {
     company: [],
-    refdata: {},
     branch:[],
+    cprefdata: {},
+    brrefdata: {},
+    refdata: {}
 }
 
 
@@ -37,7 +39,14 @@ const { subscribe, set, update } = store;
     setRef: value => update(self => {
       // ... write all your function's code here
       // self is a reference to your object
-      self.refdata = value
+      let dd = Object.keys(value)
+      dd.forEach( d => {
+        delete self.refdata[d];
+      });
+      self.refdata = {
+        ...self.refdata,
+        ...value
+      }      
       return self  //!\\ this is important! Don't forget it
     }),
     setBranch: value => update(self => {

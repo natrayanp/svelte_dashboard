@@ -182,7 +182,7 @@ import { writable } from 'svelte/store';
                                                 writeindeterminate:false,
                                                 submodules:[
                                                     { 'name' : "setting",
-                                                    'read': true,
+                                                        'read': true,
                                                       'write': true,
                                                     },
                                                     { 'name' : "settingsreport",

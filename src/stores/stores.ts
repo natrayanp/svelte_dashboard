@@ -8,8 +8,7 @@ import { initEntityStore } from './entityStore';
 
 
 //*Auth Store - START
-export const authStoreMas = initAuthStore();
-export const authStore = authStoreMas.store;
+export const authStore = initAuthStore();
 export var authVal: any;
 let authUnsub = authStore.subscribe((val) => authVal=val);
 
@@ -26,7 +25,7 @@ let entyUnsub = entityStore.subscribe((val) => enityVal=val);
 
 
 const restAllStore = () => {
-    authStoreMas.reset();
+    authStore.reset();
     entityStore.reset();
 }
 

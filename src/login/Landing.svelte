@@ -18,7 +18,7 @@
         console.log('insidenavi');
         console.log(pack);
         
-        await authStore.update(dd => ({...dd,activepack:pack}));          
+        await authStore.update(dd => ({...dd,selectedpack:pack}));          
         $goto(pack.link);
     }
 
@@ -33,7 +33,8 @@
     <p>Loading menu......</p>
 {:then packs}
 -->
-    {#each $authStore.menus as pack,i}
+    <!--{#each $authStore.menus as pack,i}-->
+    {#each $authStore.activepack.companylevel as pack,i}
 
     <div class="md:flex md:w-1/2 lg:w-1/3 px-2 py-2">
 

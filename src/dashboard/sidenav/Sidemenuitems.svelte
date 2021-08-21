@@ -16,6 +16,7 @@
         selected = n;
         console.log(menu);
         sidemenuStore.selectionUpdate(n);
+        
         //navigate(menu.link, { replace: false });
         $goto(menu.link);
     }

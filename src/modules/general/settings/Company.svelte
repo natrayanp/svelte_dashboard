@@ -9,7 +9,8 @@ import Companydetails from './Companydetails.svelte';
 
 import Alerts from '../../../common/notifications/components/alerts/Alerts.svelte';
 
-import { entityStore,enityVal } from "../../../stores/stores";
+import { entityStore,enityVal, authStore, authVal } from "../../../stores/stores";
+import {getMissingRef} from "../../../common/utilfuncs/refdata";
 
 import { getNotificationsContext } from '../../../common/notifications';
 import { each } from 'svelte/internal';
@@ -91,15 +92,20 @@ function toggle_viewdetail(){
 }
 
   function toggle_edit() {
-    mymod="edit"
+    mymod="edit";
+    datatosend = [];
+
     if(compdata.length <= 0)  mymod="new";
+    if(JSON.stringify(compdata)=== JSON.stringify({})) mymod = 'new';
     if(firstvisit)  mymod="new";
     myc = "hidden";
+    if(JSON.stringify(compdata) !== JSON.stringify({})) datatosend.push(compdata);    
+
   }
 
   async function handleresult(event) {
   console.log(event.detail.action);  
-  if (['Save','Update'].includes(event.detail.action)) await getCompany();
+  if (['Save','Update'].includes(event.detail.action)) await getCompany(true);
 
   
    if (compdata.length <= 0) {    
@@ -125,40 +131,47 @@ onMount(async() => {
     }
   })
 
-  const getCompany = async(goforfetch = false) => {
+
+const getCompany = async(goforfetch = false) => {
     console.log("inside getCompany inner if");
-    console.log(JSON.stringify(enityVal));
-    mymodal =loginprogressmodal();  
+    mymodal =loginprogressmodal();      
     let respdata;
-    console.log(enityVal);
-    console.log(enityVal.company);
-    console.log( JSON.stringify(enityVal.company.length) === 0); 
-    if(!goforfetch) {
-      if (enityVal.company.length === 0 || JSON.stringify(enityVal.refdata) === JSON.stringify({})) {
-        goforfetch = true;  
-      } 
-    }    
-
+  /*
     if(goforfetch) {
-      respdata = await http.get('getcompany'); 
-      console.log(JSON.stringify(respdata));
-      console.log("after getcompany set store start"); 
-      console.log(respdata.data.company.length);
-      if(respdata.data.company.length > 0) {
-        entityStore.setCompany(JSON.parse(JSON.stringify(respdata.data.company))); 
-      } else {
-        entityStore.setCompany([]); 
-      }
-      
-      entityStore.setRef(JSON.parse(JSON.stringify(respdata.data.refdata))); 
-      console.log("after getcompany set store end");
-    }        
+        let respdata = await http.post('getcompany',[{"Entitytype":"company","Entityid":[authVal.activecompany.companyId]}]).catch( e => {
+          let s = allAlerts({tgt:"sudo",text:"Technical error",type:'error'});    
+          return;
+        });
 
-    console.log(JSON.stringify(enityVal.company));
-    
-    compdata=JSON.parse(JSON.stringify(enityVal.company.slice()));   
-    console.log(enityVal.company) ;
-    console.log(compdata) ;
+        if(respdata.data.company.length > 0 ) {
+          authStore.setCompany(JSON.parse(JSON.stringify(respdata.data.company[0])));
+        } else if(respdata.data.company.length < 1){
+          //TODO: Throw error
+        }         
+        let ref = JSON.parse(JSON.stringify(respdata.data.refdata));
+        await entityStore.setRef({refdatatype:"company",refdata:ref}); 
+        console.log("after getcompany set store end");
+    } else 
+    */
+    let misrefs = getMissingRef("company");
+    if(misrefs.length > 0) {
+    //if(JSON.stringify(enityVal.cprefdata) === JSON.stringify({})) {
+
+      
+        //let respdata = await http.post('getrefdata',[{"Reftype": "group", "Refname": "company"}]).catch(e=>{
+        //let respdata = await http.post('getrefdata',getMissingRef("company")).catch(e=>{  
+          let respdata = await http.post('getrefdata',misrefs).catch(e=>{  
+          //TODO Error handling
+            console.error(e);
+          });
+
+        console.log(respdata);
+        let ref = JSON.parse(JSON.stringify(respdata.data.refdata));
+        await entityStore.setRef(ref); 
+    }
+
+    compdata = [];
+    if(authVal.activecompany !== null) compdata.push(JSON.parse(JSON.stringify(authVal.activecompany)));   
     refdata = JSON.parse(JSON.stringify(enityVal.refdata));  
 
     if (compdata.length <= 0) {
@@ -173,6 +186,7 @@ onMount(async() => {
   };
 
 
+  
   const allAlerts = (val) => {
     console.log(val);
 		return addNotification({

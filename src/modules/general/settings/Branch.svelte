@@ -10,7 +10,8 @@ import Branchdetails from './Branchdetails.svelte';
 
 import Alerts from '../../../common/notifications/components/alerts/Alerts.svelte';
 
-import { entityStore,enityVal } from "../../../stores/stores";
+import { entityStore,enityVal, authStore, authVal } from "../../../stores/stores";
+import {getMissingRef} from "../../../common/utilfuncs/refdata";
 
 import { getNotificationsContext } from '../../../common/notifications';
 import { prevent_default } from 'svelte/internal';
@@ -27,6 +28,7 @@ const { addNotification } = getNotificationsContext();
 let mymod = 'display';
 let myc = "hidden";
 let mymodal = null;
+let selectedbranch = "";
 
 
 let firstvisit = sessionStorage.getItem('brnfirst');
@@ -50,6 +52,7 @@ if (firstvisit){
 
 
 function toggle_viewdetail(branchdata={}){ 
+  console.log(JSON.stringify(branchdata));
   datatosend = [];
   if (myc === "hidden") {
     myc = "visible";
@@ -61,7 +64,7 @@ function toggle_viewdetail(branchdata={}){
 }
 
   function toggle_edit(branchdata={}) {
-    mymod="edit"
+    mymod="edit";
     datatosend = [];
     if(brndata.length <= 0)  mymod="new";
     if(JSON.stringify(branchdata)=== JSON.stringify({})) mymod = 'new';
@@ -71,7 +74,7 @@ function toggle_viewdetail(branchdata={}){
   }
 
   async function handleresult(event) {
-  console.log(event.detail.action);  
+  console.log(event);  
   if (['Save','Update'].includes(event.detail.action)) await getBranch();
 
   if (brndata.length <= 0) {    
@@ -85,7 +88,7 @@ function toggle_viewdetail(branchdata={}){
 
 onMount(async() => {  
   console.log("going to onmount");
-      await getBranch();
+      await getBranch();      
  
     //if (brndata.length <= 0) toggle_edit();
   });
@@ -97,6 +100,64 @@ onMount(async() => {
     }
   })
 
+
+  const getBranch = async(goforfetch = false) => {
+    console.log("inside getBranch inner if");    
+    mymodal =brnfetchprogressmodal();  
+    let respdata;
+    /*  
+    if(goforfetch && selectedbranch !="") {
+      respdata = await http.post('getbranch',[
+                      {"Entitytype":"company","Entityid":[authVal.activecompany.companyId]},
+                      {"Entitytype":"branch","Entityid":[selectedbranch]}
+                    ]).catch( e => {
+          let s = allAlerts({tgt:"sudo",text:"Technical error",type:'error'});    
+          return;
+        });
+    
+        if(respdata.data.branch.length == 1 ) {
+          await authStore.setBranch(JSON.parse(JSON.stringify(respdata.data.branch[0])));
+        } else {
+          //TODO: Throw error
+        } 
+        ref = JSON.parse(JSON.stringify(respdata.data.refdata));
+        await entityStore.setRef({refdatatype:"branch",refdata:ref}); 
+        console.log("after getcompany set store end");
+    } else 
+    */
+    let misrefs = getMissingRef("branch");
+    //if(JSON.stringify(enityVal.brrefdata) === JSON.stringify({})) {
+    if(misrefs.length > 0) {
+        //let respdata = await http.post('getrefdata',[{"Reftype": "group", "Refname": "branch"}]).catch(e=>{
+        let respdata = await http.post('getrefdata',misrefs).catch(e=>{  
+            //TODO Error handling
+            console.error(e);
+          });
+        console.log(respdata);
+        let ref = JSON.parse(JSON.stringify(respdata.data.refdata));
+        await entityStore.setRef(ref); 
+    }
+
+    brndata = [];
+    console.log(authVal.allbranch !== undefined);
+    if(authVal.allbranch !== undefined && authVal.allbranch !== null && authVal?.allbranch.length > 0)
+        brndata=(JSON.parse(JSON.stringify(authVal.allbranch.slice())));   
+    refdata = JSON.parse(JSON.stringify(enityVal.refdata));  
+
+    if (brndata.length <= 0) {
+      firstvisit = true;
+      toggle_edit();
+    }else {
+      firstvisit = false;
+    }
+    mymodal.close();
+    mymodal=null;
+    console.log("inside onmoung inner if end of getcompany");
+
+  }
+
+
+  /*
   const getBranch = async(goforfetch = false) => {
     console.log("inside getBranch inner if");
     console.log(JSON.stringify(enityVal));
@@ -112,12 +173,13 @@ onMount(async() => {
     }    
 
     if(goforfetch) {
-      respdata = await http.get('getbranch'); 
+      //respdata = await http.get('getbranch'); 
+      respdata = await http.post('getbranch',{"Entitytype":"company","Entityid":authVal.activecompany.companyId}); 
       console.log(JSON.stringify(respdata));
       console.log("after getBranch set store start"); 
       console.log(respdata.data.branch.length);
       if(respdata.data.branch.length > 0) {
-        entityStore.setBranch(JSON.parse(JSON.stringify(respdata.data.branch))); 
+        entityStore.setBranch(JSON.parse(JSON.stringify(respdata.data.branch)));
       } else {
         entityStore.setBranch([]); 
       }
@@ -145,7 +207,7 @@ onMount(async() => {
     mymodal=null;
     console.log("inside onmoung inner if end of getBranch");
   };
-
+*/
 
   const allAlerts = (val) => {
     console.log(val);
@@ -179,8 +241,10 @@ onMount(async() => {
           <caption class="bg-blue-100 rounded-t-lg divide-y divide-gray-300">                                
             <div class="flex md:flex-row flex-col items-center md:h-20 px-7">
               <h2 class="text-2xl  text-gray-700 font-bold">Branch Settings</h2>
-              <span class = "flex px-7"></span>
+              <span class = "flex px-7"></span>     
+                      
               <button class=" flex bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md" on:click|preventDefault={()=>toggle_edit()}>Add New</button>      
+              
               <span class = "flex flex-grow"></span>                         
               <select  
               class="flex mt-0 w-full md:w-56  px-2 py-1.5 bg-white rounded-2xl border-0 border-b-2 border-white-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			                                          
@@ -264,6 +328,7 @@ onMount(async() => {
               </th>
             </tr>
           </thead>
+
           {#each brndata as brndat}
 
           <tbody class="bg-white divide-y divide-gray-200">
@@ -312,7 +377,7 @@ onMount(async() => {
             <!--tr class = {myc}-->              
             <tr>
             <td colspan="6" headers="Col2">
-                <Branchdetails branchdata_init ={brndata} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod} />
+                <Branchdetails branchdata_init ={datatosend} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod} />
               </td>
             </tr>
 

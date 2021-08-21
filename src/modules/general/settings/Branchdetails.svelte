@@ -109,6 +109,7 @@ const dd = {
             console.log("else if( branchdata_init.length > 0)");
             console.log(branchdata_init);
             branchdata_init = branchdata_init[0];
+            branchdata_init.branchStartDate = new Date(branchdata_init.branchStartDate ).toLocaleDateString('en-CA');
           } else if (branchdata_init.length < 1) {
             console.log("else if( branchdata_init.length >1)");
             console.log(authVal);
@@ -190,9 +191,11 @@ const dd = {
           let formDatae = new FormData();
           console.log(JSON.stringify(branchdata));
 
-          branchdata.branchCountry = branchdata.branchCountry.refvalue;
-          branchdata.branchState = branchdata.branchState.refvalue;
-          branchdata.branchCity = branchdata.branchCity.refvalue;          
+          branchdata.branchCountry = branchdata.branchCountry?.refvalue;
+          branchdata.branchState = branchdata.branchState?.refvalue;
+          branchdata.branchCity = branchdata.branchCity?.refvalue;       
+          branchdata.branchStartDate = new Date(branchdata.branchStartDate).toISOString();   
+          
           //branchdata.companyCategory = branchdata.companyCategory.refvalue;
           //branchdata.companyIndustry = branchdata.companyIndustry.refvalue;
           //branchdata.companyPinCode = Number(branchdata.companyPinCode);
@@ -214,28 +217,31 @@ const dd = {
             //TODO Error handling
             console.error(e);
           });
+
+          if(respdata.data.branch.length == 1 ) {
+            await authStore.setBranch(JSON.parse(JSON.stringify(respdata.data.branch[0])));
+          } else {
+          //TODO: Throw error
+          } 
+
           console.log(respdata);
-          sendcardaction();
+          sendcardaction(btntxt);
         } else {
           //toggle_btn_text();
           branchform.enable(mform);
         }
         
       }
-    
-      function toggle_btn_text(){
-        (btntxt === "Edit")? btntxt = "Save" : btntxt = "Edit";
-      }
+
     
     const dispatch = createEventDispatcher();
 
     const sendcardaction = async (btnpressed) => {
-      if(['Save','Update'].includes(btnpressed)) {
+      if(firstvisit) {
+        $goto('/login');
+        return;
+      }else if(['Save','Update'].includes(btnpressed)) {
         console.log(respdata);
-        await authStore.update(dd => ({...dd,
-												allbranch:respdata.detail.data.branch,
-												activebranch: getactiveEntity(respdata.detail.data.branch),})); 
-
         }
 		  dispatch('editresult',{
 		  	action: btnpressed
@@ -304,7 +310,7 @@ function getvalue(type,matchstr) {
       return {}
     }
   case 'branchCity':  
-    if ($branchstore.branchState.submenu !== undefined) {  
+    if ($branchstore.branchState?.submenu !== undefined) {  
     return match ($branchstore.branchState.submenu,matchstr); 
     } else {
       return {}
@@ -357,15 +363,18 @@ function checkchange(e) {
     {#if mode !== 'display'}
         <div class="bg-blue-100 h-20 rounded-t-lg flex flex-row items-center px-7">
             <h2 class="text-2xl text-black text-gray-700 font-bold">{btntxt==="Save"?"Add New ":btntxt+" " } Branch</h2>
+            
             <span class="flex-grow"></span>  
+            {#if !firstvisit}
+            <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow" on:click={()=>sendcardaction('cancel')}>Cancel</button>  
+            {/if}      
+        
+           <span class="flex w-5"></span>
            <button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow" 
            on:click|preventDefault={branchsave}>
              {btntxt}
             </button>
-          {#if !firstvisit}
-           <span class="flex w-5"></span>
-          <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow" on:click={()=>sendcardaction('cancel')}>Cancel</button>  
-          {/if}    
+          
           
         </div>
     {/if}

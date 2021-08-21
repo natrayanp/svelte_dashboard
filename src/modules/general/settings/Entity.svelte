@@ -9,7 +9,7 @@ import Companydetails from './Companydetails.svelte';
 
 import Alerts from '../../../common/notifications/components/alerts/Alerts.svelte';
 
-import { entityStore,enityVal } from "../../../stores/stores";
+import { entityStore,enityVal, authVal } from "../../../stores/stores";
 
 import { getNotificationsContext } from '../../../common/notifications';
 const { addNotification } = getNotificationsContext();
@@ -194,7 +194,8 @@ onMount(async() => {
       } 
     }  
     if(goforfetch) {
-      respdata = await http.get('getcompany'); 
+      //respdata = await http.get('getcompany'); 
+      respdata = await http.post('getcompany',{"companyid":authVal.activecompany.companyId}); 
       console.log(JSON.stringify(respdata));
     }
     mymodal.close();
