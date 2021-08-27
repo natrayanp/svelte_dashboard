@@ -27,12 +27,12 @@
     "svelte": "^3.41.0",
     "svelte-check": "^2.2.0",
     "svelte-preprocess": "^4.7.3",
-    "tailwindcss": "^2.2.6",
+    "tailwindcss": "^2.2.7",
     "tslib": "^2.3.0"
   },
   "dependencies": {
     "@open-wc/building-rollup": "^1.10.0",
-    "@rollup/plugin-commonjs": "^19.0.0",
+    "@rollup/plugin-commonjs": "^20.0.0",
     "@rollup/plugin-node-resolve": "^13.0.0",
     "@rollup/plugin-typescript": "^8.2.1",
     "@tailwindcss/forms": "^0.3.3",

@@ -5,6 +5,7 @@ import { createSessionStore } from "./session";
 import { writable, derived } from "svelte/store"
 import { initAuthStore } from './authStore';
 import { initEntityStore } from './entityStore';
+import { initRoleStore } from './roleStore';
 
 
 //*Auth Store - START
@@ -22,6 +23,21 @@ export var enityVal: any;
 let entyUnsub = entityStore.subscribe((val) => enityVal=val);
 
 //*Enitity Store - END
+
+//*Roles store - START
+export let roleStore = initRoleStore();
+export let roleVal;
+/*
+export const getRoleStore = () => { 
+    console.log("nat");
+    roleStore = initRoleStore();
+    let roleUnsub = roleStore.subscribe((val) => roleVal=val);
+    return roleStore;
+};
+*/
+let roleUnsub = roleStore.subscribe((val) => roleVal=val);
+
+//*Roles store - END
 
 
 const restAllStore = () => {
