@@ -545,7 +545,7 @@ function dragEnterLeave(tarstr){
       {/if}
 
       {#each $roleStore.Selectedmodules as basket, basketIndex (basket)} 
-          <div class="shadow rounded-lg p-3  bg-green-100 w-full md:w-5/12">
+          <div class="shadow rounded-lg p-3  bg-green-100 w-full md:w-9/19">
               <div class="flex flex-row justify-center">
                   <b class="m-3 ">{basket.name}</b>
                   <span class="flex flex-1 "></span> 
@@ -583,7 +583,9 @@ function dragEnterLeave(tarstr){
                            
                                 {#if item != null ||  item !== undefined }
                                     --> 
+                                
                                 <Roledetails  basketsd = {$roleStore.Selectedmodules} {basketIndex} {patharray}/>
+                             
                                 <!--
                               {/if}
                               {/each}

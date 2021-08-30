@@ -14,6 +14,7 @@ const INITIAL_AUTH_STORE = {
     activecompany:null,
     allbranch:[],
     activebranch:null,
+    allowedops:[],
     allpack:[],
     activepack:null,
     selectedpack:null, 

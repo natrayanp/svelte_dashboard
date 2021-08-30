@@ -249,6 +249,7 @@ import { get } from 'svelte/store';
 												activecompany: val.detail.data.menu.ActiveCompany,
 												allbranch:val.detail.data.menu.BranchLst,
 												activebranch: val.detail.data.menu.ActiveBranch,
+												allowedops: val.detail.data.refdata.allowedops,
 												allpack:{"companylevel":val.detail.data.menu.CpyLvlTreeforCpy,
 												  		 "branchlevel":val.detail.data.menu.BrnLvlTreeforCpy},
 												activepack:{"companylevel":acpaccp[0].EntityTree,

@@ -8,6 +8,10 @@ module.exports = {
         zIndex: {
           "-1": "-1",
         },
+        width: {
+          '9/20': '45.0000000%',
+          '9/19': '47.3684211%',
+        }
       },
     },
     variants: { borderColor: ["responsive", "hover", "focus", "focus-within"] },

@@ -120,7 +120,7 @@ function toggle_viewdetail(){
 onMount(async() => {  
   console.log("going to onmount");
       await getCompany();
- 
+    console.log((authVal));
     //if (compdata.length <= 0) toggle_edit();
   });
 
