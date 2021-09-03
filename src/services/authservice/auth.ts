@@ -1,6 +1,11 @@
 
-    import firebase from 'firebase/app';
-    import 'firebase/auth';
+//    import firebase from 'firebase/app';
+import { initializeApp } from "firebase/app";
+import { getAuth, signInWithPopup, signInWithRedirect, signInWithEmailAndPassword, 
+            createUserWithEmailAndPassword,getRedirectResult,onAuthStateChanged,
+            GoogleAuthProvider,EmailAuthProvider,FacebookAuthProvider} from "firebase/auth";
+
+  //  import 'firebase/auth';
     import {authStore} from '../../stores/stores';
     import {providertype} from './authModals';
     import {environment as env} from '../../environment/production';   
@@ -39,9 +44,11 @@ export const initAuth = (useRedirect = false) => {
 
     //Initialise the firebase
 	const firebaseConfig = env.firebase;
-	firebase.initializeApp(firebaseConfig);
+	//firebase.initializeApp(firebaseConfig);
+    const firebaseApp = initializeApp(firebaseConfig);
 	
-	const auth = firebase.auth();
+	//const auth = firebase.auth();
+    const auth = getAuth(firebaseApp);
   
     const loginWithEmailPassword = (email, password) => {  
         let userCred;
@@ -49,7 +56,8 @@ export const initAuth = (useRedirect = false) => {
         let dd = {};
         return new Promise(async (resolve,reject) => {
             try{
-                userCred = await auth.signInWithEmailAndPassword(email, password);            
+                //userCred = await auth.signInWithEmailAndPassword(email, password);            
+                userCred = await signInWithEmailAndPassword(auth, email, password)
             } catch (err) {
                 dd = await fbErrorHandle('FBUsrEmailFail',err);
                 reject(dd);
@@ -74,7 +82,8 @@ export const initAuth = (useRedirect = false) => {
         return new Promise(async (resolve,reject) => { 
             try{
                 console.log("strarting sign up");
-                userCred = await auth.createUserWithEmailAndPassword(email, password);   
+                //userCred = await auth.createUserWithEmailAndPassword(email, password);   
+                userCred = await createUserWithEmailAndPassword(auth,email, password);   
                 console.log(userCred);
             } catch (err) {
                 console.log(err);
@@ -122,10 +131,12 @@ export const initAuth = (useRedirect = false) => {
                         reject(dd);                            
                     }                   
 
-                    userCred = await auth.signInWithRedirect(provider);     
+                    //userCred = await auth.signInWithRedirect(provider);     
+                    userCred = await signInWithRedirect(auth,provider);     
 
                 } else {
-                    userCred = await auth.signInWithPopup(provider);
+                    //userCred = await auth.signInWithPopup(provider);
+                    userCred = await signInWithPopup(auth,provider);
                 }
             } catch (err) {
                 let x = isSignup?'FBSignupFail':'FBloginFail';
@@ -176,7 +187,8 @@ export const initAuth = (useRedirect = false) => {
             console.log(useRedirect);
             if(useRedirect){
                 try{
-                    userCred = await auth.getRedirectResult();
+                    //userCred = await auth.getRedirectResult();
+                    userCred = await getRedirectResult(auth);
                     console.log(userCred);
                     if(!userCred.user) {
                         console.log('going in');
@@ -262,7 +274,8 @@ export const initAuth = (useRedirect = false) => {
       let dd = {};
       authStore.update(dd => ({...dd,stage:'FBAuthChkStart'}));
       return new Promise((resolve, reject) => {
-          const unsubscribe = firebase.auth().onAuthStateChanged(async (userCred) => {
+          //const unsubscribe = firebase.auth().onAuthStateChanged(async (userCred) => {
+            const unsubscribe = onAuthStateChanged(auth,async (userCred) => {
               unsubscribe();
               //return auth ? resolve(auth) : reject();
               console.log(userCred);
@@ -300,13 +313,16 @@ export const initAuth = (useRedirect = false) => {
 
     const getSigninProvider = (prov) => {
         if (prov === providertype.EMAILPASSWORD) {
-            return new firebase.auth.EmailAuthProvider();            
+            //return new firebase.auth.EmailAuthProvider();            
+            return new EmailAuthProvider();            
         }
         else if (prov === providertype.GOOGLE){
-            return new firebase.auth.GoogleAuthProvider();            
+            //return new firebase.auth.GoogleAuthProvider();            
+            return new GoogleAuthProvider();            
         }
         else if (prov === providertype.FACEBOOK){
-            return new firebase.auth.FacebookAuthProvider();            
+            //return new firebase.auth.FacebookAuthProvider();            
+            return new FacebookAuthProvider();    
         }
     }  
     
