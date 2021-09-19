@@ -72,17 +72,8 @@ function toggle_viewdetail(branchdata={}){
     if(JSON.stringify(branchdata) !== JSON.stringify({})) datatosend.push(branchdata);    
   }
 
-  async function handleresult(event) {
-  console.log(event);  
-  if (['Save','Update'].includes(event.detail.action)) await getBranch();
-
-  if (brndata.length <= 0) {    
-    let s = allAlerts({tgt:"sudo1",text:"No Branch setup exists. Please save Branch",type:'error'});    
-  } else {
-    mymod = 'display';
-    myc = "hidden";
-  }
-}
+  
+  
 
 
 onMount(async() => {  

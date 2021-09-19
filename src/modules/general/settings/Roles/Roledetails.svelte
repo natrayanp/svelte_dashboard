@@ -170,7 +170,7 @@ function dragEnterLeave(tarstr){
         <div class ="h-96 flex-grow">Nothing selected yet</div>
     {/if}
 
-    {#each $roleStore.SelectActivemod?.Modules as basket, basketIndex (basket)} 
+    {#each $roleStore.SelectActivemod.Modules as basket, basketIndex (basket)} 
         <div class="shadow rounded-lg p-3  bg-green-100 w-full md:w-9/19">
             <div class="flex flex-row justify-center">
                 <b class="m-3 ">{basket.name}</b>
@@ -178,61 +178,13 @@ function dragEnterLeave(tarstr){
                 <span on:click={()=>removemodule(basket)}><i class="fas fa-trash-alt text-red-600 font-bold hover:text-red-300"></i></span>
               </div>
               <div class="container">
-                            <table class="min-w-full divide-y divide-gray-200 ">
-                   
-                              
-                              <Roleselectdetails  basketsd = {$roleStore.SelectActivemod.Modules} {basketIndex} {patharray}/>
-
-                                              <!--         
-                              {#each $roleStore.SelectActivemod.Modules[basketIndex].submenu as item, itemIndex (item)}           
+                            <table class="min-w-full divide-y divide-gray-200 ">  
                                 
-                              {#if item.submenu !== null}
-                                <thead  class="bg-blue-100">                           
-                                    <tr>
-                                        <th class="sticky top-0 px-6 py-3 text-red-900 "> {item.name} </th>
-                                        <th class="sticky top-0  py-3 text-red-900 "><input type="checkbox" on:change={()=>onReadChange(basketIndex)} class="h-4 w-4 text-red-600" 
-                                            bind:checked={$roleStore.SelectActivemod.Modules[basketIndex].readAll} 
-                                            bind:indeterminate={$roleStore.SelectActivemod.Modules[basketIndex].readindeterminate} /> Read</th>
-                                        <th class="sticky top-0  py-3 text-blue-900 "><input type="checkbox" on:change={()=>onWriteChange(basketIndex)} class="h-4 w-4 text-blue-600" 
-                                            bind:checked={$roleStore.SelectActivemod.Modules[basketIndex].writeAll}
-                                            bind:indeterminate={$roleStore.SelectActivemod.Modules[basketIndex].writeindeterminate}/> Write</th>
-                                        <th class="sticky top-0  px-1 py-3 text-black " on:click={()=>toggleshow(basketIndex)}><i class="fas fa-angle-down fa-lg"></i></th>
-                                    </tr>
-                                </thead>                                    
-                                {/if}
-                                {#if item.submenu === null}
-                                <tbody class="bg-white divide-y divide-gray-200 overflow-y-scroll h-28">                                        
-                                    <tr>                                            
-                                        <td class="px-3 py-1 whitespace-nowrap">{item.name}</td>
-                                        <td class="px-10 py-1 whitespace-nowrap"><input type="checkbox" class="h-4 w-4 text-red-600" on:change={()=>onReadChangeIt(basketIndex,itemIndex)}  bind:checked={$roleStore.SelectActivemod.Modules[basketIndex].submenu[itemIndex].read}></td>
-                                        <td class="px-6 py-1 whitespace-nowrap"><input type="checkbox" class="h-4 w-4 text-blue-600"  on:change={()=>onWriteChangeIt(basketIndex,itemIndex)} bind:checked={$roleStore.SelectActivemod.Modules[basketIndex].submenu[itemIndex].write}></td>
-                                        <td></td>
-                                    </tr>                                        
-                                </tbody>
-                            {/if}
-                         
-                              {#if item != null ||  item !== undefined }
-                                  --> 
-                           
-                              <!--
-                            {/if}
-                            {/each}
-                            -->
+                                    <Roleselectdetails  bind:basketsd = {$roleStore.SelectActivemod.Modules} basket={basket} {basketIndex} {patharray}/>                                
+                                
                             </table>
               </div>
 
-
-                    <!--    <span class="flex flex-row items-center">  
-                            {item.name}
-                            <div>sdffasdfasdfasdjfsdaf</div>
-                            <span class="flex flex-1 "></span>             
-                            <i class="fas fa-ellipsis-v text-gray-300 hover:text-red-300"></i>
-                        </span> 
-                    </li>                        
-                </div>
-
-          </ul> 
-            -->
         </div>
     {/each}
 
@@ -242,102 +194,4 @@ function dragEnterLeave(tarstr){
 
 </div>
 </div>
-
-<!--
-<div class = "flex flex-col bg-white justify-center shadow rounded-lg p-3">
-
-<div class = "flex flex-col md:flex-row flex-wrap bg-blue-100 justify-center gap-x-5 gap-y-5 shadow rounded-lg p-3">
-
-    {#each baskets.Availablemodules as basket, basketIndex (basket)} 
-        <div class="shadow rounded-lg p-3  bg-gray-100 w-full md:w-5/12">
-            <b class="m-3 p-5">{basket.name}</b>
-            
-            <ul
-            class = "flex flex-col md:flex-row flex-wrap bg-red-100 justify-center gap-x-2 gap-y-2 shadow rounded-lg p-3 w-full"
-            on:dragenter={() => hoveringOverBasket = basket.name}
-            on:dragleave={() => hoveringOverBasket = null}
-                on:drop={event => drop(event, basketIndex)}
-                ondragover="return false"
-          >
-
-            {#each basket.submenu as item, itemIndex (item)}
-                <div animate:flip class="inline" >
-                    <li   
-                    class=" shadow rounded-lg bg-green-100 rounded-lg cursor-pointer hover:bg-yellow-200 border-2 p-3 w-64"                     
-                      draggable={true}
-                      on:dragstart={event => dragStart(event, basketIndex, itemIndex)}
-                    >
-                        <span class="flex flex-row items-center">  
-                            {item.name}
-                            <span class="flex flex-1 "></span>             
-                            <i class="fas fa-ellipsis-v text-gray-300 hover:text-red-300"></i>
-                        </span>
-                    </li>                        
-                </div>
-            {/each}
-          </ul> 
-            
-        </div>
-    {/each}
-
-</div>
-
-<div class = "flex flex-col md:flex-row flex-wrap bg-blue-100 justify-center gap-x-5 gap-y-5 shadow rounded-lg p-3">
-
-    {#each baskets.Selectedmodules as basket, basketIndex (basket)} 
-        <div class="shadow rounded-lg p-3  bg-gray-100 w-full md:w-5/12">
-            <b class="m-3 p-5">{basket.name}</b>
-            
-            <ul
-            class = "flex flex-col md:flex-row flex-wrap bg-red-100 justify-center gap-x-2 gap-y-2 shadow rounded-lg p-3 w-full"
-            on:dragenter={() => hoveringOverBasket = basket.name}
-            on:dragleave={() => hoveringOverBasket = null}
-                on:drop={event => drop(event, basketIndex)}
-                ondragover="return false"
-          >
-
-            {#each basket?.submenu as item, itemIndex (item)}
-                <div animate:flip class="inline" >
-                    <li   
-                    class=" shadow rounded-lg bg-green-100 rounded-lg cursor-pointer hover:bg-yellow-200 border-2 p-3 w-64"                     
-                      draggable={true}
-                      on:dragstart={event => dragStart(event, basketIndex, itemIndex)}
-                    >
-                        <span class="flex flex-row items-center">  
-                            {item.name}
-                            <span class="flex flex-1 "></span>             
-                            <i class="fas fa-ellipsis-v text-gray-300 hover:text-red-300"></i>
-                        </span>
-                    </li>                        
-                </div>
-            {/each}
-          </ul> 
-            
-        </div>
-    {/each}
-
-</div>
-
-
-</div>
--->
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
