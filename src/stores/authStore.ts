@@ -11,13 +11,14 @@ const INITIAL_AUTH_STORE = {
     allentity:[],
     activeentity:null,
     allcompany:[],
-    activecompany:null,
+    activecompany:null,  //This has the company selected by user
     allbranch:[],
-    activebranch:null,
+    activebranch:null,   //This has the company selected by user
     allowedops:[],
     allpack:[],
     activepack:null,
     selectedpack:null, 
+    livepack:{},
 };
 
 

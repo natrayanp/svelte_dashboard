@@ -3,7 +3,10 @@ import { writable, get } from 'svelte/store'
 const INITIAL_ROLE_STORE =        {                              
     "Availablemodules": [] ,                              
     "Selectedmodules": [],
-    "Unselectedmodules": []
+    "Unselectedmodules": [],
+    "Activemod":[],
+    "AvailActivemod":[],
+    "SelectActivemod":[],    
   };
 
 export const initRoleStore = (initialStore = INITIAL_ROLE_STORE) => {

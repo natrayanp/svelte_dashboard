@@ -1,0 +1,184 @@
+<script>
+import { onMount } from 'svelte';
+
+
+import { createForm } from "svelte-forms-lib";
+import { writable, derived } from 'svelte/store';
+import { authVal, enityVal, roleVal, roleStore } from '../../../../stores/stores';
+import Roledetails from './Roledetails.svelte';
+import Alerts from '../../../../common/notifications/components/alerts/Alerts.svelte';
+import { http } from '../../../../stores/services';
+import { getNotificationsContext } from '../../../../common/notifications';
+const { addNotification } = getNotificationsContext();
+
+    let datatosend = [];
+    let mymod = 'display';
+
+let yes = true;
+let firstvisit = false;
+let mymodal = null;
+let myc = "hidden";
+
+
+
+onMount(async ()=> {
+  await getRolesForCompany();
+})
+
+roleStore.subscribe((d)=>console.log(d));
+
+
+const getRolesForCompany = async(goforfetch = false) => {
+    console.log("inside getBranch inner if");    
+    mymodal =Rolefetchprogressmodal();  
+    
+    let postdata = {"Optype":"fetch","Companyid":authVal.activecompany.companyId,"Branchid":authVal.activebranch.branchId};
+    console.log("postdate = ", postdata);
+    let respdata = await http.post('getroledata',postdata).catch(e=>{  
+            //TODO Error handling
+            console.error(e);
+          });
+        console.log(respdata);
+        let ref = JSON.parse(JSON.stringify(respdata.data.roledata));
+        console.log(ref.Selectedmodules.length);        
+        if (ref.Selectedmodules.length) {
+          $roleStore.Selectedmodules = ref.Selectedmodules.slice();
+        } else {
+          $roleStore.Selectedmodules = [];
+        }        
+        $roleStore.Availablemodules = ref.Availablemodules.slice();
+        mymodal.close();
+    mymodal=null;        
+}
+
+const Rolefetchprogressmodal = () => {
+		return addNotification({
+				title : 'Checking your account',
+				text: 'hi i am custom notification why it cant be sol long so i can test it before using it' ,
+				notificationtype: 'modal',            
+				modaltype:'modal-loading',  	
+        //comp : Circularprogress,				
+			});
+	}
+
+  const selectallrec =() => {
+
+  }
+
+
+  function toggle_viewdetail(roledata={}){ 
+  console.log(JSON.stringify(roledata));
+  datatosend = [];
+  if (myc === "hidden") {
+    myc = "visible";
+  } else {
+    myc = "hidden";
+  }
+  mymod ='display';
+  if(JSON.stringify(branchdata) !== JSON.stringify({})) datatosend.push(branchdata);    
+}
+
+  function toggle_edit(roledata={}) {
+    mymod="edit";
+    datatosend = [];
+    if($roleStore.Selectedmodules.length <= 0)  mymod="new";
+    if(JSON.stringify(roledata)=== JSON.stringify({})) mymod = 'new';
+    if(firstvisit)  mymod="new";
+    myc = "hidden";    
+    if(JSON.stringify($roleStore.Selectedmodules) !== JSON.stringify({})) datatosend.push(roledata);    
+  }
+
+</script>
+
+<Alerts targetid="sudo"/>
+
+{#if mymod !== 'edit'}
+
+<div class="flex flex-col" >
+
+
+  <div class="-my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+    <div class="py-2 align-middle inline-block min-w-full sm:px-6 lg:px-8">
+      <div class="shadow overflow-hidden border-b border-gray-200 sm:rounded-lg">
+        <table class="min-w-full divide-y divide-gray-200">
+          <caption class="bg-blue-100 rounded-t-lg divide-y divide-gray-300">                                
+            <div class="flex md:flex-row flex-col items-center md:h-20 px-7">
+              <h2 class="text-2xl  text-gray-700 font-bold">Role Settings</h2>
+              <span class = "flex px-7"></span>     
+                      
+              <button class=" flex bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md" on:click|preventDefault={()=>toggle_edit()}>Add New</button>      
+              
+              
+
+            </div>              
+            <div></div>
+          </caption>
+          <thead class="bg-blue-100">
+            <tr>
+              <th on:click={()=> dt1=true} on:focusout={()=> dt1=false} scope="col" class="px-6 py-6 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                  <span >Selection</span>
+
+              </th>
+
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Role Name
+              </th>
+
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium  text-gray-700 uppercase tracking-wider">
+                <span >Action</span>
+              </th>
+
+            </tr>
+          </thead>
+
+          {#each $roleStore.Selectedmodules as role}
+
+          <tbody class="bg-white divide-y divide-gray-200">
+            <tr>
+              <td>
+                <div class="pristine-form-group md:col-start-8 md:col-span-4">				
+                  <label for="default"></label>
+                    <input type=checkbox bind:checked={yes} on:change= {e=>selectallrec(e)}>   
+                    {yes?'Yes':'No'}
+                    <div class="pristine-error-group"></div>                 
+                    
+                  </div>
+
+                
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10">
+                    <img class="h-10 w-10 rounded-full" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=4&amp;w=256&amp;h=256&amp;q=60" alt="">
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">
+                      {role.Displayname}
+                    </div>
+                    <div class="text-sm text-gray-500">
+                      {role.Rolemasterid}
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                <a href="#" class="text-green-600 hover:text-red-900 mr-5" on:click|preventDefault={()=>toggle_viewdetail(role)}><i class="far fa-eye fa-lg"/></a>
+                <a href="#" class="text-green-600 hover:text-green-900 mr-4" on:click|preventDefault={()=>toggle_edit(role)}><i class="far fa-edit fa-lg"/></a>
+              </td>
+
+            </tr>
+
+            <!-- More rows... -->
+          </tbody>
+          {/each}
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+{/if}
+
+{#if mymod ==='edit' || mymod ==='new'}
+<Alerts targetid="sudo1"/>
+<Roledetails roledata_init={datatosend}> </Roledetails> 
+{/if}

@@ -14,7 +14,6 @@ import { entityStore,enityVal, authStore, authVal } from "../../../stores/stores
 import {getMissingRef} from "../../../common/utilfuncs/refdata";
 
 import { getNotificationsContext } from '../../../common/notifications';
-import { prevent_default } from 'svelte/internal';
 const { addNotification } = getNotificationsContext();
 
 
@@ -394,7 +393,6 @@ onMount(async() => {
 </div>
 {/if}
 
-<!--div class="py-10"></div-->
 
 
 {#if mymod ==='edit' || mymod ==='new'}

@@ -39,6 +39,7 @@
     "concurrently": "^6.2.0",
     "firebase": "^9.0.1",
     "sirv-cli": "^1.0.12",
+    "svelte-forms-lib": "^1.10.7",
     "typescript": "^4.3.4"
   }
 }
