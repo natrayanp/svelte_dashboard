@@ -1,32 +1,65 @@
 <script>
-import { onMount } from 'svelte';
+import { onMount,createEventDispatcher } from 'svelte';
 //import { options } from '../../../../../routify/routes';
 import { authStore, roleStore, roleVal } from '../../../../stores/stores';
 import Roleselectdetails from './Roleselectdetails.svelte';
 import {flip} from 'svelte/animate';
+import { goto } from '@roxi/routify';
+import { getNotificationsContext } from '../../../../common/notifications';
+const { addNotification,subscribe } = getNotificationsContext();
 
-export let roledata_init;	
-$roleStore.SelectActivemod.Modules=[];
+//export let roledata_init;	
+$roleStore.LiveSelectmod.Modules=[];
 let showe = [];
 let patharray = [];
 let hoveringOverBasket;
+let firstvisit = false;
 
+let mymodl = null;
+let avs= [];
 
 onMount(async() => {  
-    console.log(roledata_init);
-    $roleStore.SelectActivemod = (roledata_init.slice())[0];    
-    $roleStore.AvailActivemod = $roleStore.Availablemodules;
-    $roleStore.SelectActivemod.Modules.forEach ( (mod) => {             
-        console.log(mod);
-         let avs = $roleStore.AvailActivemod.filter(av => !(av.packid === mod.packid));
-         $roleStore.AvailActivemod = avs.slice();
-    })
+    Initialise();
 });
 
-    function removemodule(data) {              
-        $roleStore.SelectActivemod.Modules = $roleStore.SelectActivemod.Modules.filter(x => !(x.packid === data.packid));
-        let intarget = $roleStore.Availablemodules.filter(x => x.packid === data.packid);
-        $roleStore.AvailActivemod.push(intarget[0])
+function Initialise(){
+    console.log("Initialising");
+    /*
+    console.log(JSON.stringify(roledata_init));
+    console.log(roledata_init.length);
+    if(JSON.stringify(roledata_init)=== JSON.stringify([{}])) mymodl = 'new';
+    if (mymodl !== 'new') $roleStore.LiveSelectmod = JSON.parse(JSON.stringify((roledata_init.slice())[0]));
+    */
+    $roleStore.LiveSelectmod = JSON.parse(JSON.stringify(($roleStore.Liverole)));
+    let td= $roleStore.Availablemodules.slice();   
+    $roleStore.LiveAvailmod = td.slice();
+
+    if(JSON.stringify($roleStore.LiveSelectmod) !== JSON.stringify({})){
+        $roleStore.LiveSelectmod.Modules.forEach ( (mod) => {             
+            console.log(mod);
+             avs = $roleStore.LiveAvailmod.filter(av => !(av.packid === mod.packid));
+             $roleStore.LiveAvailmod = avs.slice();
+
+        })
+    }
+}
+
+
+    function removemodule_d(data) {               
+        $roleStore.LiveSelectmod.Modules = $roleStore.LiveSelectmod.Modules.filter(x => !(x.packid === data.packid));
+
+        //Check if the removedmodule is in Liverole (To retain values got from DB)
+        let mynewv = $roleStore.Liverole.Modules.filter(y => y.packid === data.packid);
+        let datas;
+        if (mynewv.length > 0 ){
+            //If yes, take the value from Liverole
+            datas= JSON.parse(JSON.stringify(mynewv[0]))
+        } else {
+            //If no, this means we don't have data in db for this pack so show the fresh value
+            let intarget = $roleStore.Availablemodules.filter(x => x.packid === data.packid);
+            datas= JSON.parse(JSON.stringify(intarget[0]))
+        }
+        $roleStore.LiveAvailmod.push({...datas,basketname:"Availablemodules"});
     }
 
          
@@ -42,36 +75,65 @@ onMount(async() => {
 	}
 	
 	function drop(event, basket) {
+        console.log("Drop");
 		event.preventDefault();
         const json = event.dataTransfer.getData("text/plain");
-        const data = JSON.parse(json);       
-
+        const data = JSON.parse(json);   
+        console.log(JSON.stringify(data));
+        
+        
         if(data.basketname !== basket.basketname) {
             if(data.basketname === "Availablemodules" && basket.basketname === "Selectedmodules"){                
-                $roleStore.AvailActivemod = $roleStore.AvailActivemod.filter(x => !(x.packid === data.packid));
-                data.basketname="Selectedmodules";
-                $roleStore.SelectActivemod.Modules.push({...data,basketname:"Selectedmodules"});
+                let mynewv = $roleStore.LiveAvailmod.filter(x => x.packid === data.packid);
+                $roleStore.LiveAvailmod = $roleStore.LiveAvailmod.filter(x => !(x.packid === data.packid));
+                $roleStore.LiveSelectmod.Modules.push({...JSON.parse(JSON.stringify(mynewv[0])),basketname:"Selectedmodules"});
             }
         }
     hoveringOverBasket = null;   
     }
 
 
+    const dispatch = createEventDispatcher();
+
+    const sendcardaction = async (btnpressed) => {
+        
+        if(firstvisit) {
+          $goto('/login');
+          resetst();
+          return;
+        }else if(['Save','Update'].includes(btnpressed)) {            
+          console.log(respdata);
+        }        
+        dispatch('editresult',{
+        action: btnpressed
+        });
+        resetst();
+	}
 
 
-function dragEnterLeave(tarstr){
-    console.log(JSON.stringify(tarstr));
-    console.log(JSON.stringify(hoveringOverBasket));
-    if(tarstr.status === 'leave'){
-        if(hoveringOverBasket && hoveringOverBasket.basketname === tarstr.basketname) {
-            hoveringOverBasket = null;            
-        }
-    } else {
-        hoveringOverBasket = tarstr;    
+function resetst(){
+    $roleStore.LiveAvailmod = [];
+    $roleStore.Liverole = {};
+    $roleStore.LiveSelectmod = {};
+}
+
+
+const RoleDel = () => {
+		return addNotification({
+				title : 'Data Loss Alert',
+				text: 'Your changes will be lost.  Do you want to proceed?' ,
+				notificationtype: 'modal',            
+				modaltype:'modal-accept-reject',  	
+        //comp : Circularprogress,				
+			});
+	}
+
+    function removemodule(data) {               
+        mymodl =  RoleDel();
+        mymodl.returneddata.then(d => {
+        if(d.accept) removemodule_d(data);
+        });               
     }
-    
-}   
-
 
 
 </script>
@@ -82,7 +144,7 @@ function dragEnterLeave(tarstr){
         <span class="flex-grow"></span>  
        <button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md">Save</button>
        <span class="flex w-5"></span>
-      <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow-md">Cancel</button>      
+      <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow-md" on:click={()=>sendcardaction('cancel')}>Cancel</button>      
     </div>
     <form class="px-10 py-1 rounded w-full my-5 inputs space-y-6">
         <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-1 md:gap-x-10  gap-y-5 md:gap-y-0	">
@@ -126,10 +188,10 @@ function dragEnterLeave(tarstr){
         <b class="m-3 p-5">Available modules</b>
         <div class = "flex flex-col md:flex-row flex-wrap bg-red-100 justify-center gap-x-2 gap-y-2 shadow rounded-lg p-3 w-full">
           
-            {#if $roleStore.AvailActivemod.length === 0}
+            {#if $roleStore.LiveAvailmod.length === 0}
             <div class ="h-52 flex-grow"> All Available modules assigned </div>
         {/if}
-        {#each $roleStore.AvailActivemod as basket, basketIndex (basket)} 
+        {#each $roleStore.LiveAvailmod as basket, basketIndex (basket)} 
         <div animate:flip class="inline" >
         <ul            
         on:dragenter={() => hoveringOverBasket = "Availablemodules"}
@@ -166,11 +228,11 @@ function dragEnterLeave(tarstr){
     ondragover="return false"
 >
 
-    {#if $roleStore?.SelectActivemod?.Modules?.length === 0}
+    {#if $roleStore?.LiveSelectmod?.Modules?.length === 0}
         <div class ="h-96 flex-grow">Nothing selected yet</div>
     {/if}
 
-    {#each $roleStore.SelectActivemod.Modules as basket, basketIndex (basket)} 
+    {#each $roleStore.LiveSelectmod.Modules as basket, basketIndex (basket)} 
         <div class="shadow rounded-lg p-3  bg-green-100 w-full md:w-9/19">
             <div class="flex flex-row justify-center">
                 <b class="m-3 ">{basket.name}</b>
@@ -180,7 +242,7 @@ function dragEnterLeave(tarstr){
               <div class="container">
                             <table class="min-w-full divide-y divide-gray-200 ">  
                                 
-                                    <Roleselectdetails  bind:basketsd = {$roleStore.SelectActivemod.Modules} basket={basket} {basketIndex} {patharray}/>                                
+                                    <Roleselectdetails  bind:basketsd = {$roleStore.LiveSelectmod.Modules} basket={basket} {basketIndex} {patharray}/>                                
                                 
                             </table>
               </div>

@@ -79,20 +79,47 @@ const Rolefetchprogressmodal = () => {
 }
 
   function toggle_edit(roledata={}) {
+    console.log("toogle eeid");
     mymod="edit";
-    datatosend = [];
+   // datatosend = [];
     if($roleStore.Selectedmodules.length <= 0)  mymod="new";
     if(JSON.stringify(roledata)=== JSON.stringify({})) mymod = 'new';
     if(firstvisit)  mymod="new";
     myc = "hidden";    
-    if(JSON.stringify($roleStore.Selectedmodules) !== JSON.stringify({})) datatosend.push(roledata);    
+    
+   // datatosend.push(JSON.parse(JSON.stringify(roledata)));    
+    
+    $roleStore.Liverole = JSON.parse(JSON.stringify(roledata));   
+    /*
+    if(JSON.stringify($roleStore.Selectedmodules) !== JSON.stringify({})) {
+      datatosend.push(roledata);  
+      console.log(JSON.stringify(roledata)) ;
+      $roleStore.Liverole = JSON.parse(JSON.stringify(roledata));
+    }
+    */
   }
+
+  async function handleresult(event) {
+  console.log(event.detail.action);  
+  //TODO: Don't go for full fetch.  after Save/Update, replace the new values in store
+  if (['Save','Update'].includes(event.detail.action)) await getRolesForCompany(true);
+
+  
+  /* if (roledata.length <= 0) {    
+    let s = allAlerts({tgt:"sudo1",text:"No Role setup exists. Please save company",type:'error'});    
+  } else {*/
+    mymod = 'display';
+    myc = "hidden";
+  //}
+}
+
 
 </script>
 
 <Alerts targetid="sudo"/>
 
-{#if mymod !== 'edit'}
+{#if !(['edit','new'].includes(mymod))}
+
 
 <div class="flex flex-col" >
 
@@ -180,5 +207,6 @@ const Rolefetchprogressmodal = () => {
 
 {#if mymod ==='edit' || mymod ==='new'}
 <Alerts targetid="sudo1"/>
-<Roledetails roledata_init={datatosend}> </Roledetails> 
+<!--<Roledetails roledata_init={datatosend}  on:editresult= {handleresult}> </Roledetails> -->
+<Roledetails   on:editresult= {handleresult}> </Roledetails> 
 {/if}

@@ -4,9 +4,9 @@ const INITIAL_ROLE_STORE =        {
     "Availablemodules": [] ,                              
     "Selectedmodules": [],
     "Unselectedmodules": [],
-    "Activemod":[],
-    "AvailActivemod":[],
-    "SelectActivemod":[],    
+    "Liverole":[],
+    "LiveAvailmod":[],
+    "LiveSelectmod":[],    
   };
 
 export const initRoleStore = (initialStore = INITIAL_ROLE_STORE) => {

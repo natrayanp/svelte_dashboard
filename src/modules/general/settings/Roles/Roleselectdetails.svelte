@@ -113,7 +113,7 @@
                 <div class="flex items-center">
                     <div class="ml-2">
                      <div class="text-sm text-gray-500">
-                            <input type="checkbox" class="h-4 w-4 text-red-600" on:change={(event)=>onReadChangeIt(event,operindex,true)} bind:checked={basket.allowedopsval[operindex]}  >
+                            <input type="checkbox" class="h-3 w-3 text-red-600" on:change={(event)=>onReadChangeIt(event,operindex,true)} bind:checked={basket.allowedopsval[operindex]}  >
                       </div>
                     </div>
                   </div>
