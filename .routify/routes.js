@@ -1,11 +1,11 @@
 
 /**
  * @roxi/routify 2.18.3
- * File generated Wed Sep 22 2021 20:36:48 GMT+0800 (Singapore Standard Time)
+ * File generated Sat Oct 02 2021 20:32:56 GMT+0800 (Singapore Standard Time)
  */
 
 export const __version = "2.18.3"
-export const __timestamp = "2021-09-22T12:36:48.665Z"
+export const __timestamp = "2021-10-02T12:32:56.107Z"
 
 //buildRoutes
 import { buildClientTree } from "@roxi/routify/runtime/buildRoutes"
@@ -22,7 +22,7 @@ export const _tree = {
   "filepath": "/_layout.svelte",
   "root": true,
   "ownMeta": {},
-  "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/_layout.svelte",
+  "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/_layout.svelte",
   "children": [
     {
       "isFile": true,
@@ -32,7 +32,7 @@ export const _tree = {
       "name": "_fallback",
       "ext": "svelte",
       "badExt": false,
-      "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/_fallback.svelte",
+      "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/_fallback.svelte",
       "importPath": "../src/pages/_fallback.svelte",
       "isLayout": false,
       "isReset": false,
@@ -57,7 +57,7 @@ export const _tree = {
       "name": "index",
       "ext": "svelte",
       "badExt": false,
-      "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/index.svelte",
+      "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/index.svelte",
       "importPath": "../src/pages/index.svelte",
       "isLayout": false,
       "isReset": false,
@@ -82,7 +82,7 @@ export const _tree = {
       "name": "_layout",
       "ext": "svelte",
       "badExt": false,
-      "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/_layout.svelte",
+      "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/_layout.svelte",
       "children": [
         {
           "isFile": true,
@@ -92,7 +92,7 @@ export const _tree = {
           "name": "_layout",
           "ext": "svelte",
           "badExt": false,
-          "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/[slug]/_layout.svelte",
+          "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/[slug]/_layout.svelte",
           "children": [
             {
               "isFile": true,
@@ -102,7 +102,7 @@ export const _tree = {
               "name": "branchsettings",
               "ext": "svelte",
               "badExt": false,
-              "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/[slug]/branchsettings.svelte",
+              "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/[slug]/branchsettings.svelte",
               "importPath": "../src/pages/landing/[slug]/branchsettings.svelte",
               "isLayout": false,
               "isReset": false,
@@ -128,7 +128,7 @@ export const _tree = {
               "name": "companysettings",
               "ext": "svelte",
               "badExt": false,
-              "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/[slug]/companysettings.svelte",
+              "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/[slug]/companysettings.svelte",
               "importPath": "../src/pages/landing/[slug]/companysettings.svelte",
               "isLayout": false,
               "isReset": false,
@@ -154,7 +154,7 @@ export const _tree = {
               "name": "index",
               "ext": "svelte",
               "badExt": false,
-              "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/[slug]/index.svelte",
+              "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/[slug]/index.svelte",
               "importPath": "../src/pages/landing/[slug]/index.svelte",
               "isLayout": false,
               "isReset": false,
@@ -180,7 +180,7 @@ export const _tree = {
               "name": "roles",
               "ext": "svelte",
               "badExt": false,
-              "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/[slug]/roles.svelte",
+              "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/[slug]/roles.svelte",
               "importPath": "../src/pages/landing/[slug]/roles.svelte",
               "isLayout": false,
               "isReset": false,
@@ -206,7 +206,7 @@ export const _tree = {
               "name": "_layout",
               "ext": "svelte",
               "badExt": false,
-              "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/[slug]/settings/_layout.svelte",
+              "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/[slug]/settings/_layout.svelte",
               "children": [
                 {
                   "isFile": true,
@@ -216,7 +216,7 @@ export const _tree = {
                   "name": "test",
                   "ext": "svelte",
                   "badExt": false,
-                  "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/[slug]/settings/test.svelte",
+                  "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/[slug]/settings/test.svelte",
                   "importPath": "../src/pages/landing/[slug]/settings/test.svelte",
                   "isLayout": false,
                   "isReset": false,
@@ -242,7 +242,7 @@ export const _tree = {
                   "name": "userroles",
                   "ext": "svelte",
                   "badExt": false,
-                  "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/[slug]/settings/userroles.svelte",
+                  "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/[slug]/settings/userroles.svelte",
                   "importPath": "../src/pages/landing/[slug]/settings/userroles.svelte",
                   "isLayout": false,
                   "isReset": false,
@@ -268,7 +268,7 @@ export const _tree = {
                   "name": "usersettings",
                   "ext": "svelte",
                   "badExt": false,
-                  "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/[slug]/settings/usersettings.svelte",
+                  "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/[slug]/settings/usersettings.svelte",
                   "importPath": "../src/pages/landing/[slug]/settings/usersettings.svelte",
                   "isLayout": false,
                   "isReset": false,
@@ -312,7 +312,7 @@ export const _tree = {
               "name": "users",
               "ext": "svelte",
               "badExt": false,
-              "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/[slug]/users.svelte",
+              "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/[slug]/users.svelte",
               "importPath": "../src/pages/landing/[slug]/users.svelte",
               "isLayout": false,
               "isReset": false,
@@ -359,7 +359,7 @@ export const _tree = {
           "name": "index",
           "ext": "svelte",
           "badExt": false,
-          "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/index.svelte",
+          "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/index.svelte",
           "importPath": "../src/pages/landing/index.svelte",
           "isLayout": false,
           "isReset": false,
@@ -384,7 +384,7 @@ export const _tree = {
           "name": "pricing",
           "ext": "svelte",
           "badExt": false,
-          "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/pricing.svelte",
+          "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/pricing.svelte",
           "importPath": "../src/pages/landing/pricing.svelte",
           "isLayout": false,
           "isReset": false,
@@ -409,7 +409,7 @@ export const _tree = {
           "name": "subdomain",
           "ext": "svelte",
           "badExt": false,
-          "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/landing/subdomain.svelte",
+          "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/landing/subdomain.svelte",
           "importPath": "../src/pages/landing/subdomain.svelte",
           "isLayout": false,
           "isReset": false,
@@ -451,7 +451,7 @@ export const _tree = {
       "name": "login",
       "ext": "svelte",
       "badExt": false,
-      "absolutePath": "/home/nirudhi/projects/svelte/svelte_dashboard/src/pages/login.svelte",
+      "absolutePath": "/media/nirudhi/Ubuntudata/project/svelte/svelte_dashboard/src/pages/login.svelte",
       "importPath": "../src/pages/login.svelte",
       "isLayout": false,
       "isReset": false,

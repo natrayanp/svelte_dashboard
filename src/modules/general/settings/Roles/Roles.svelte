@@ -12,7 +12,7 @@ import { getNotificationsContext } from '../../../../common/notifications';
 const { addNotification } = getNotificationsContext();
 
     let datatosend = [];
-    let mymod = 'display';
+    let mymod = 'list';
 
 let yes = true;
 let firstvisit = false;
@@ -75,7 +75,8 @@ const Rolefetchprogressmodal = () => {
     myc = "hidden";
   }
   mymod ='display';
-  if(JSON.stringify(branchdata) !== JSON.stringify({})) datatosend.push(branchdata);    
+  //if(JSON.stringify(branchdata) !== JSON.stringify({})) datatosend.push(branchdata);   
+  $roleStore.Liverole = JSON.parse(JSON.stringify(roledata));    
 }
 
   function toggle_edit(roledata={}) {
@@ -108,7 +109,7 @@ const Rolefetchprogressmodal = () => {
   /* if (roledata.length <= 0) {    
     let s = allAlerts({tgt:"sudo1",text:"No Role setup exists. Please save company",type:'error'});    
   } else {*/
-    mymod = 'display';
+    mymod = 'list';
     myc = "hidden";
   //}
 }
@@ -118,7 +119,7 @@ const Rolefetchprogressmodal = () => {
 
 <Alerts targetid="sudo"/>
 
-{#if !(['edit','new'].includes(mymod))}
+{#if (['list'].includes(mymod))}
 
 
 <div class="flex flex-col" >
@@ -142,9 +143,14 @@ const Rolefetchprogressmodal = () => {
           </caption>
           <thead class="bg-blue-100">
             <tr>
+              <!--
               <th on:click={()=> dt1=true} on:focusout={()=> dt1=false} scope="col" class="px-6 py-6 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
                   <span >Selection</span>
 
+              </th>
+-->
+              <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
+                Role Id
               </th>
 
               <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-700 uppercase tracking-wider">
@@ -162,6 +168,7 @@ const Rolefetchprogressmodal = () => {
 
           <tbody class="bg-white divide-y divide-gray-200">
             <tr>
+              <!--
               <td>
                 <div class="pristine-form-group md:col-start-8 md:col-span-4">				
                   <label for="default"></label>
@@ -173,24 +180,31 @@ const Rolefetchprogressmodal = () => {
 
                 
               </td>
-              <td class="px-6 py-4 whitespace-nowrap">
+              -->
+              <td class="px-6 py-1 whitespace-nowrap">
                 <div class="flex items-center">
-                  <div class="flex-shrink-0 h-10 w-10">
-                    <img class="h-10 w-10 rounded-full" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=4&amp;w=256&amp;h=256&amp;q=60" alt="">
-                  </div>
                   <div class="ml-4">
-                    <div class="text-sm font-medium text-gray-900">
-                      {role.Displayname}
-                    </div>
-                    <div class="text-sm text-gray-500">
+                    <div class="text-xs font-semibold	 text-gray-900">
                       {role.Rolemasterid}
                     </div>
                   </div>
                 </div>
               </td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                <a href="#" class="text-green-600 hover:text-red-900 mr-5" on:click|preventDefault={()=>toggle_viewdetail(role)}><i class="far fa-eye fa-lg"/></a>
-                <a href="#" class="text-green-600 hover:text-green-900 mr-4" on:click|preventDefault={()=>toggle_edit(role)}><i class="far fa-edit fa-lg"/></a>
+
+              <td class="px-6 py-1 whitespace-nowrap">
+                <div class="flex items-center">
+
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-gray-900">
+                      {role.Displayname}
+                    </div>
+
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-1 whitespace-nowrap text-sm text-gray-500">
+                <a href="#" class="text-green-600 hover:text-red-900 mr-5" on:click|preventDefault={()=>toggle_viewdetail(role)}><i class="far fa-eye fa-sm"/></a>
+                <a href="#" class="text-green-600 hover:text-green-900 mr-4" on:click|preventDefault={()=>toggle_edit(role)}><i class="far fa-edit fa-sm"/></a>
               </td>
 
             </tr>
@@ -205,8 +219,9 @@ const Rolefetchprogressmodal = () => {
 </div>
 {/if}
 
-{#if mymod ==='edit' || mymod ==='new'}
+{#if (['edit','new','display'].includes(mymod))}
+
 <Alerts targetid="sudo1"/>
 <!--<Roledetails roledata_init={datatosend}  on:editresult= {handleresult}> </Roledetails> -->
-<Roledetails   on:editresult= {handleresult}> </Roledetails> 
+<Roledetails  {mymod} on:editresult= {handleresult}> </Roledetails> 
 {/if}

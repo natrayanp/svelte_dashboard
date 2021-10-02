@@ -29,6 +29,20 @@
         onReadChangeIt(dd.event,dd.index,dd.nosubmenu);
     }
     
+    function getClass(df) {
+        console.log("inside get class");
+        console.log(df);
+        console.log(df.disablefunc);
+        if(df.disablefunc) {
+            return "divide-y divide-gray-200 overflow-y-scroll h-15 bg-gray-300 avoidclicks"
+        }
+        return "divide-y divide-gray-200 overflow-y-scroll h-15 bg-white";
+        
+    }
+
+    
+
+
     /*
     TODO : Add header checkbox
             const dispatch = createEventDispatcher();
@@ -58,13 +72,17 @@
     </script>
    
    
-
+<style>
+    .avoidclicks {
+  pointer-events: none;
+}
+</style>
 
    {#if basket.submenu !=null}
 
         {#if basket.type !== "pack"}
             <tbody class="bg-blue-100 divide-y divide-gray-200 overflow-y-scroll h-15">                                        
-                <tr>                                            
+                <tr >                                            
                     <td class="px-3 py-1 whitespace-nowrap">{basket.name}</td>
                     
                     {#each $authStore.allowedops as oper, operindex(oper)}
@@ -101,15 +119,15 @@
                     <svelte:self bind:basketsd = {basket.submenu} bind:basket={baskete} on:message={handleMessage}/>
                 {/each}
             {/if}
-    {:else}
-
-    <tbody class="bg-white divide-y divide-gray-200 overflow-y-scroll h-15">                                        
+    {:else}    
+    
+    <tbody class={getClass(basket)}  >
         <tr>                                            
             <td class="px-3 py-1 whitespace-nowrap">{basket.name}</td>
             {#each $authStore.allowedops as oper, operindex(oper)}
 
 
-            <td>
+            <td >
                 <div class="flex items-center">
                     <div class="ml-2">
                      <div class="text-sm text-gray-500">

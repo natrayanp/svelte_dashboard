@@ -24,7 +24,8 @@
 
 
   </script>
-  <Notifications>
+
+<Notifications>
 	
   <!--
   <Router url="{url}">
