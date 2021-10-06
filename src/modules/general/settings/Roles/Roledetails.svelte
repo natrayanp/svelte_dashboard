@@ -9,6 +9,8 @@ import { getNotificationsContext } from '../../../../common/notifications';
 const { addNotification,subscribe } = getNotificationsContext();
 import {diffJson} from 'diff';
 import Switch from '../../../../common/components/Switch.svelte';
+import { createForm } from "svelte-forms-lib";
+import * as yup from 'yup';
 
 //export let roledata_init;	
 export let mymod;
@@ -62,6 +64,37 @@ function Initialise(){
     }
     
 }
+
+
+
+const {
+      // observables state
+      form,
+      errors,
+      state,
+      touched,
+      isValid,
+      isSubmitting,
+      isValidating,
+      // handlers
+      handleBlur,
+      handleChange,
+      handleSubmit
+    } = createForm({
+      initialValues:JSON.parse(JSON.stringify(($roleStore.Liverole))),
+      validationSchema: yup.object().shape({
+        name: yup.string().required(),
+        email: yup
+          .string()
+          .email()
+          .required()
+      }),
+      onSubmit: values => {
+        return makeRequest().then(() => {
+          alert(JSON.stringify(values, null, 2));
+        });
+      }
+    });
 
 
 function edgeloop(inx){
@@ -278,27 +311,25 @@ const RoleDel = () => {
        <span class="flex w-5"></span>
       <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow-md" on:click|preventDefault={()=>sendcardaction('cancel')}>Cancel</button>      
     </div>
+    {JSON.stringify($form)}
     <form class="px-10 py-1 rounded w-full my-5 inputs space-y-6"  style={mystyle}>
         <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-1 md:gap-x-10  gap-y-5 md:gap-y-0	">
   
 
-
-            <div class="pristine-form-group md:col-start-1 md:col-span-3">				  
-                <label for="firstname">Company</label>
-                        <select required 
-                        class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                        >dasdfasdf</select>
-                        <div class="pristine-error-group"></div>
+            
+            <div class=" md:col-start-1 md:col-span-4">				  
+             
+                <label for="firstname"><b>Company : </b>{$authStore.activecompany.companyName}</label>
+                
                     </div>
 
 
-                    <div class="pristine-form-group md:col-span-3">				  
-                        <label for="firstname">Branch</label>
-                                <select required 
-                                class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                                >dasdfasdf</select>
-                                <div class="pristine-error-group"></div>
+                    <div class=" md:col-span-4">				  
+                        <label for="firstname"><b>Branch : </b>{$authStore.activebranch.branchName} </label>
+             
+                                
                             </div>
+
 
 
 
@@ -325,17 +356,31 @@ const RoleDel = () => {
 
         <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-1 md:gap-x-10  gap-y-5 md:gap-y-0	">
         
-            <div class="pristine-form-group md:col-start-1 md:col-span-5">				  
-                <label for="branchname">Branch Short Name</label>
+            <!--div class="pristine-form-group md:col-start-1 md:col-span-5">	-->		
+            
+              
+            <label for="branchname">Branch Name</label>
+                        <input  
+                        class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"
+                        type = "text"
+                        id = "branchname"
+                        name = "branchName"
+                        bind:value={$form.branchName}
+                        />
+            
+            <!--
+            <label for="branchname">Branch Short Name</label>
                         <input required 
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                 type = "text"
                         />
-                        <!--bind:value={$branchstore.branchShortName}-->
-                        <div class="pristine-error-group"></div>
-                    </div>
 
-                    <div class="pristine-form-group md:col-start-6 md:col-span-5">				  
+                        -->
+                        <!--bind:value={$branchstore.branchShortName}-->
+                        <!--div class="pristine-error-group"></div>
+                    </div-->
+
+                    <!--div class="pristine-form-group md:col-start-6 md:col-span-5"-->				  
                         <label for="branchname">Branch Short Name</label>
                         <!--bind:value={$branchstore.branchShortName}-->
                         <input required 
@@ -344,13 +389,13 @@ const RoleDel = () => {
                         
         
                                 />
-                                <div class="pristine-error-group"></div>
-                            </div>
+                                <!--div class="pristine-error-group"></div>
+                            </div-->
 
 
 
         
-        </div>
+                </div>
 
         <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-1 md:gap-x-10  gap-y-5 md:gap-y-0	">
             <div class="pristine-form-group md:col-start-1 md:col-span-5">				  
