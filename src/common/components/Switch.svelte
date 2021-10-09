@@ -1,6 +1,7 @@
 <script>
     export let checked = false;
     export let color = "#2196F3";
+	export let istouched = false;
 
     /*
         .switch {
@@ -9,8 +10,16 @@
       width: 60px;
       height: 25px;
     }
-
     */
+
+let old_chk = checked;
+let count = 0;
+
+
+$: {if(checked !== old_chk) {
+		count = count+1;
+		if(count>0) istouched = true;
+	}};
 
 </script>
   

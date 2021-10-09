@@ -27,7 +27,6 @@ function add() {
 
 
 </script>
-
 <p> you are inside home</p>
 <Alerts/>
 

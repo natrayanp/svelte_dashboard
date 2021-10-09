@@ -26,6 +26,8 @@ let modtext = '';
 let mystyle ='';
 let btntxt = '';
 let uno = false;
+let istouched = false;
+$: istouched;
 
 onMount(async() => {  
     Initialise();
@@ -334,9 +336,10 @@ const RoleDel = () => {
 
 
         </div>
-        <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-1 md:gap-x-10  gap-y-5 md:gap-y-0	">
+        <!--
+        <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-1 md:gap-x-10  gap-y-5 md:gap-y-0 h-14">
             <div class="pristine-form-group md:col-span-3">			  
-            <Switch bind:checked={uno}></Switch>
+            <Switch bind:istouched={istouched}  bind:checked={uno}></Switch>
             </div>
             {#if uno}
             <div class="pristine-form-group md:col-span-3">				  
@@ -347,18 +350,19 @@ const RoleDel = () => {
                     <div class="pristine-error-group"></div>
             </div>
             {:else}
-                <div class="md:col-span-3">	
+                <div class="md:col-span-4">	
                     <label for="firstname">Creating Role from Scratch.  <p>Toggle button to Copy Existing Role</p></label>
                 </div>
             {/if}
         
         </div>
-
+        --->
+        
         <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-1 md:gap-x-10  gap-y-5 md:gap-y-0	">
         
-            <!--div class="pristine-form-group md:col-start-1 md:col-span-5">	-->		
+            <!--div class="pristine-form-group md:col-start-1 md:col-span-5"-->
             
-              
+            <div class="md:col-start-1 md:col-span-5">
             <label for="branchname">Branch Name</label>
                         <input  
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"
@@ -367,7 +371,19 @@ const RoleDel = () => {
                         name = "branchName"
                         bind:value={$form.branchName}
                         />
-            
+            </div>
+
+            <div class="md:col-start-6 md:col-span-5">
+                <label for="branchname">Branch Short Name</label>
+                            <input  
+                            class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"
+                            type = "text"
+                            id = "branchshortname"
+                            name = "branchshortName"
+                            bind:value={$form.branchName}
+                            />
+                </div>
+
             <!--
             <label for="branchname">Branch Short Name</label>
                         <input required 
@@ -378,123 +394,145 @@ const RoleDel = () => {
                         -->
                         <!--bind:value={$branchstore.branchShortName}-->
                         <!--div class="pristine-error-group"></div>
-                    </div-->
+                    </div>
 
-                    <!--div class="pristine-form-group md:col-start-6 md:col-span-5"-->				  
+                    <div class="pristine-form-group md:col-start-6 md:col-span-5">
                         <label for="branchname">Branch Short Name</label>
-                        <!--bind:value={$branchstore.branchShortName}-->
+                        <bind:value={$branchstore.branchShortName}>
                         <input required 
                                 class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                         type = "text"
                         
         
                                 />
-                                <!--div class="pristine-error-group"></div>
-                            </div-->
+                                <div class="pristine-error-group"></div-->
+                            
 
 
 
-        
+                        
                 </div>
 
         <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-1 md:gap-x-10  gap-y-5 md:gap-y-0	">
-            <div class="pristine-form-group md:col-start-1 md:col-span-5">				  
+            <div class= "md:col-start-1 md:col-span-5">				  
                 <label for="Addressline2">Address Line 2</label>
                 <!--bind:value={$branchstore.branchAddLine2}-->
                 <textarea required 
+                        name = "addressline2"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-                type = "text"
-                
+                        type = "text"                
                         ></textarea>
-                        <div class="pristine-error-group"></div>
+                        <!--div class="pristine-error-group"></div-->
                     </div>
                     
         
 
     </div>
+    
     </form> 
 
-<div class = "flex flex-col bg-white justify-center shadow rounded-lg p-3">
-{#if mymod !== 'display'}
-<div class = "flex flex-col md:flex-row flex-wrap bg-blue-100 justify-center gap-x-5 gap-y-5 shadow rounded-lg p-3">
-
-    <div class="shadow rounded-lg p-3  bg-gray-100 w-full md:w-5/12">            
-        <b class="m-3 p-5">Available modules</b>
-        <div class = "flex flex-col md:flex-row flex-wrap bg-red-100 justify-center gap-x-2 gap-y-2 shadow rounded-lg p-3 w-full">
-          
-        {#if  $roleStore.LiveAvailmod.length === 0}
-            <div class ="h-52 flex-grow"> All Available modules assigned </div>
+    <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-1 md:gap-x-10  gap-y-5 md:gap-y-0 h-14">
+        <div class="pristine-form-group md:col-span-3">			  
+        <Switch bind:istouched={istouched}  bind:checked={uno}></Switch>
+        </div>
+        {#if uno}
+        <div class="pristine-form-group md:col-span-3">				  
+            <label for="firstname">Copy from Role</label>
+                <select required 
+                class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
+                >dasdfasdf</select>
+                <div class="pristine-error-group"></div>
+        </div>
         {:else}
-        {#each $roleStore.LiveAvailmod as basket, basketIndex (basket)} 
-        <div animate:flip class="inline" >
-        <ul            
-        on:dragenter={() => hoveringOverBasket = "Availablemodules"}
-        on:dragleave={() => null}
-        on:drop={event => drop(event,{groupid:"mygroup",basketname:"Availablemodules"})}     
-            ondragover="return false"
-        >           
-            
-                <li   
-                    class=" shadow rounded-lg bg-green-100 rounded-lg cursor-pointer hover:bg-yellow-200 border-2 p-3 w-64"                     
-                    draggable={true}
-                    on:dragstart={event => dragStart(event, basket)}
-                    >
-                        <span class="flex flex-row items-center">  
-                            {basket.name}
-                            <span class="flex flex-1 "></span>             
-                            <i class="fas fa-ellipsis-v text-gray-300 hover:text-red-300"></i>
-                        </span>
-                </li>                        
-            
-        
-      </ul> 
-        </div>
-    {/each}
-    {/if}
-    </div>
-    </div>
-</div>
-
-<div>kdkdkkd</div>
-{/if}
-<!-- on:dragenter={() => hoveringOverBasket = basket.name} -->
-<div class = "flex flex-col md:flex-row flex-wrap bg-blue-100 justify-center gap-x-5 gap-y-5 shadow rounded-lg p-3"
-    on:dragenter={() => hoveringOverBasket = "Selectedmodules"}
-    on:dragleave={() => null}
-    on:drop={event => drop(event,{groupid:"mygroup",basketname:"Selectedmodules"})}     
-    ondragover="return false"
-    style={mystyle}
+            <div class="md:col-span-4">	
+                <label for="firstname">Creating Role from Scratch.  <p>Toggle button to Copy Existing Role</p></label>
+            </div>
+        {/if}
     
->
+    </div>
 
-    {#if JSON.stringify($roleStore.LiveSelectmod) === JSON.stringify({}) || $roleStore.LiveSelectmod.Modules?.length === 0 }
-        <div class ="h-96 flex-grow">Nothing selected yet</div>
-    {:else}
+    <div></div>
 
-    {#each $roleStore.LiveSelectmod.Modules as basket, basketIndex (basket)} 
-        <div class="shadow rounded-lg p-3  bg-green-100 w-full md:w-9/19">
-            <div class="flex flex-row justify-center">
-                <b class="m-3 ">{basket.name}</b>
-                <span class="flex flex-1 "></span> 
-                {#if mymod !== 'display'}
-                <span on:click={()=>removemodule(basket)}><i class="fas fa-trash-alt text-red-600 font-bold hover:text-red-300"></i></span>
-                {/if}
-              </div>
-              <div class="container">
-                            <table class="min-w-full divide-y divide-gray-200">  
-                                
-                                    <Roleselectdetails  bind:basketsd = {$roleStore.LiveSelectmod.Modules} basket={basket} {basketIndex} {patharray}/>                                
-                                
-                            </table>
-              </div>
+{#if istouched}
+<div class = "flex flex-col bg-white justify-center shadow rounded-lg p-3">
+    {#if mymod !== 'display'}
+        <div class = "flex flex-col md:flex-row flex-wrap bg-blue-100 justify-center gap-x-5 gap-y-5 shadow rounded-lg p-3">
 
+            <div class="shadow rounded-lg p-3  bg-gray-100 w-full md:w-5/12">            
+                <b class="m-3 p-5">Available modules</b>
+                <div class = "flex flex-col md:flex-row flex-wrap bg-red-100 justify-center gap-x-2 gap-y-2 shadow rounded-lg p-3 w-full">
+                
+                {#if  $roleStore.LiveAvailmod.length === 0}
+                    <div class ="h-52 flex-grow"> All Available modules assigned </div>
+                {:else}
+                {#each $roleStore.LiveAvailmod as basket, basketIndex (basket)} 
+                <div animate:flip class="inline" >
+                <ul            
+                on:dragenter={() => hoveringOverBasket = "Availablemodules"}
+                on:dragleave={() => null}
+                on:drop={event => drop(event,{groupid:"mygroup",basketname:"Availablemodules"})}     
+                    ondragover="return false"
+                >           
+                    
+                        <li   
+                            class=" shadow rounded-lg bg-green-100 rounded-lg cursor-pointer hover:bg-yellow-200 border-2 p-3 w-64"                     
+                            draggable={true}
+                            on:dragstart={event => dragStart(event, basket)}
+                            >
+                                <span class="flex flex-row items-center">  
+                                    {basket.name}
+                                    <span class="flex flex-1 "></span>             
+                                    <i class="fas fa-ellipsis-v text-gray-300 hover:text-red-300"></i>
+                                </span>
+                        </li>                        
+                    
+                
+            </ul> 
+                </div>
+            {/each}
+            {/if}
+            </div>
+            </div>
         </div>
-    {/each}
+
+        <div>kdkdkkd</div>
     {/if}
-</div>
+<!-- on:dragenter={() => hoveringOverBasket = basket.name} -->
+    <div class = "flex flex-col md:flex-row flex-wrap bg-blue-100 justify-center gap-x-5 gap-y-5 shadow rounded-lg p-3"
+        on:dragenter={() => hoveringOverBasket = "Selectedmodules"}
+        on:dragleave={() => null}
+        on:drop={event => drop(event,{groupid:"mygroup",basketname:"Selectedmodules"})}     
+        ondragover="return false"
+        style={mystyle}    
+    >
+        {#if JSON.stringify($roleStore.LiveSelectmod) === JSON.stringify({}) || $roleStore.LiveSelectmod.Modules?.length === 0 }
+            <div class ="h-96 flex-grow">Nothing selected yet</div>
+        {:else}
+            {#each $roleStore.LiveSelectmod.Modules as basket, basketIndex (basket)} 
+                <div class="shadow rounded-lg p-3  bg-green-100 w-full md:w-9/19">
+                    <div class="flex flex-row justify-center">
+                        <b class="m-3 ">{basket.name}</b>
+                        <span class="flex flex-1 "></span> 
+                        {#if mymod !== 'display'}
+                        <span on:click={()=>removemodule(basket)}><i class="fas fa-trash-alt text-red-600 font-bold hover:text-red-300"></i></span>
+                        {/if}
+                    </div>
+                    <div class="container">
+                                    <table class="min-w-full divide-y divide-gray-200">  
+                                        
+                                            <Roleselectdetails  bind:basketsd = {$roleStore.LiveSelectmod.Modules} basket={basket} {basketIndex} {patharray}/>                                
+                                        
+                                    </table>
+                    </div>
+
+                </div>
+            {/each}
+        {/if}
+    </div>
 
 
 
 </div>
+{/if}
 </div>
 
