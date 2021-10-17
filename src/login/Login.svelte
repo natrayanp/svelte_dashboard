@@ -221,20 +221,26 @@ import { get } from 'svelte/store';
 			}*/
 			console.log(val.detail.data.nextaction);
 			console.log(val.detail);
-			let acpaccp = val.detail.data.menu.CpyLvlTreeforCpy.filter(x => {
-															   if (x.Entityid === val.detail.data.menu.ActiveCompany.companyId) {
-																	return x;
-															   }															  
-														   });
 
-					let acpacbr = val.detail.data.menu.BrnLvlTreeforCpy.filter(x => {					   										
-					   										if (x.Entityid === val.detail.data.menu.ActiveBranch.branchId) {
+			let acpaccp =[{"EntityTree":{}}]
+			if(val.detail.data.menu.CpyLvlTreeforCpy !== null && val.detail.data.menu.ActiveCompany.companyId !== '') {
+				acpaccp = val.detail.data.menu.CpyLvlTreeforCpy.filter(x => {															
+															if (x.Entityid === val.detail.data.menu.ActiveCompany.companyId) {
 																return x;
-					   										}					   										
+															}															  
 														});
-														
-														console.log(acpaccp);
-														console.log(acpacbr);
+			}
+			
+			let acpacbr = [{"EntityTree":{}}];
+			if(val.detail.data.menu.BrnLvlTreeforCpy !== null && val.detail.data.menu.ActiveBranch.branchId !== ''){
+				acpacbr = val.detail.data.menu.BrnLvlTreeforCpy.filter(x => {					   										
+														if (x.Entityid === val.detail.data.menu.ActiveBranch.branchId) {
+															return x;
+														}					   										
+													});
+			}
+			console.log(acpaccp);			
+			console.log(acpacbr);
 			switch (val.detail.data.nextaction){		
 				case 'LANDING':		
 
@@ -276,13 +282,19 @@ import { get } from 'svelte/store';
 					$goto('/landing/pricing');	
 					break;
 				case 'ADDCOMPANY':
-					console.log(val.detail.data.menu[0].submenu);
+					console.log(val.detail.data.menu);
 					await authStore.update(dd => ({...dd,
 												stage:'done',
 												session:(val.detail.session),
 												siteid:ins.siteid,
-												menus:val.detail.data.menu,
-												activepack:val.detail.data.menu[0]}));				
+												allcompany: val.detail.data.menu.CompanyLst,
+												activecompany: val.detail.data.menu.ActiveCompany,
+												allpack:{"companylevel":val.detail.data.menu.CpyLvlTreeforCpy,
+												  		 "branchlevel":val.detail.data.menu.BrnLvlTreeforCpy},
+												activepack:{"companylevel":val.detail.data.menu.CpyLvlTreeforCpy[0].EntityTree,
+												  			"branchlevel":[]},
+												selectedpack:val.detail.data.menu.CpyLvlTreeforCpy[0].EntityTree[0],
+											}));				
 					sessionStorage.setItem('cpyfirst', true);
 					$goto('./landing/companysettings');	
 					break;
@@ -295,9 +307,9 @@ import { get } from 'svelte/store';
 												activecompany: val.detail.data.menu.ActiveCompany,
 												allpack:{"companylevel":val.detail.data.menu.CpyLvlTreeforCpy,
 												  		 "branchlevel":val.detail.data.menu.BrnLvlTreeforCpy},
-												activepack:{"companylevel":acpaccp[0].EntityTree,
+												activepack:{"companylevel":val.detail.data.menu.CpyLvlTreeforCpy[0].EntityTree,
 												  			"branchlevel":[]},
-												selectedpack:acpaccp[0].EntityTree[0],
+												selectedpack:val.detail.data.menu.CpyLvlTreeforCpy[0].EntityTree[0],
 											}));
 					console.log(authVal);
 					sessionStorage.setItem('brnfirst', true);
