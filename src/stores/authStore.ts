@@ -37,12 +37,18 @@ export const initAuthStore = (initialStore = INITIAL_AUTH_STORE) => {
    */
 
      let companyset_replace = (str,val) => {
-        str.activecompany = val;
 
+        str.activecompany = val;
+        
         str.allcompany = str.allcompany.filter( (cpy,i) => {
+          console.log(val);
+          console.log(cpy);
+          console.log(i);
             return cpy.companyId !== val.companyId;
-        })
+        });
         str.allcompany.push(val);
+        
+
      }  
 
 
@@ -69,7 +75,9 @@ export const initAuthStore = (initialStore = INITIAL_AUTH_STORE) => {
        update,       
        reset: () => set(INITIAL_AUTH_STORE),
        setCompany: (value) => update(self => {
+        console.log("going inside companyset start");
         companyset_replace(self,value);
+        console.log("going inside companyset end");
         return self;
       }),  
       setBranch: (value) => update(self => {

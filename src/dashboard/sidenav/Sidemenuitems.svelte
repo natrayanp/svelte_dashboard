@@ -42,7 +42,7 @@
     <ul class="relative">
 
         <!-- This is the menu header -->
-        {#if menu.link === null}
+        {#if menu.link === null || menu.link === ""}
             <li>
                 <button type="button"  on:click={()=> openLink(index)} class="focus:bg-none border-none py-2 w-full flex items-center focus:outline-none focus-visible:underline" style = "padding-left: {(level==1? `0.75rem` : (1.6*level +`rem`))}">
 
@@ -73,7 +73,7 @@
             </li>
         {/if}
 
-        {#if menu.link !== null}
+        {#if menu.link !== null && menu.link !== ""}
             <li>
                 <!-- Selection item Highlighter -->
                 <span  class:hidden={$sidemenuStore.selected !== index} class="absolute h-10 w-full bg-gray-100  py-2 px-10  rounded-lg shadow ease-out transition-transform transition-medium" style = "padding-left: {level*1.6}rem">
@@ -105,8 +105,7 @@
         {/if}
         
         {#if menu.submenu && menu.open}
-            {#each menu.submenu as menu,index1}
-        
+            {#each menu.submenu as menu,index1}        
                 <svelte:self {menu} index={index + '_' + index1} secondaryMenu={true} level={level+1}/>
             {/each}
         {/if}

@@ -26,6 +26,7 @@ $domainstore = domaindata;
 let mymodal = null;
 let pgtog = false;
 let yes = false;
+let myurl = null;
 
 const loginunsub = domainstore.subscribe(value => {		
 		console.log(value)	;
@@ -84,6 +85,7 @@ async function registerDomain() {
     //$goto('/login');
   } else {    
     pgtog = true;
+    myurl = respdata.data.URL;
     let s = allAlerts({text:respdata.data.message,type:'success'});    
     if(mymodal) {			
 				mymodal.close();
@@ -192,7 +194,7 @@ onDestroy(async () => {
       <button on:click={registerDomain} class=" flex justify-center	border-none bg-indigo-700 rounded text-white font-semibold w-36 py-2 shadow-md">Confirm</button>  
     </div>
   {:else}
-    <p>Please login with your URL now to start the journey</p>
+    <p>Please login with your URL now to start the journey </p><a href={myurl}>Click here</a>
   {/if}
   </div>
 

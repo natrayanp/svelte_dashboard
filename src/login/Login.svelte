@@ -288,7 +288,8 @@ import { get } from 'svelte/store';
 												session:(val.detail.session),
 												siteid:ins.siteid,
 												allcompany: val.detail.data.menu.CompanyLst,
-												activecompany: val.detail.data.menu.ActiveCompany,
+												//activecompany: val.detail.data.menu.ActiveCompany,
+												activecompany: null,
 												allpack:{"companylevel":val.detail.data.menu.CpyLvlTreeforCpy,
 												  		 "branchlevel":val.detail.data.menu.BrnLvlTreeforCpy},
 												activepack:{"companylevel":val.detail.data.menu.CpyLvlTreeforCpy[0].EntityTree,
@@ -324,7 +325,7 @@ import { get } from 'svelte/store';
 	let sessionConf = async (val) => {
 		console.log("inside d");
 		console.log(val);
-		if (val.accept) {
+		if (val || val.accept) {
 			await sessionexist();
 		} else {
 			await dosignout();

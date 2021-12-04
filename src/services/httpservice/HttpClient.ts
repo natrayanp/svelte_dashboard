@@ -9,7 +9,7 @@ let tkn = null;
 export const HttpClient = () => {    
 
   const apiRequest = async (method, url, data?, opts={},formdata=false) => {    
-    console.log(url);
+    console.log("myurl",url);
     let myurl = apiurls.all_api_url + environment['endpt_' + url];
     let conf = {          
           method: method.toUpperCase(),          
@@ -51,7 +51,7 @@ export const HttpClient = () => {
         }        
         conf['headers'] = hdrs;       
         console.log(JSON.stringify(conf));  
-       
+        console.log(myurl);
         let resp = await fetch(myurl,conf).catch(handleErr);
 
         

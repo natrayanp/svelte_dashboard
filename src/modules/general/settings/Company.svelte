@@ -4,6 +4,8 @@ import {formValidator} from '../../../common/formvalidators/formvalidator';
 import {onMount, onDestroy} from 'svelte';
 import { http } from '../../../stores/services';
 
+import { createForm } from "svelte-forms-lib";
+
 import { Accordion, AccordionItem } from "../../../common/accordion/index";
 import Companydetails from './Companydetails.svelte';
 
@@ -54,6 +56,7 @@ const dd1 = {
   let dt1 = false
   let refdata = {};
   let compdata = [];
+  let datatosend = [];
 	
 let mymod = 'display';
 let myc = "hidden";
@@ -64,6 +67,23 @@ let firstvisit = sessionStorage.getItem('cpyfirst');
 sessionStorage.removeItem('cpyfirst');
 if(firstvisit == null) firstvisit = false;
 
+
+
+
+
+    const { form, handleChange, handleSubmit } = createForm({
+      initialValues: {
+        title: "",
+        name: "",
+        email: ""
+      },
+      onSubmit: values => {
+        alert(JSON.stringify(values));
+      }
+    });
+
+
+  
 
 
 const loginprogressmodal = () => {
@@ -98,8 +118,9 @@ function toggle_viewdetail(){
     if(compdata.length <= 0)  mymod="new";
     if(JSON.stringify(compdata)=== JSON.stringify({})) mymod = 'new';
     if(firstvisit)  mymod="new";
+    console.log("firstvisit",firstvisit);
     myc = "hidden";
-    if(JSON.stringify(compdata) !== JSON.stringify({})) datatosend.push(compdata);    
+    if(JSON.stringify(compdata) !== JSON.stringify({})) datatosend.push(compdata);  
 
   }
 
@@ -119,8 +140,10 @@ function toggle_viewdetail(){
 
 onMount(async() => {  
   console.log("going to onmount");
-      await getCompany();
+    await getCompany();
     console.log((authVal));
+    console.log("firstvisit de atuvalue send",firstvisit);
+
     //if (compdata.length <= 0) toggle_edit();
   });
 
@@ -169,10 +192,12 @@ const getCompany = async(goforfetch = false) => {
         let ref = JSON.parse(JSON.stringify(respdata.data.refdata));
         await entityStore.setRef(ref); 
     }
-
-    compdata = [];
-    if(authVal.activecompany !== null) compdata.push(JSON.parse(JSON.stringify(authVal.activecompany)));   
+    console.log(authVal);
+    compdata = [];  
+    if(authVal.activecompany !== null ) compdata.push(JSON.parse(JSON.stringify(authVal.activecompany)));   
     refdata = JSON.parse(JSON.stringify(enityVal.refdata));  
+    console.log(compdata.length );
+    console.log(compdata );
 
     if (compdata.length <= 0) {
       firstvisit = true;
@@ -182,6 +207,7 @@ const getCompany = async(goforfetch = false) => {
     }
     mymodal.close();
     mymodal=null;
+    console.log("firstvisit inner end",firstvisit);
     console.log("inside onmoung inner if end of getcompany");
   };
 
@@ -207,7 +233,8 @@ const getCompany = async(goforfetch = false) => {
 </script>
 
 <Alerts targetid="sudo"/>
-{#if mymod !== 'edit'}
+{#if !(['edit','new'].includes(mymod))}
+
 <div class="flex flex-col" >
 
 
@@ -365,7 +392,7 @@ const getCompany = async(goforfetch = false) => {
 </div>
 {/if}
 
-{#if mymod ==='edit'}
+{#if mymod ==='edit' || mymod ==='new'}
 <Alerts targetid="sudo1"/>
 <Companydetails companydata_init={compdata} firstvisit = {firstvisit} refdata = {refdata} mode = {mymod} on:editresult= {handleresult}/>
 {/if}

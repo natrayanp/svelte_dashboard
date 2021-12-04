@@ -1,7 +1,7 @@
 import { enityVal } from "../../stores/stores";
 
 const requiredrefs = {
-    company:["country", "industype", "compcat"],
+    company:["country", "industype", "compcat","timezone","currency","finyear"],
     branch:["country"]
 }
 

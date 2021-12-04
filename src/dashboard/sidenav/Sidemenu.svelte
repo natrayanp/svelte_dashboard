@@ -10,7 +10,7 @@
     export let menus;
     let selected= -1;    
     export let sidenavopen;
-    
+    console.log('inside sidemenu');
     console.log(menus);
     let sidemenuStore = initSideMenuStore(menus);
     console.log(sidemenuStore);
