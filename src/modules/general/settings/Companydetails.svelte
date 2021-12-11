@@ -9,7 +9,7 @@
     import { entityStore,enityVal,authStore } from "../../../stores/stores";
     import { goto } from '@roxi/routify';
     import * as yup from "yup";
-
+    import Alerts from '../../../common/notifications/components/alerts/Alerts.svelte';
     import { getNotificationsContext } from '../../../common/notifications';
   const { addNotification } = getNotificationsContext();
 
@@ -56,7 +56,7 @@ const dd = {
 
        // let companyform;	
        // let companystore;
-       // let companydata;
+        let companydatacpy;
         let respdata;
 
         export let companydata_init;	
@@ -227,13 +227,199 @@ const dd = {
             companydata_init = dd; 
           }
 
-
-
-
           $form = JSON.parse(JSON.stringify(companydata_init));
+          companydatacpy = JSON.parse(JSON.stringify($form));
+          console.log(companydatacpy);
           //$companydata = JSON.parse(JSON.stringify(companydata_init));
           //$companystore = companydata_init;	
           console.log("init the dorp down values");
+                // Populate the default values for the dropdown    
+                console.log(JSON.stringify(companydata_init));
+                init_all_Dropdowns();
+
+             /*   if (companydata_init.companyId != null) {
+                    if (typeof companydata_init.companyCountry === 'string' || companydata_init.companyCountry instanceof String) {
+                      $form.companyCountry = getvalue('companyCountry',companydata_init.companyCountry);    
+                    } else {
+                      $form.companyCountry = companydata_init.companyCountry;    
+                    }                
+                    let mys = companydata_init.companyState;
+                    let myc = companydata_init.companyCity;
+
+                
+                    countryselect();        
+                    console.log(JSON.stringify(companydata_init));   
+                    console.log(myc);
+                    if (typeof mys === 'string' || mys instanceof String) { 
+                        $form.companyState = getvalue('companyState', mys);
+                    } else {
+                        $form.companyState = mys;
+                    }
+                  stateselect();      
+                  if (typeof myc === 'string' || myc instanceof String) {          
+                    $form.companyCity = getvalue('companyCity', myc);
+                  } else {
+                        $form.companyCity = myc;
+                    }                
+                    if (typeof companydata_init.companyCategory === 'string' || companydata_init.companyCategory instanceof String) {          
+                      $form.companyCategory=getvalue('companyCategory',companydata_init.companyCategory);  
+                  } else {
+                    $form.companyCategory = companydata_init.companyCategory;
+                    }  
+
+                    if (typeof companydata_init.companyIndustry === 'string' || companydata_init.companyIndustry instanceof String) {          
+                      $form.companyIndustry =   getvalue('companyIndustry',companydata_init.companyIndustry); 
+                  } else {
+                    $form.companyIndustry=companydata_init.companyIndustry;
+                    }  
+
+
+                    if (typeof companydata_init.companyTimeZone === 'string' || companydata_init.companyTimeZone instanceof String) {          
+                      $form.companyTimeZone =   getvalue('companyTimeZone',companydata_init.companyTimeZone); 
+                  } else {
+                    $form.companyTimeZone=companydata_init.companyTimeZone;
+                    }  
+
+                    if (typeof companydata_init.companyBaseCurency === 'string' || companydata_init.companyBaseCurency instanceof String) {          
+                      $form.companyBaseCurency =   getvalue('companyBaseCurency',companydata_init.companyBaseCurency); 
+                  } else {
+                    $form.companyBaseCurency=companydata_init.companyBaseCurency;
+                    }  
+
+                    if (typeof companydata_init.companyFiscalYear === 'string' || companydata_init.companyFiscalYear instanceof String) {          
+                      $form.companyFiscalYear =   getvalue('companyFiscalYear',companydata_init.companyFiscalYear); 
+                  } else {
+                    $form.companyFiscalYear=companydata_init.companyFiscalYear;
+                    }  
+                }*/
+
+            if(mode === 'display') {
+                disableform(mform);
+            } else {
+              enableform(mform);
+              if(mode === "edit") disableelement([document.getElementById("companyName")]);	              
+              btntxt = "Save";
+              if (mode === "edit") btntxt = "Update";
+              console.log()
+            }
+           //mymodal.close();
+           //mymodal=null;   
+           console.log("firstvisit de send",firstvisit);
+         
+        });   
+        
+
+      export async function companysave(formdata){
+        disableform(mform);
+        console.log(btntxt);
+        let formdatacpy = JSON.parse(JSON.stringify(formdata));
+        if(["Save","Update"].includes(btntxt)) {
+          let formDatae = new FormData();          
+         // console.log(JSON.stringify(companydata));
+          formdata.companyCountry = formdata.companyCountry.refvalue;
+          formdata.companyState = formdata.companyState.refvalue;
+          formdata.companyCity = formdata.companyCity.refvalue;          
+          formdata.companyCategory = formdata.companyCategory.refvalue;
+          formdata.companyIndustry = formdata.companyIndustry.refvalue;
+          formdata.companyTimeZone = formdata.companyTimeZone.refvalue;
+          formdata.companyFiscalYear = formdata.companyFiscalYear.refvalue;
+          formdata.companyBaseCurency = formdata.companyBaseCurency.refvalue;
+          
+          //companydata.companyPinCode = Number(companydata.companyPinCode);
+          //companydata.companyFiscalYear = Number(companydata.companyFiscalYear); 
+          
+          if (!formdata.companyCity === undefined) formdata.companyCity = ""; 
+          console.log(JSON.stringify(formdata));
+          console.log(JSON.stringify(companydatacpy));
+          console.log(JSON.stringify(formdata)=== JSON.stringify(companydatacpy));
+          if(JSON.stringify(formdata) !== JSON.stringify(companydatacpy)) {
+            formdata.companyStartDate = new Date(formdata.companyStartDate).toISOString();
+            formDatae.append("text_field", JSON.stringify(formdata));
+            formDatae.append("text_action",JSON.stringify({"optype": btntxt}))
+            formDatae.append("file_field", avatar);
+  
+            respdata = await http.postForm('upload',formDatae).catch(e=>{
+              //TODO Error handling
+              console.error(e);
+            });
+
+
+            console.log(respdata);
+            console.log(respdata.data.company.length);
+            console.log(respdata.data.company[0]);
+            if(!firstvisit) {
+              if(respdata.data.company.length == 1 ) {
+                respdata.data.company[0].companyStartDate = new Date(respdata.data.company[0].companyStartDate).toLocaleDateString('en-CA');
+                console.log("after conversion");
+                console.log(respdata.data.company[0]);
+                authStore.setCompany(JSON.parse(JSON.stringify(respdata.data.company[0])));
+                console.log("after update");
+              } else {
+              //TODO: Throw error
+              } 
+            }
+            console.log("sendcaraction");
+            sendcardaction(btntxt);
+          } else {
+            console.log("No Change in values to update");   
+            let s = allAlerts({tgt:"sudo3",text:"No data changed for "+btntxt,type:'warning'});    
+            $form = JSON.parse(JSON.stringify(formdatacpy));       
+            init_all_Dropdowns();
+            enableform(mform);
+          }
+
+        } else {
+          //toggle_btn_text();
+          //companyform.enable(mform);
+          enableform(mform);
+          
+        }
+        
+      }
+    /*
+      function toggle_btn_text(){
+        (btntxt === "Edit")? btntxt = "Save" : btntxt = "Update";
+      }
+    */
+      let dt2 = false 
+      let dt1 = false
+    
+        
+        const onFileSelected =(e)=>{
+                let image = e.target.files[0];    
+                let reader = new FileReader();
+                reader.readAsDataURL(image);
+                reader.onload = e => {
+                    console.log('kdkdkkd');
+                     avatar = e.target.result;
+                     console.log(avatar);
+                };
+    }
+
+    const dispatch = createEventDispatcher();
+
+    const sendcardaction = async (btnpressed) => {		
+      let cpy;
+      if(firstvisit) {
+        $goto('/login');
+        return;
+      }  
+      if(['Save','Update'].includes(btnpressed)) {
+        console.log(respdata);
+        cpy =  respdata.data.company[0];
+      } else {
+        cpy = "";
+      }
+		//Dispatch the favorite event with object data
+		dispatch('editresult',{
+			action: btnpressed,
+      company: cpy
+		});
+	}
+
+
+  function init_all_Dropdowns(){
+    console.log("init the dorp down values");
                 // Populate the default values for the dropdown    
                 console.log(JSON.stringify(companydata_init));
                 if (companydata_init.companyId != null) {
@@ -291,111 +477,7 @@ const dd = {
                     $form.companyFiscalYear=companydata_init.companyFiscalYear;
                     }  
                 }
-
-            if(mode === 'display') {
-                disableform(mform);
-            } else {
-              enableform(mform);
-              if(mode === "edit") disableelement([document.getElementById("companyName")]);	              
-              btntxt = "Save";
-              if (mode === "edit") btntxt = "Update";
-              console.log()
-            }
-           //mymodal.close();
-           //mymodal=null;   
-           console.log("firstvisit de send",firstvisit);
-         
-        });   
-        
-
-      export async function companysave(formdata){
-        disableform(mform);
-        console.log(btntxt);
-        if(["Save","Update"].includes(btntxt)) {
-          let formDatae = new FormData();          
-         // console.log(JSON.stringify(companydata));
-          formdata.companyCountry = formdata.companyCountry.refvalue;
-          formdata.companyState = formdata.companyState.refvalue;
-          formdata.companyCity = formdata.companyCity.refvalue;          
-          formdata.companyCategory = formdata.companyCategory.refvalue;
-          formdata.companyIndustry = formdata.companyIndustry.refvalue;
-          formdata.companyTimeZone = formdata.companyTimeZone.refvalue;
-          formdata.companyFiscalYear = formdata.companyFiscalYear.refvalue;
-          formdata.companyBaseCurency = formdata.companyBaseCurency.refvalue;
-          formdata.companyStartDate = new Date(formdata.companyStartDate).toISOString();
-          //companydata.companyPinCode = Number(companydata.companyPinCode);
-          //companydata.companyFiscalYear = Number(companydata.companyFiscalYear); 
-          
-          if (!formdata.companyCity === undefined) formdata.companyCity = ""; 
-          formDatae.append("text_field", JSON.stringify(formdata));
-          formDatae.append("text_action",JSON.stringify({"optype": btntxt}))
-          formDatae.append("file_field", avatar);
- 
-          respdata = await http.postForm('upload',formDatae).catch(e=>{
-            //TODO Error handling
-            console.error(e);
-          });
-          console.log(respdata);
-          console.log(respdata.data.company.length);
-          console.log(respdata.data.company[0]);
-          if(!firstvisit) {
-          if(respdata.data.company.length == 1 ) {
-            respdata.data.company[0].companyStartDate = new Date(respdata.data.company[0].companyStartDate).toLocaleDateString('en-CA');
-            console.log("after conversion");
-            console.log(respdata.data.company[0]);
-            authStore.setCompany(JSON.parse(JSON.stringify(respdata.data.company[0])));
-            console.log("after update");
-          } else {
-          //TODO: Throw error
-          } 
-        }
-
-          console.log("sendcaraction");
-          sendcardaction(btntxt);
-        } else {
-          //toggle_btn_text();
-          //companyform.enable(mform);
-          enableform(mform);
-          
-        }
-        
-      }
-    /*
-      function toggle_btn_text(){
-        (btntxt === "Edit")? btntxt = "Save" : btntxt = "Update";
-      }
-    */
-      let dt2 = false 
-      let dt1 = false
-    
-        
-        const onFileSelected =(e)=>{
-                let image = e.target.files[0];    
-                let reader = new FileReader();
-                reader.readAsDataURL(image);
-                reader.onload = e => {
-                    console.log('kdkdkkd');
-                     avatar = e.target.result;
-                     console.log(avatar);
-                };
-    }
-
-    const dispatch = createEventDispatcher();
-
-    const sendcardaction = async (btnpressed) => {		
-      if(firstvisit) {
-        $goto('/login');
-        return;
-      }  
-      if(['Save','Update'].includes(btnpressed)) {
-        console.log(respdata);
-        }
-		//Dispatch the favorite event with object data
-		dispatch('editresult',{
-			action: btnpressed
-		});
-	}
-
+  }
   
 
   function countryselect() {
@@ -530,6 +612,23 @@ const getCompany1 = async() => {
     console.log("inside onmoung inner if end of getcompany companydetails");
   };
 */
+
+const allAlerts = (val) => {
+    console.log(val);
+		return addNotification({
+				targetid: val.tgt,
+				title : 'Alert',				
+				//text: 'dkdkdk',
+				text: val.text,
+				type:val.type,								
+				notificationtype: 'alert',     
+				disableClose: false,       
+        //position:'top-right' 
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});	
+	}
+
 function myfunc() {
 console.log("button clci");
 handleSubmit();
@@ -543,6 +642,7 @@ handleSubmit();
     {firstvisit}
     {JSON.stringify($form)}
     --> 
+    <Alerts targetid="sudo3"/>
     <div class="shadow rounded-lg flex flex-col flex-auto pb-7 bg-white">
       
     {#if mode !== 'display'}

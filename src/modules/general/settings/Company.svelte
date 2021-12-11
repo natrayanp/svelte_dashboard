@@ -124,6 +124,7 @@ function toggle_viewdetail(){
 
   }
 
+
   async function handleresult(event) {
   console.log(event.detail.action);  
   if (['Save','Update'].includes(event.detail.action)) await getCompany(true);
@@ -134,6 +135,38 @@ function toggle_viewdetail(){
   } else {
     mymod = 'display';
     myc = "hidden";
+
+    if (['Save','Update'].includes(event.detail.action)) {
+      //let s = allAlerts({tgt:"sudo",text:event.detail.action + " action for Company " + event.detail.company.companyName + " is successful",type:'success'});    
+      let s = addNotification({
+				//targetid: val.tgt,
+				title : 'Alert',				
+				//text: 'dkdkdk',
+				text: event.detail.action + " action for Company " + event.detail.company.companyName + " is successful",
+				type:'success',								
+				notificationtype: 'notification',     
+				disableClose: false,        
+        position:'bottom-right',
+        removeAfter:2000,
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});	
+/*
+      let s1 = addNotification({
+				//targetid: val.tgt,
+				title : 'Second Alert',				
+				//text: 'dkdkdk',
+				text: event.detail.action + " action for Company " + event.detail.company.companyName + " is successful",
+				type:'success',								
+				notificationtype: 'notification',     
+				disableClose: false,        
+        position:'bottom-right',
+        removeAfter:2000,
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});	
+*/
+    }
   }
 }
 

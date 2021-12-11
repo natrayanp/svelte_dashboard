@@ -50,7 +50,8 @@ const addNotification = (notification, update) => {
   let tid = notification.targetid? notification.targetid : (notification.notificationtype === 'alert'?'alert-default': null);
   
   notification['targetid'] = tid;
-  notification['id'] = new Date().getTime();
+  notification['id'] = (new Date().getUTCMilliseconds()* Math.random()).toString(36);
+  //notification['id'] = new Date().valueOf();
   
   //Enrich Notification
   //console.log(notification.hasbackdrop);

@@ -325,7 +325,8 @@ import { get } from 'svelte/store';
 	let sessionConf = async (val) => {
 		console.log("inside d");
 		console.log(val);
-		if (val || val.accept) {
+		console.log( (val || val.accept));
+		if (val === null || val.accept) {
 			await sessionexist();
 		} else {
 			await dosignout();
