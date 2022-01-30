@@ -14,7 +14,7 @@ import * as yup from 'yup';
 
 //export let roledata_init;	
 export let mymod;
-$roleStore.LiveSelectmod.Modules=[];
+//$roleStore.LiveSelectmod.Modules=[];
 
 let patharray = [];
 let hoveringOverBasket;
@@ -26,10 +26,30 @@ let modtext = '';
 let mystyle ='';
 let btntxt = '';
 let uno = false;
+let uno1 = false;
 let istouched = false;
 $: istouched;
+$: uno1;
+let tobcal = true;
+
+$: {    
+    if(uno) {
+        console.log("if "+uno);
+        uno1 = false;
+        togglechangeaction();        
+ 
+       // console.log($roleStore);
+        
+    } else {
+        console.log("else tst :"+uno);        
+       // console.log($roleStore);
+        uno1 = true;
+        togglechangeaction();
+    }
+}
 
 onMount(async() => {  
+    
     Initialise();
 });
 
@@ -41,6 +61,7 @@ function Initialise(){
     if(JSON.stringify(roledata_init)=== JSON.stringify([{}])) mymodl = 'new';
     if (mymodl !== 'new') $roleStore.LiveSelectmod = JSON.parse(JSON.stringify((roledata_init.slice())[0]));
     */
+    /*
     $roleStore.LiveSelectmod = JSON.parse(JSON.stringify(($roleStore.Liverole)));
     let td= $roleStore.Availablemodules.slice();   
     $roleStore.LiveAvailmod = td.slice();
@@ -53,7 +74,10 @@ function Initialise(){
                  $roleStore.LiveAvailmod = avs.slice();
             })
         }
-    
+    */
+
+    reinstate_val();
+    console.log($roleStore);
     if(mymod === 'display') {
         modtext = 'View';        
         mystyle ='pointer-events:none';
@@ -67,7 +91,64 @@ function Initialise(){
     
 }
 
+function reinstate_val(){
 
+    $roleStore.LiveSelectmod = JSON.parse(JSON.stringify(($roleStore.Liverole)));
+    let td= $roleStore.Availablemodules.slice();   
+    $roleStore.LiveAvailmod = td.slice();
+
+    
+        if(JSON.stringify($roleStore.LiveSelectmod) !== JSON.stringify({})){
+            $roleStore.LiveSelectmod.Modules.forEach ( (mod) => {             
+                console.log(mod);
+                 avs = $roleStore.LiveAvailmod.filter(av => !(av.packid === mod.packid));
+                 $roleStore.LiveAvailmod = avs.slice();
+            })
+        }
+}
+
+
+function chk_value_change(){
+    console.log(JSON.stringify($roleStore.LiveSelectmod));
+    console.log(JSON.stringify($roleStore.Liverole));
+    if($roleStore.LiveSelectmod.Modules) console.log($roleStore.LiveSelectmod.Modules.length);
+    let valch = false;
+    if (JSON.stringify($roleStore.LiveSelectmod) === JSON.stringify(($roleStore.Liverole))) {
+        //No change in value
+        console.log("liverole and liveselecetmod are same");
+    } else if ($roleStore.LiveSelectmod.Modules && $roleStore.Liverole.Modules) {
+        if ($roleStore.LiveSelectmod.Modules.count === $roleStore.Liverole.Modules.count) {
+            console.log("liverole and liveselecetmod length are same");
+            $roleStore.LiveSelectmod.Modules.forEach ( (mod) => {             
+                 console.log(mod);
+                 avs = $roleStore.Liverole.Modules.filter(av => !(av.packid === mod.packid));
+                 $roleStore.Liverole.Modules = avs.slice();
+            })
+            if ($roleStore.Liverole.Modules.length != 0) {
+                console.log("liverole and liveselecetmod length are diff");
+                //There is a change
+                valch = true;
+            }   
+        //No change in value
+        }
+    } else if ($roleStore.LiveSelectmod.Modules.length === 0){
+
+        if (JSON.stringify(($roleStore.Liverole)) !== JSON.stringify({})) {
+            //There is a change
+            valch = true;
+            console.log("liverole and liveselecetmod length is zeeo");
+        }
+    } else {
+        //There is a change
+        console.log(JSON.stringify($roleStore.LiveSelectmod));
+        console.log(JSON.stringify($roleStore.Liverole));
+        console.log("liverole and liveselecetmod no condition met");
+
+        valch = true;
+    }
+
+    return valch;
+}
 
 const {
       // observables state
@@ -85,11 +166,9 @@ const {
     } = createForm({
       initialValues:JSON.parse(JSON.stringify(($roleStore.Liverole))),
       validationSchema: yup.object().shape({
-        name: yup.string().required(),
-        email: yup
-          .string()
-          .email()
-          .required()
+        rolename: yup.string().required(),
+        roledisplayname: yup.string().required(),
+        roledescription: yup.string().required(),
       }),
       onSubmit: values => {
         return makeRequest().then(() => {
@@ -175,6 +254,8 @@ if(mod.menulevel !== 'COMPANY') {
         
 
         hoveringOverBasket = null;
+
+        console.log(JSON.stringify($roleStore));
     }
 
     function chk(mynewv) {
@@ -215,7 +296,10 @@ if(mod.menulevel !== 'COMPANY') {
         }
         */
 
-        if(mynewvcpy.submenu !== null || mynewvcpy.submenu.length > 0){
+        console.log(br);
+        console.log(mynewvcpy);
+
+        if(mynewvcpy.submenu !== null && mynewvcpy.submenu.length > 0){
             mynewvcpy.submenu.forEach( nbr => {
                 br.submenu.forEach ( xbr => {
                     if(nbr.packid === xbr.packid) {
@@ -266,16 +350,49 @@ const RoleDel = () => {
 	}
 
     function removemodule(data) {               
+        /*
         mymodl =  RoleDel();
         mymodl.returneddata.then(d => {
         if(d.accept) removemodule_d(data);
         });               
+        */
+        removemodule_d(data);
     }
 
-    function saveaction(action){                
+    function togglechangeaction(action){            
+        console.log("-----togglechangeaction start-----");
+        if(tobcal) {
+        /*
+        console.log(istouched);
+        console.log(JSON.stringify($roleStore.Liverole));
+        console.log(JSON.stringify($roleStore.LiveSelectmod));
+        if (!$roleStore.LiveSelectmod) {
+             $roleStore.LiveSelectmod = JSON.parse(JSON.stringify({}));
+             console.log(JSON.stringify($roleStore.LiveSelectmoduched));
+        }
         let dd = diffJson($roleStore.Liverole,$roleStore.LiveSelectmod);
         console.log(dd);
-    
+        console.log(JSON.stringify($roleStore));
+        */
+        let chkres = true;
+        chkres = chk_value_change();
+        
+        if(chkres) {
+            let mymodl =  RoleDel();
+            mymodl.returneddata.then(d => {
+            if(d.accept) {
+                reinstate_val();
+            } else {
+                uno1 = !uno1;
+                uno = !uno;
+                tobcal = false;  
+            }
+            });  
+        }
+        } else {
+            tobcal = true;    
+        }
+        console.log("-----togglechangeaction stop-----");
     }
 
     let tog = true;
@@ -283,6 +400,15 @@ const RoleDel = () => {
         tog = !tog;
     }
     
+    function mych() {
+        console.log("sd");
+    }
+
+    function saveaction(action) {
+        console.log(action);
+        console.log($roleStore);
+        console.log($form);
+    }
 
 </script>
 
@@ -302,7 +428,7 @@ const RoleDel = () => {
     }
     </style>
 
-<div class="shadow rounded-lg flex flex-col  bg-white">
+<div class="shadow rounded-lg flex flex-col  bg-white py-1.5">
     <div class="bg-blue-100 h-20 rounded-t-lg flex flex-row items-center px-7">
       
         <h2 class="text-2xl text-black text-gray-700 font-bold">{modtext } Role</h2>  
@@ -363,24 +489,26 @@ const RoleDel = () => {
             <!--div class="pristine-form-group md:col-start-1 md:col-span-5"-->
             
             <div class="md:col-start-1 md:col-span-5">
-            <label for="branchname">Branch Name</label>
+            <label for="rolename">Role Name</label>
                         <input  
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"
                         type = "text"
-                        id = "branchname"
-                        name = "branchName"
-                        bind:value={$form.branchName}
+                        id = "rolename"
+                        name = "rolename"
+                        bind:value={$form.rolename}
+                        on:change={mych}
                         />
             </div>
 
             <div class="md:col-start-6 md:col-span-5">
-                <label for="branchname">Branch Short Name</label>
+                <label for="roledisplayname">Role Display Name</label>
                             <input  
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"
                             type = "text"
-                            id = "branchshortname"
-                            name = "branchshortName"
-                            bind:value={$form.branchName}
+                            id = "roledisplayname"
+                            name = "roledisplayname"
+                            bind:value={$form.roledisplayname}
+                            on:change={mych}
                             />
                 </div>
 
@@ -415,12 +543,16 @@ const RoleDel = () => {
 
         <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-1 md:gap-x-10  gap-y-5 md:gap-y-0	">
             <div class= "md:col-start-1 md:col-span-5">				  
-                <label for="Addressline2">Address Line 2</label>
+                <label for="roledescription">Role Description</label>
                 <!--bind:value={$branchstore.branchAddLine2}-->
                 <textarea required 
-                        name = "addressline2"
+                        name = "roledescription"
+                        id = "roledescription"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
-                        type = "text"                
+                        
+                        type = "text"    
+                        bind:value={$form.roledescription}                                    
+                        on:change={mych}
                         ></textarea>
                         <!--div class="pristine-error-group"></div-->
                     </div>
@@ -430,30 +562,30 @@ const RoleDel = () => {
     </div>
     
     </form> 
-
-    <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-1 md:gap-x-10  gap-y-5 md:gap-y-0 h-14">
-        <div class="pristine-form-group md:col-span-3">			  
-        <Switch bind:istouched={istouched}  bind:checked={uno}></Switch>
+    
+    <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-1 md:gap-x-10  gap-y-5 md:gap-y-0 h-18 " >
+        <div class="md:col-span-3">			  
+            <Switch bind:istouched={istouched}  bind:checked={uno}></Switch>
         </div>
         {#if uno}
-        <div class="pristine-form-group md:col-span-3">				  
+        <div class="md:col-span-3">				  
             <label for="firstname">Copy from Role</label>
                 <select required 
                 class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
                 >dasdfasdf</select>
-                <div class="pristine-error-group"></div>
+                <!--div class="pristine-error-group"></div-->
         </div>
         {:else}
-            <div class="md:col-span-4">	
-                <label for="firstname">Creating Role from Scratch.  <p>Toggle button to Copy Existing Role</p></label>
+            <div class="md:col-span-6">	
+                <label for="firstname">You are {mymod === 'new'?"Creating a Role from Scratch now":"Editing the Role"} <p>Want to Copy values from an Existing Role? Then Toggle the button </p></label>
             </div>
         {/if}
     
     </div>
-
+    
     <div></div>
 
-{#if istouched}
+{#if uno1}
 <div class = "flex flex-col bg-white justify-center shadow rounded-lg p-3">
     {#if mymod !== 'display'}
         <div class = "flex flex-col md:flex-row flex-wrap bg-blue-100 justify-center gap-x-5 gap-y-5 shadow rounded-lg p-3">

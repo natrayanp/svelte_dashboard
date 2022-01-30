@@ -232,6 +232,11 @@ const dd = {
           console.log(companydatacpy);
           //$companydata = JSON.parse(JSON.stringify(companydata_init));
           //$companystore = companydata_init;	
+
+          if(JSON.stringify(refdata) === JSON.stringify({})) {
+            console.error("No refdata go back to branch.svelete");
+          }
+          
           console.log("init the dorp down values");
                 // Populate the default values for the dropdown    
                 console.log(JSON.stringify(companydata_init));
@@ -403,8 +408,7 @@ const dd = {
       if(firstvisit) {
         $goto('/login');
         return;
-      }  
-      if(['Save','Update'].includes(btnpressed)) {
+      }else if(['Save','Update'].includes(btnpressed)) {
         console.log(respdata);
         cpy =  respdata.data.company[0];
       } else {
@@ -629,10 +633,7 @@ const allAlerts = (val) => {
 			});	
 	}
 
-function myfunc() {
-console.log("button clci");
-handleSubmit();
-}
+
 
     </script>
     

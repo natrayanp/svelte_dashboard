@@ -52,11 +52,18 @@ export const initAuthStore = (initialStore = INITIAL_AUTH_STORE) => {
      }  
 
 
-     let branchset_replace = (str,val) => {      
-      if(str.activebranch !== undefined && str.activebranch.branchId == val.branchId) {
-        str.activebranch = JSON.parse(val);
-      }
+     let branchset_replace = (str,val) => {  
 
+      console.log(str.activebranch);
+      console.log(val);
+
+      
+      if(str.activebranch !== undefined && str.activebranch.branchId == val.branchId) {
+        console.log("appada1");
+        str.activebranch = JSON.parse(JSON.stringify(val));
+        console.log("appada2");
+      }
+      console.log("appada");
       if(str.allbranch !== undefined) {
       str.allbranch = str.allbranch.filter( (bran) => {
           return bran.branchId !== val.branchId;
@@ -81,7 +88,10 @@ export const initAuthStore = (initialStore = INITIAL_AUTH_STORE) => {
         return self;
       }),  
       setBranch: (value) => update(self => {
+                console.log("going inside companyset start");
+
         branchset_replace(self,value);
+        console.log("going inside companyset end");
         return self;
       }),  
    

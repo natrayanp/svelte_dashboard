@@ -102,8 +102,11 @@ export const HttpClient = () => {
           masterStore.resetAll();
          // $goto('/landing');
         }
-
-
+        console.log(respdata.detail);
+        console.log(!respdata.data);
+        console.log(respdata.data);
+        if(!respdata.data) respdata.data = JSON.parse(JSON.stringify(respdata.detail));
+        console.log(respdata);    
         return respdata;
   };
 

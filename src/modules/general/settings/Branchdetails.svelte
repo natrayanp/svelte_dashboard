@@ -2,12 +2,15 @@
 
     import {formValidator} from '../../../common/formvalidators/formvalidator';
     import {onMount, onDestroy} from 'svelte';
+    import {disableform,enableform,disableelement,enableelement}from '../../../common/formvalidators/formdisable';
+    import * as yup from "yup";
     import { http } from '../../../stores/services';
     import { Accordion, AccordionItem } from "../../../common/accordion/index";
     import { createEventDispatcher } from 'svelte';
     import { entityStore,enityVal, authStore, authVal } from "../../../stores/stores";
     import { goto } from '@roxi/routify';
-
+    import Alerts from '../../../common/notifications/components/alerts/Alerts.svelte';
+    import { createForm } from "svelte-forms-lib";
     import { getNotificationsContext } from '../../../common/notifications';
 const { addNotification } = getNotificationsContext();
 
@@ -18,9 +21,7 @@ const dd = {
             branchId: null,
             branchName: null,
             branchShortName: null,
-            branchCategory: null,
             branchStatus: null,
-            branchDescription: null,
             branchImageUrl: null,
             branchAddLine1: null,
             branchAddLine2: null,
@@ -40,15 +41,15 @@ const dd = {
         
 
     console.log("+++++++++++++++++ start Branch details ++++++++++++++++++++++");
-    let  avatar, fileinput;
+   // let  avatar, fileinput;
     let mymodal = null;
 
       let btntxt;
       let mform;	
 
-        let branchform;	
-        let branchstore;
-        let branchdata;
+       // let branchform;	
+        //let branchstore;
+        let branchdatacpy;
         let yes = true;
         let respdata;
 
@@ -69,11 +70,11 @@ const dd = {
         }
 
         // This is required as the data is loaded only after onmount
-        if (!refdata.induscat)  refdata.induscat = [];
-        if (!refdata.industype) refdata.industype = [];
-        if (!refdata.compcat) refdata.compcat = [];
+        //if (!refdata.induscat)  refdata.induscat = [];
+        //if (!refdata.industype) refdata.industype = [];
+        //if (!refdata.compcat) refdata.compcat = [];
 
-        $: branchdata;
+      /*  $: branchdata;
         console.log(branchdata_init);
         if(branchdata_init.isArray && branchdata_init.length > 0 ) {  
           branchdata= JSON.parse(JSON.stringify(branchdata_init[0]));
@@ -82,12 +83,71 @@ const dd = {
         branchform = formValidator(branchdata);
         branchstore = branchform.data;	
         $branchstore = branchdata;
-    
+*/
+
+const { form, errors,state,  handleChange, handleSubmit } = createForm({
+          initialValues: branchdata_init,
+          validationSchema: yup.object().shape({
+              companyName: yup.string().required("Required field"),
+              branchName: yup.string().required("Required field"),    
+              branchShortName: yup.string().required("Required field"),                        
+             /* branchCategory: yup.object().test(
+                                                'category',
+                                                'Please select Category',
+                                                  val => !val.refvalue ? false : true,
+                                                ),
+              //companyLogoUrl: null,
+              //companyLogo: null,
+              
+              branchDescription: yup.string().required("Required field"), */
+              branchStartDate: yup.date().required("Required field")
+                                          .default(() => new Date().toLocaleDateString('en-CA')),                                          
+              branchAddLine1: yup.string().required("Required field"),
+              branchAddLine2: yup.string().required("Required field"),
+              branchCountry: yup.object().test(
+                                                'country',
+                                                'Please select Country',
+                                                  val => !val.refvalue ? false : true,
+                                                ),
+              branchCity: yup.object().test(
+                                                'city',
+                                                'Please select city',
+                                                  val => !val.refvalue ? false : true,
+                                                ),
+              branchState: yup.object().test(
+                                                'state',
+                                                'Please select State',
+                                                  val => !val.refvalue ? false : true,
+                                                ),
+              branchPinCode: yup.string().required("Required field"),
+              branchPhone: yup.string(),
+              branchFax: yup.string(),
+              branchMobile: yup.number().required("Required field"),
+              branchEmail: yup.string().email().required("Required field"),
+              branchWebsite: yup.string().required("Required field"),
+              
+              //entityid:null,
+            }),
+          onSubmit:  async values => {  
+            console.log(values);
+            await branchsave(values);            
+          }
+        });
+
+
+
+
+
+    /*
         const branchunsub = branchstore.subscribe(value => {		
             console.log(value)	;
             branchdata= value;		
         });
+
+        */
     
+
+        
         const brnchdetfetchprogressmodal = () => {
 		return addNotification({
 				title : 'Checking your account',
@@ -104,23 +164,42 @@ const dd = {
           console.log("_____________-going inside onmount 232-____________________")  ;
           console.log(mode);
           //mymodal =brnchdetfetchprogressmodal(); 
+          mform = document.getElementById("branchform");	
 
-          if( branchdata_init.length > 0) {
+         
+          if( Array.isArray(branchdata_init) && branchdata_init.length > 0) {
             console.log("else if( branchdata_init.length > 0)");
             console.log(branchdata_init);
             branchdata_init = branchdata_init[0];
-            branchdata_init.branchStartDate = new Date(branchdata_init.branchStartDate ).toLocaleDateString('en-CA');
-          } else if (branchdata_init.length < 1) {
+            branchdata_init.branchStartDate = new Date(branchdata_init.branchStartDate ).toLocaleDateString('en-CA');            
+            branchdata_init.companyName = authVal.activecompany.companyName;
+          //} else if (branchdata_init.length < 1) {
+          } else {
             console.log("else if( branchdata_init.length >1)");
             console.log(authVal);
             if(mode === "new") {
               dd.companyId = authVal.activecompany.companyId;
               dd.companyName = authVal.activecompany.companyName;
+              if(authVal.allbranch && authVal.allbranch.length > 0) {
+                let defbr = authVal.allbranch.filter((x) => x.isdefault === 'Y');
+                
+                if(defbr.length > 0) {
+                  dd.isdefault='N';
+                }
+              }
               branchdata_init = dd;  
             } else {
               console.error("No branchdata go back to branch.svelete");
             }
           }
+
+          $form = JSON.parse(JSON.stringify(branchdata_init));
+          console.log(branchdata_init.isdefault==='Y'?true:false);
+          branchdata_init.isdefault==='Y'?yes=true:yes=false; 
+          branchdatacpy = JSON.parse(JSON.stringify($form));
+          console.log(branchdatacpy);
+          console.log(yes);
+
 
           if(JSON.stringify(refdata) === JSON.stringify({})) {
             console.error("No refdata go back to branch.svelete");
@@ -128,81 +207,97 @@ const dd = {
           
           console.log(authVal);
           console.log(branchdata_init);
-          $branchstore = branchdata_init;	
+          //$branchstore = branchdata_init;	
 
-          console.log("init the dorp down values");
-
-                // Populate the default values for the dropdown    
-                console.log(JSON.stringify(branchdata));
-                if (branchdata.branchId != null) {
-                    if (typeof branchdata.branchCountry === 'string' || branchdata.branchCountry instanceof String) {
-                      $branchstore.branchCountry = getvalue('branchCountry',branchdata.branchCountry);    
-                    } else {
-                      $branchstore.branchCountry = branchdata.branchCountry;    
-                    }                
-                    console.log(JSON.stringify(branchdata));
-                    let mys = branchdata.branchState;
-                    let myc = branchdata.branchCity;
-
-                
-                    countryselect();        
-                    console.log(JSON.stringify(branchdata));   
-                    console.log(myc);
-                    if (typeof mys === 'string' || mys instanceof String) { 
-                        $branchstore.branchState = getvalue('branchState', mys);
-                    } else {
-                        $branchstore.branchState = mys;
-                    }
-                  stateselect();      
-                  if (typeof myc === 'string' || myc instanceof String) {          
-                    $branchstore.branchCity = getvalue('branchCity', myc);
-                  } else {
-                        $branchstore.branchCity = myc;
-                    }               
-               
-                  branchdata.branchState === 'Y'?yes =true:yes =false;                  
-                  $branchstore.isdefault =  yes?'Y':'N';
-                }
+          init_all_Dropdowns();
 
               console.log("forming form");
-            mform = document.getElementById("branchform");		
-            branchform.initVal(mform);	
+            //mform = document.getElementById("branchform");		
+            //branchform.initVal(mform);	
 	
             if(mode === 'display') {
-                branchform.disable(mform);
+                //branchform.disable(mform);
+                disableform(mform);
             } else {
-              branchform.enable(mform);              
-              branchform.eledisable([document.getElementById("cpyname")]);	              
+              enableform(mform);           
+              disableelement([document.getElementById("companyName")]);	              
+              if(mode === "edit") disableelement([document.getElementById("branchName")]);	              
               btntxt = "Save";
               if (mode === "edit") btntxt = "Update";
             }
-            console.log(JSON.stringify(enityVal));
+           // console.log(JSON.stringify(enityVal));
            //mymodal.close();
            //mymodal=null;            
         });   
         
 
-      export async function branchsave(){
-        
-        if(["Save","Update"].includes(btntxt)) {
-          console.log(branchdata);
-          //toggle_btn_text();
-          branchform.disable(mform);
-          let formDatae = new FormData();
-          console.log(JSON.stringify(branchdata));
+    function init_all_Dropdowns(){
+      console.log("init the dorp down values");
 
-          branchdata.branchCountry = branchdata.branchCountry?.refvalue;
-          branchdata.branchState = branchdata.branchState?.refvalue;
-          branchdata.branchCity = branchdata.branchCity?.refvalue;       
-          branchdata.branchStartDate = new Date(branchdata.branchStartDate).toISOString();   
+// Populate the default values for the dropdown    
+console.log(JSON.stringify(branchdata_init));
+if (branchdata_init.branchId != null) {
+    if (typeof branchdata_init.branchCountry === 'string' || branchdata_init.branchCountry instanceof String) {
+      $form.branchCountry = getvalue('branchCountry',branchdata_init.branchCountry);    
+    } else {
+      $form.branchCountry = branchdata.branchCountry;    
+    }                
+    console.log(JSON.stringify(branchdata_init));
+    let mys = branchdata_init.branchState;
+    let myc = branchdata_init.branchCity;
+
+
+    countryselect();        
+    console.log(JSON.stringify(branchdata_init));   
+    console.log(myc);
+    if (typeof mys === 'string' || mys instanceof String) { 
+        $form.branchState = getvalue('branchState', mys);
+    } else {
+        $form.branchState = mys;
+    }
+  stateselect();      
+  if (typeof myc === 'string' || myc instanceof String) {          
+    $form.branchCity = getvalue('branchCity', myc);
+  } else {
+        $form.branchCity = myc;
+    }               
+
+  branchdata_init.isdefault === 'Y'?yes =true:yes =false;                  
+  $form.isdefault =  yes?'Y':'N';
+}
+    }
+
+       async function branchsave(formdata){
+        disableform(mform);
+        let formdatacpy = JSON.parse(JSON.stringify(formdata));
+        console.log(btntxt);
+        console.log(["Save","Update"].includes(btntxt));
+
+        if(["Save","Update"].includes(btntxt)) {
+          console.log("test");
+        }
+        if(["Save","Update"].includes(btntxt)) {
+          console.log("dldls1");
+          //console.log(branchdata);
+
+          //toggle_btn_text();
+         // branchform.disable(mform);
+          //let formDatae = new FormData();
+          //console.log(JSON.stringify(branchdata));
+
+          formdata.companyName = authVal.activecompany.companyName;
+          formdata.branchCountry = formdata.branchCountry.refvalue;
+          formdata.branchState = formdata.branchState.refvalue;
+          formdata.branchCity = formdata.branchCity.refvalue;       
+         
           
           //branchdata.companyCategory = branchdata.companyCategory.refvalue;
           //branchdata.companyIndustry = branchdata.companyIndustry.refvalue;
           //branchdata.companyPinCode = Number(branchdata.companyPinCode);
           //branchdata.companyFiscalYear = Number(branchdata.companyFiscalYear); 
 
-          
-          if (!branchdata.branchCity === undefined) branchdata.branchCity = ""; 
+          console.log("dldls");
+          if (!formdata.branchCity === undefined) formdata.branchCity = ""; 
          /*
           formDatae.append("text_field", JSON.stringify(branchdata));
           formDatae.append("text_action",JSON.stringify({"optype": btntxt}))
@@ -210,52 +305,102 @@ const dd = {
           */
           //respdata = await http.postForm('upload',formDatae);
 
-          let senddata = {'optype': btntxt,'branchdata':branchdata}
 
+          let senddata = {}
+          if(JSON.stringify(formdata) !== JSON.stringify(branchdatacpy)) {
+          formdata.branchStartDate = new Date(formdata.branchStartDate).toISOString();   
+          senddata = {'optype': btntxt,'branchdata':formdata}
           console.log(senddata);
           respdata = await http.post('branchsave',senddata).catch(e=>{
             //TODO Error handling
             console.error(e);
           });
 
+          console.log(respdata);
+            console.log(respdata.data.branch.length);
+            console.log(respdata.data.branch[0]);
+            console.log(firstvisit);
+
+          if(!firstvisit) {
           if(respdata.data.branch.length == 1 ) {
-            await authStore.setBranch(JSON.parse(JSON.stringify(respdata.data.branch[0])));
+            console.log("entering update");
+            respdata.data.branch[0].branchStartDate = new Date(respdata.data.branch[0].branchStartDate).toLocaleDateString('en-CA');
+            console.log("entering update1");
+            authStore.setBranch(JSON.parse(JSON.stringify(respdata.data.branch[0])));
+            console.log("after update");
+
           } else {
           //TODO: Throw error
+          console.log("in else after update");
+
           } 
+        }
+        console.log("sendcaraction");
 
           console.log(respdata);
           sendcardaction(btntxt);
+        } else{
+          console.log("No Change in values to update");   
+            let s = allAlerts({tgt:"sudo4",text:"No data changed for "+btntxt,type:'warning'});    
+            $form = JSON.parse(JSON.stringify(formdatacpy));       
+            init_all_Dropdowns();
+            enableform(mform);
+            disableelement([document.getElementById("companyName")]);	
+        }
         } else {
           //toggle_btn_text();
-          branchform.enable(mform);
+          //branchform.enable(mform);
+          console.log("going else");
+          enableform(mform);
+          disableelement([document.getElementById("companyName")]);	
         }
         
       }
 
-    
+      const allAlerts = (val) => {
+    console.log(val);
+		return addNotification({
+				targetid: val.tgt,
+				title : 'Alert',				
+				//text: 'dkdkdk',
+				text: val.text,
+				type:val.type,								
+				notificationtype: 'alert',     
+				disableClose: false,       
+        //position:'top-right' 
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});	
+	}
+  
     const dispatch = createEventDispatcher();
 
     const sendcardaction = async (btnpressed) => {
+      let cpy;
       if(firstvisit) {
         $goto('/login');
         return;
       }else if(['Save','Update'].includes(btnpressed)) {
         console.log(respdata);
+        cpy =  respdata.data.branch[0];
+        } else {
+          cpy = "";
         }
-		  dispatch('editresult',{
-		  	action: btnpressed
-		  });
+		//Dispatch the favorite event with object data
+		dispatch('editresult',{
+			action: btnpressed,
+      branch: cpy
+		});
 	}
 
   
   function countryselect() {
     
-    console.log($branchstore);
-    console.log($branchstore.branchCountry.submenu);
-    if($branchstore.branchCountry.submenu) {
+    console.log($form);
+    console.log($form.branchCountry.submenu);
+    if($form.branchCountry.submenu) {
       console.log("@@#$@#@#@#@#@#@#@#@#@#");
-      states = $branchstore.branchCountry.submenu;      
+      states = $form.branchCountry.submenu;      
     } else {
       console.log("@@#$@#@#@#@#@#@#@#@#@#    NUILL");
       states = [];      
@@ -269,22 +414,22 @@ const dd = {
     }
 
     //Reset the previously selected values
-    $branchstore.branchState = '';
-    $branchstore.branchCity = '';  
+    $form.branchState = '';
+    $form.branchCity = '';  
   }
 
 
   function stateselect() {
     console.log("------State change start------");
-    console.log($branchstore.branchState);
-    if($branchstore.branchState.submenu) {
-      citys = $branchstore.branchState.submenu;
+    console.log($form.branchState);
+    if($form.branchState.submenu) {
+      citys = $form.branchState.submenu;
     } else {
       citys = [];
     }
 
     //Reset the previously selected values
-    $branchstore.branchCity = '';
+    $form.branchCity = '';
     console.log("------State change End------");
   }
     
@@ -304,14 +449,14 @@ function getvalue(type,matchstr) {
   case 'branchCountry':    
     return match (refdata.country,matchstr);  
   case 'branchState':    
-    if ($branchstore.branchCountry.submenu !== undefined) {
-      return match ($branchstore.branchCountry.submenu,matchstr); 
+    if ($form.branchCountry.submenu !== undefined) {
+      return match ($form.branchCountry.submenu,matchstr); 
     } else {
       return {}
     }
   case 'branchCity':  
-    if ($branchstore.branchState?.submenu !== undefined) {  
-    return match ($branchstore.branchState.submenu,matchstr); 
+    if ($form.branchState?.submenu !== undefined) {  
+    return match ($form.branchState.submenu,matchstr); 
     } else {
       return {}
     }
@@ -341,9 +486,13 @@ function match (arrval,matchstr) {
 }
 
 
+
+
 function checkchange(e) {
+  console.log(e);
+  console.log("inside chkec change");
   
-  $branchstore.isdefault = e.target.checked?'Y':'N';
+  $form.isdefault = e.target.checked?'Y':'N';
 
   if(e.target.checked) {
     //Check there are no other default branches exists    
@@ -352,13 +501,16 @@ function checkchange(e) {
   }
 }
 
+function chkcllick(){
+  console.log("clicked button");
+  handleSubmit();
+  console.log($state.isSubmitting);
 
+}
 
     </script>
     
-    
-    {yes}
-    
+<Alerts targetid="sudo4"/>
 <div class="shadow rounded-lg flex flex-col  bg-white">
     {#if mode !== 'display'}
         <div class="bg-blue-100 h-20 rounded-t-lg flex flex-row items-center px-7">
@@ -370,11 +522,12 @@ function checkchange(e) {
             {/if}      
         
            <span class="flex w-5"></span>
-           <button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow" 
-           on:click|preventDefault={branchsave}>
+           <button class="bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow" 
+           on:click ={handleSubmit}>
              {btntxt}
             </button>
           
+            
           
         </div>
     {/if}
@@ -382,48 +535,66 @@ function checkchange(e) {
 
 
 
-    <form id="branchform" class="px-10 py-1 rounded w-full my-5 inputs space-y-6">
+    <form id="branchform" class="px-10 py-1 rounded w-full my-5 inputs space-y-6" on:submit|preventDefault={handleSubmit}>
         <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-6 md:gap-x-10  gap-y-5 md:gap-y-0	">
   
-            <div class="pristine-form-group md:col-start-1 md:col-span-5">				  
+            <div class=" md:col-start-1 md:col-span-5">				  
                 <label for="companyname">Company Name</label>
                 <input required disabled
-                        id="cpyname"  
+                        id="companyName"  
+                        name = "companyName"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                         type = "text"
-                        bind:value={$branchstore.companyName}
+                        bind:value={$form.companyName}
+                        on:blur ={handleChange}
+                        on:change ={handleChange}
                         />
-                <div class="pristine-error-group"></div>
+                      {#if $errors.companyName && (JSON.stringify($errors.companyName)!= '{}') }
+                        <small style="color:red">{$errors.companyName}</small>
+                      {/if}
               </div>
 
 
-              <div class="pristine-form-group md:col-start-8 md:col-span-4">				
+              <div class="md:col-start-8 md:col-span-4">				
               <label for="default">Default Branch?</label>
                 <input type=checkbox bind:checked={yes} on:change= {e=>checkchange(e)}>   
                 {yes?'Yes':'No'}
-                <div class="pristine-error-group"></div>                 
-                
+                {#if $errors.isdefault && (JSON.stringify($errors.isdefault)!= '') }
+                <small style="color:red">{$errors.isdefault}</small>
+              {/if}
               </div>
   
-              <div class="pristine-form-group md:col-start-1 md:col-span-5">				  
+              <div class=" md:col-start-1 md:col-span-5">				  
                 <label for="branchname">Branch Name</label>
                         <input required 
+                        id="branchName"  
+                        name = "branchName"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                 type = "text"
-                bind:value={$branchstore.branchName}
+                bind:value={$form.branchName}
+                on:blur ={handleChange}
+                on:change ={handleChange}
                         />
-                        <div class="pristine-error-group"></div>
-                    </div>
+                        {#if $errors.branchName && (JSON.stringify($errors.branchName)!= '{}') }
+                        <small style="color:red">{$errors.branchName}</small>
+                      {/if}      
+                                  </div>
        
-              <div class="pristine-form-group md:col-start-6 md:col-span-5">				  
-                <label for="branchname">Branch Short Name</label>
+              <div class="md:col-start-6 md:col-span-5">				  
+                <label for="branchShortName">Branch Short Name</label>
                         <input required 
+                        id="branchShortName"  
+                        name = "branchShortName"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                 type = "text"
-                bind:value={$branchstore.branchShortName}
+                bind:value={$form.branchShortName}
+                on:blur ={handleChange}
+                on:change ={handleChange}
 
                         />
-                        <div class="pristine-error-group"></div>
+                        {#if $errors.branchShortName && (JSON.stringify($errors.branchShortName)!= '{}') }
+                        <small style="color:red">{$errors.branchShortName}</small>
+                      {/if} 
                     </div>
   
   
@@ -455,31 +626,47 @@ function checkchange(e) {
                     </div-->
   
   
-                <div class="pristine-form-group md:col-start-1 md:col-span-5">				  
-                <label for="firstname">Address Line 1</label>
+                <div class="md:col-start-1 md:col-span-5">				  
+                <label for="branchAddLine1">Address Line 1</label>
                         <textarea required 
+                        id="branchAddLine1"  
+                        name = "branchAddLine1"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                 type = "text"
-                bind:value={$branchstore.branchAddLine1}
+                bind:value={$form.branchAddLine1}
+                on:blur ={handleChange}
+                on:change ={handleChange}
                         ></textarea>
-                        <div class="pristine-error-group"></div>
+                        {#if $errors.branchAddLine1 && (JSON.stringify($errors.branchAddLine1)!= '{}') }
+                        <small style="color:red">{$errors.branchAddLine1}</small>
+                      {/if} 
                     </div>
        
-              <div class="pristine-form-group md:col-start-6 md:col-span-5">				  
-                <label for="Addressline2">Address Line 2</label>
+              <div class="md:col-start-6 md:col-span-5">				  
+                <label for="branchAddLine2">Address Line 2</label>
                         <textarea required 
+                        id="branchAddLine2"  
+                        name = "branchAddLine2"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                 type = "text"
-                bind:value={$branchstore.branchAddLine2}
+                bind:value={$form.branchAddLine2}
+                on:blur ={handleChange}
+                on:change ={handleChange}
                         ></textarea>
-                        <div class="pristine-error-group"></div>
+                        {#if $errors.branchAddLine2 && (JSON.stringify($errors.branchAddLine2)!= '{}') }
+                        <small style="color:red">{$errors.branchAddLine2}</small>
+                      {/if} 
                     </div>
   
-              <div class="pristine-form-group md:col-start-1 md:col-span-3 my-3">				  
-                <label for="Country">Country</label>
+              <div class="md:col-start-1 md:col-span-3 my-3">				  
+                <label for="branchCountry">Country</label>
                         <select required 
+                        id="branchCountry"  
+                        name = "branchCountry"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                        bind:value={$branchstore.branchCountry} on:change={()=>countryselect()}
+                        bind:value={$form.branchCountry} 
+                        on:change={()=>countryselect()}
+
                         >
                         {#each refdata.country as country}
                         <option value={country}>
@@ -487,16 +674,21 @@ function checkchange(e) {
                         </option>
                       {/each}
                       </select>
-                        <div class="pristine-error-group"></div>
+                      {#if $errors.branchCountry && (JSON.stringify($errors.branchCountry)!= '{}') }
+                      <small style="color:red">{$errors.branchCountry}</small>
+                    {/if} 
                     </div>
        
 
        
-              <div class="pristine-form-group md:col-start-4 md:col-span-3  my-3">				  
-                <label for="State">State</label>
+              <div class="md:col-start-4 md:col-span-3  my-3">				  
+                <label for="branchState">State</label>
                         <select required 
+                        id="branchState"  
+                        name = "branchState"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                        bind:value={$branchstore.branchState}  on:change={stateselect}
+                        bind:value={$form.branchState}  
+                        on:change={stateselect}
                         >
           
                         {#each states as state}
@@ -505,14 +697,18 @@ function checkchange(e) {
                         </option>
                       {/each}
                     </select>
-                        <div class="pristine-error-group"></div>
+                    {#if $errors.branchState && (JSON.stringify($errors.branchState)!= '{}') }
+                    <small style="color:red">{$errors.branchState}</small>
+                  {/if} 
                     </div>
 
-                    <div class="pristine-form-group md:col-start-7 md:col-span-3  my-3">				  
-                      <label for="City">City</label>
+                    <div class="md:col-start-7 md:col-span-3  my-3">				  
+                      <label for="branchCity">City</label>
                               <select required 
+                              id="branchCity"  
+                              name = "branchCity"
                               class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                              bind:value={$branchstore.branchCity}
+                              bind:value={$form.branchCity}
                               >
                               {#each citys as city}
                               <option value={city}>
@@ -520,17 +716,25 @@ function checkchange(e) {
                               </option>
                             {/each}
                           </select>
-                              <div class="pristine-error-group"></div>
+                          {#if $errors.branchCity && (JSON.stringify($errors.branchCity)!= '{}') }
+                          <small style="color:red">{$errors.branchCity}</small>
+                        {/if} 
                           </div>
        
-                <div class="pristine-form-group md:col-start-1 md:col-span-3  my-3">				  
-                <label for="firstname">Pin</label>
+                <div class="md:col-start-1 md:col-span-3  my-3">				  
+                <label for="branchPinCode">Pin</label>
                         <input required 
+                        id="branchPinCode"  
+                        name = "branchPinCode"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                 type = "text"
-                bind:value={$branchstore.branchPinCode}
+                bind:value={$form.branchPinCode}
+                on:blur ={handleChange}
+                on:change ={handleChange}
                         />
-                        <div class="pristine-error-group"></div>
+                        {#if $errors.branchPinCode && (JSON.stringify($errors.branchPinCode)!= '{}') }
+                        <small style="color:red">{$errors.branchPinCode}</small>
+                      {/if} 
                     </div>
               
   
@@ -541,41 +745,65 @@ function checkchange(e) {
        
               
        
-              <div class="pristine-form-group  md:col-start-1 md:col-span-3">				  
-                <label for="Phone">Phone</label>
+              <div class="md:col-start-1 md:col-span-3">				  
+                <label for="branchPhone">Phone</label>
                         <input  required 
+                        id="branchPhone"  
+                        name = "branchPhone"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
                         type = "text"
-                        bind:value={$branchstore.branchPhone}                        
+                        bind:value={$form.branchPhone}      
+                        on:blur ={handleChange}
+                        on:change ={handleChange}                  
                         />
-                        <div class="pristine-error-group"></div>
+                        {#if $errors.branchPhone && (JSON.stringify($errors.branchPhone)!= '{}') }
+                        <small style="color:red">{$errors.branchPhone}</small>
+                      {/if} 
                     </div>
-              <div class="pristine-form-group md:col-start-4 md:col-span-3">				  
-                <label for="Phone">Fax</label>
+              <div class="md:col-start-4 md:col-span-3">				  
+                <label for="branchFax">Fax</label>
                         <input type="text" required 
+                        id="branchFax"  
+                        name = "branchFax"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                        bind:value={$branchstore.branchFax}
+                        bind:value={$form.branchFax}
+                        on:blur ={handleChange}
+                        on:change ={handleChange}
                         />
-                        <div class="pristine-error-group"></div>
+                        {#if $errors.branchFax && (JSON.stringify($errors.branchFax)!= '{}') }
+                        <small style="color:red">{$errors.branchFax}</small>
+                      {/if} 
                     </div>
               
        
-              <div class="pristine-form-group md:col-start-7 md:col-span-3">				  
-                <label for="Phone">Mobile</label>
+              <div class="md:col-start-7 md:col-span-3">				  
+                <label for="branchMobile">Mobile</label>
                         <input type="text" required 
+                        id="branchMobile"  
+                        name = "branchMobile"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                        bind:value={$branchstore.branchMobile}
+                        bind:value={$form.branchMobile}
+                        on:blur ={handleChange}
+                        on:change ={handleChange}
                         />
-                        <div class="pristine-error-group"></div>
+                        {#if $errors.branchMobile && (JSON.stringify($errors.branchMobile)!= '{}') }
+                        <small style="color:red">{$errors.branchMobile}</small>
+                      {/if} 
                     </div>
        
-              <div class="pristine-form-group  md:col-span-5">				  
-                <label for="Phone">email</label>
+              <div class="md:col-span-5">				  
+                <label for="branchEmail">email</label>
                         <input type="text" required 
+                        id="branchEmail"  
+                        name = "branchEmail"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                        bind:value={$branchstore.branchEmail}
+                        bind:value={$form.branchEmail}
+                        on:blur ={handleChange}
+                        on:change ={handleChange}
                         />
-                        <div class="pristine-error-group"></div>
+                        {#if $errors.branchEmail && (JSON.stringify($errors.branchEmail)!= '{}') }
+                        <small style="color:red">{$errors.branchEmail}</small>
+                      {/if}
                     </div>
        
        
@@ -599,23 +827,35 @@ function checkchange(e) {
                     </div-->
        
        
-              <div class="pristine-form-group  md:col-span-5">				  
-                <label for="Phone">Website</label>
+              <div class="md:col-span-5">				  
+                <label for="branchWebsite">Website</label>
                         <input type="text" required 
+                        id="branchWebsite"  
+                        name = "branchWebsite"
                         class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                        bind:value={$branchstore.branchWebsite}
+                        bind:value={$form.branchWebsite}
+                        on:blur ={handleChange}
+                        on:change ={handleChange}
                         />
-                        <div class="pristine-error-group"></div>
+                        {#if $errors.branchWebsite && (JSON.stringify($errors.branchWebsite)!= '{}') }
+                        <small style="color:red">{$errors.branchWebsite}</small>
+                      {/if}
                     </div>     
 
-                    <div class="pristine-form-group md:col-start-1 md:col-span-3">				  
-                      <label for="firstname">Start Date</label>
+                    <div class="md:col-start-1 md:col-span-3">				  
+                      <label for="branchStartDate">Start Date</label>
                               <input required 
+                              id="branchStartDate"  
+                              name = "branchStartDate"
                               class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                       type = "date"
-                      bind:value={$branchstore.branchStartDate}
+                      bind:value={$form.branchStartDate}
+                      on:blur ={handleChange}
+                      on:change ={handleChange}
                               />
-                              <div class="pristine-error-group"></div>
+                              {#if $errors.branchStartDate && (JSON.stringify($errors.branchStartDate)!= '{}') }
+                              <small style="color:red">{$errors.branchStartDate}</small>
+                            {/if}
                           </div>
   
         </div>

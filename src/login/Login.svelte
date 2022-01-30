@@ -137,6 +137,8 @@ import { get } from 'svelte/store';
 
 
 	const allAlerts = (val) => {
+		console.log(val.detail);
+		console.log(val.detail.detail);
 		return addNotification({
 				targetid: sign_up_mode?'signup': 'login',
 				title : sign_up_mode?'Signup Alert': 'Login Alert',				
@@ -192,7 +194,8 @@ import { get } from 'svelte/store';
 				console.log('FBUsrCrFail mymod');
 				mymodal.close();
 				mymodal=null;
-			}			
+			}		
+			console.log(val);
 			let myerror = allAlerts(val);
 		} else if(['loginSuc','redirectloginSuc'].includes(val.stage)) {
 			console.log('Just close the Modal and navigate to secure page');				
@@ -327,7 +330,14 @@ import { get } from 'svelte/store';
 		console.log(val);
 		console.log( (val || val.accept));
 		if (val === null || val.accept) {
+			console.log("starting sessionexists");
+			if(!mymodal){
+				mymodal = loginprogressmodal();
+			}
 			await sessionexist();
+			mymodal=null;
+			mymodal.close();
+			console.log("ending sessionexists");
 		} else {
 			await dosignout();
 			//send('LOGOUT');

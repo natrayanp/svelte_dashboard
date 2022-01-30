@@ -150,7 +150,7 @@ onMount(async() => {
   /*
   const getBranch = async(goforfetch = false) => {
     console.log("inside getBranch inner if");
-    console.log(JSON.stringify(enityVal));
+      console.log(JSON.stringify(enityVal));
     mymodal =brnfetchprogressmodal();  
     let respdata;
     console.log(enityVal);
@@ -214,7 +214,50 @@ onMount(async() => {
 			});	
 	}
 
+  async function handleresult(event) {
+  console.log(event.detail.action);  
+  if (['Save','Update'].includes(event.detail.action)) await getBranch(true);
+
   
+   if (brndata.length <= 0) {    
+    let s = allAlerts({tgt:"sudo1",text:"No Branch setup exists. Please save Branch",type:'error'});    
+  } else {
+    mymod = 'display';
+    myc = "hidden";
+
+    if (['Save','Update'].includes(event.detail.action)) {
+      //let s = allAlerts({tgt:"sudo",text:event.detail.action + " action for Company " + event.detail.company.companyName + " is successful",type:'success'});    
+      let s = addNotification({
+				//targetid: val.tgt,
+				title : 'Alert',				
+				//text: 'dkdkdk',
+				text: event.detail.action + " action for Branch " + event.detail.branchName + " is successful",
+				type:'success',								
+				notificationtype: 'notification',     
+				disableClose: false,        
+        position:'bottom-right',
+        removeAfter:2000,
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});	
+/*
+      let s1 = addNotification({
+				//targetid: val.tgt,
+				title : 'Second Alert',				
+				//text: 'dkdkdk',
+				text: event.detail.action + " action for Company " + event.detail.company.companyName + " is successful",
+				type:'success',								
+				notificationtype: 'notification',     
+				disableClose: false,        
+        position:'bottom-right',
+        removeAfter:2000,
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});	
+*/
+    }
+  }
+}
 
 </script>
 
@@ -235,14 +278,16 @@ onMount(async() => {
                       
               <button class=" flex bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md" on:click|preventDefault={()=>toggle_edit()}>Add New</button>      
               
-              <span class = "flex flex-grow"></span>                         
+              <span class = "flex flex-grow"></span>  
+              <!--                       
               <select  
               class="flex mt-0 w-full md:w-56  px-2 py-1.5 bg-white rounded-2xl border-0 border-b-2 border-white-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			                                          
               >
               <option value="" >Select Company</option>
               <option value="1" >Select 1</option>
               <option value="2" >Select 2</option>
-              </select> 
+              </select>
+              --> 
             </div>              
             <div></div>
           </caption>
