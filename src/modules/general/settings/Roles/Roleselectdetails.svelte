@@ -1,6 +1,6 @@
 <script>
     import { onMount } from 'svelte';
-    import { authStore } from '../../../../stores/stores';
+    import { authStore, roleStore } from '../../../../stores/stores';
 	import { createEventDispatcher } from 'svelte';    
     import { connectAuthEmulator } from '@firebase/auth';
     
@@ -8,7 +8,9 @@
 
     export let basketsd;
     export let basket;    
+    
     let expanded = true;
+    
 
     if(basket.allowedopsval === null) {
         basket.allowedopsval=new Array(basket.allowedops.length).fill(false);            
@@ -58,13 +60,121 @@
     */  
 
     function onReadChangeIt(event,d,nosubmenu=false) { 
-        console.log("inside read change");
+        console.log("-----inside read change start-----");
         console.log(basket);
         if (basket.allowedopsval === null)  basket.allowedopsval=[];
         basket.allowedopsval[d]=event.target.checked;        
-            /* TODO : Add header checkbox
-            if(basket.type === "function") sayHello(event,d,nosubmenu);
-            */
+        /* TODO : Add header checkbox
+        if(basket.type === "function") sayHello(event,d,nosubmenu);
+        */            
+        let cond = "NOTINBOTH";
+        let dd = [];
+        dd.push(basket);
+        let indet =[];
+        let inorg =[];
+        console.log("start hcekc");
+        console.log(JSON.stringify($roleStore));
+        if($roleStore.ChangeDetails.detail.length !== 0){
+            indet = $roleStore.ChangeDetails.detail.filter( (x) => x.packid === basket.packid);  
+        }
+        
+        if($roleStore.ChangeDetails.orgdetail.length !== 0){ 
+            inorg = $roleStore.ChangeDetails.orgdetail.filter( (x) => x.packid === basket.packid);
+        } 
+        console.log("details");
+        console.log(indet);
+        console.log(inorg);        
+        let so = [];
+        let sn = basket.allowedopsval.slice();
+        let defopval = Array($authStore.allowedops.length).fill(false);
+        let op = "UPDATE";
+
+        if(inorg.length && indet.length){ 
+            cond = "INBOTH";                             
+            dd = inorg.slice(); 
+            so = inorg[0].allowedopsval.slice();     
+        } else if (inorg.length && !indet.length) {
+            cond = "INORG_NOTINDETAIL";                             
+            dd = inorg.slice();      
+            so = inorg[0].allowedopsval.slice();     
+        } else if (!inorg.length && indet.length) {
+            cond = "NOTINORG_INDETAIL";                             
+            //dd = indet.slice();      
+        }        
+
+        let oldauditval = {allowedopsval: so.length?so.slice():[]};
+        let newauditval = {allowedopsval:basket.allowedopsval.slice()};
+
+        if( cond !== "NOTINBOTH") {
+            if(JSON.stringify(sn) === JSON.stringify(so)) {
+                op = "SAME"
+            } else {
+                console.log(JSON.stringify(sn));
+                console.log(JSON.stringify(defopval));
+                console.log(JSON.stringify(sn) === JSON.stringify(defopval));
+                if (JSON.stringify(sn) === JSON.stringify(defopval)) {                    
+                    op = "DELETE";
+                    newauditval = {allowedopsval:[]};
+                }
+            }
+        }
+
+
+        if( cond === "NOTINBOTH") op = "ADD"
+        if( cond === "NOTINORG_INDETAIL" && op === "UPDATE") op = "ADD"
+
+        
+
+        switch(cond) {
+            case("NOTINBOTH"): {
+                console.log("INSIDE NOT IN BOTH");
+                let dp = dd.map(({roledetailid,rolemasterid,packid,planid,allowedopsval})=>  ({roledetailid,rolemasterid,packid,planid,allowedopsval,companyid:$authStore.companyid,branchid:$authStore.branchid,
+                                                                                                audit:{action:op,old:{...oldauditval},new:{...newauditval}}}));
+                console.log(dp);
+                $roleStore.ChangeDetails.detail.push(JSON.parse(JSON.stringify(dp[0])));
+                break;
+            }
+            case("INBOTH"): {
+                console.log("INSIDE INBOTH");
+                let ab = $roleStore.ChangeDetails.detail.filter( s => s.packid != dd[0].packid);
+                $roleStore.ChangeDetails.detail = ab.slice();                
+            }
+            case("INORG_NOTINDETAIL") : {   
+                console.log("INSIDE INORG_NOTINDETAIL");             
+                if(["UPDATE","DELETE"].includes(op)){
+                    console.log("INSIDE INORG_NOTINDETAIL UPDATE DELETE");  
+                    let dp = dd.map(({roledetailid,rolemasterid,packid,planid})=> ({roledetailid,rolemasterid,packid,planid,allowedopsval:newauditval.slice(),companyid:$authStore.companyid,branchid:$authStore.branchid,
+                                                                                    audit:{action:op,old:{...oldauditval},new:{...newauditval}}}));
+                    console.log(dp);
+                    $roleStore.ChangeDetails.detail.push(JSON.parse(JSON.stringify(dp[0])));
+                }                
+                break;   
+            }
+            case("NOTINORG_INDETAIL") : {
+                console.log("INSIDE NOTINORG_INDETAIL");
+                let ab = $roleStore.ChangeDetails.detail.filter( s => s.packid != dd[0].packid);
+                $roleStore.ChangeDetails.detail = ab.slice();                                
+                if(op === "ADD"){
+                    console.log("INSIDE NOTINORG_INDETAIL ADD");
+                    let dp = dd.map(({roledetailid,rolemasterid,packid,planid,allowedopsval})=> ({roledetailid,rolemasterid,packid,planid,allowedopsval,companyid:$authStore.companyid,branchid:$authStore.branchid,
+                                                                                                    audit:{action:op,old:{...oldauditval},new:{...newauditval}}}));
+                    console.log(dp);
+                    $roleStore.ChangeDetails.detail.push(JSON.parse(JSON.stringify(dp[0])));
+                }
+                break;     
+            }
+        }
+        console.log($roleStore);
+        console.log("-----inside read change end-----");
+        /*
+        console.log($roleStore.ChangeDetails);
+        if (!$roleStore.ChangeDetails.detail.includes('test')) {
+            $roleStore.ChangeDetails.detail.push('test');
+        } 
+        console.log($roleStore.ChangeDetails);
+
+        let roledetails = [{roledetailid:'',rolemasterid:'',packfuncid:'',planid:'',companyid:'',branchid:'',allowedopsval:[],action:'',audit:{}}];
+        */
     }
 
 

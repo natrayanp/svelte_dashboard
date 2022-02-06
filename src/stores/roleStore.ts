@@ -6,7 +6,9 @@ const INITIAL_ROLE_STORE =        {
     "Unselectedmodules": [],
     "Liverole":{},
     "LiveAvailmod":[],
-    "LiveSelectmod":{},    
+    "LiveSelectmod":{},
+    "ChangeDetails" :{masterdefaul: {rolemasterid : "NEW",rolename : "",roledisplayname : "",roledescription : ""},
+                        master:{},orgdetail:[],detail:[]},
   };
 
 export const initRoleStore = (initialStore = INITIAL_ROLE_STORE) => {
