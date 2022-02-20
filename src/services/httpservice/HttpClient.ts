@@ -112,6 +112,7 @@ export const HttpClient = () => {
 
 
   function handleErr(err) {
+    console.log("iam entereing handlerror");
         console.warn(err);
         console.log(err);
         let resp = new Response(

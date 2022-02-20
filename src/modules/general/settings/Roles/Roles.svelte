@@ -27,20 +27,29 @@ onMount(async ()=> {
   await getRolesForCompany();
 })
 
-roleStore.subscribe((d)=>console.log(d));
+//roleStore.subscribe((d)=>console.log(d));
 
 
 const getRolesForCompany = async(goforfetch = false) => {
     console.log("inside getBranch inner if");    
-    mymodal =Rolefetchprogressmodal();  
+    if ($roleStore.Selectedmodules.length  === 0) {
+    mymodal =Rolefetchprogressmodal();   
     
     let postdata = {"Optype":"fetch","Companyid":authVal.activecompany.companyId,"Branchid":authVal.activebranch.branchId};
     console.log("postdate = ", postdata);
-    let respdata = await http.post('getroledata',postdata).catch(e=>{  
-            //TODO Error handling
-            console.error(e);
-          });
-        console.log(respdata);
+    let respdata = await http.post('getroledata',postdata);
+
+    if(!(respdata.status === "SUCCESS")) {
+    //allAlerts({text:respdata.data.message,type:'success'});
+    console.log("inside error")
+        let s = allAlerts({tgt:"sudo",text:respdata.data.message,type:'error'});    
+    if(mymodal) {			
+				mymodal.close();
+				mymodal=null;
+			}
+    //$goto('/login');
+  } else {    
+    console.log(respdata);
         let ref = JSON.parse(JSON.stringify(respdata.data.roledata));
         console.log(ref.Selectedmodules.length);        
         if (ref.Selectedmodules.length) {
@@ -48,9 +57,15 @@ const getRolesForCompany = async(goforfetch = false) => {
         } else {
           $roleStore.Selectedmodules = [];
         }        
-        $roleStore.Availablemodules = ref.Availablemodules.slice();
-        mymodal.close();
-    mymodal=null;        
+        $roleStore.Availablemodules = ref.Availablemodules.slice(); 
+    if(mymodal) {			
+				mymodal.close();
+				mymodal=null;
+			}
+  }
+
+    
+      }  
 }
 
 const Rolefetchprogressmodal = () => {
@@ -63,9 +78,20 @@ const Rolefetchprogressmodal = () => {
 			});
 	}
 
-  const selectallrec =() => {
-
-  }
+  const allAlerts = (val) => {
+    console.log(val);
+		return addNotification({
+				targetid: 'sudo',
+				title : 'Alert',				
+				//text: 'dkdkdk',
+				text: val.text,
+				type:val.type,								
+				notificationtype: 'alert',     
+				disableClose: false,        
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});	
+	}
 
 
   function toggle_viewdetail(roledata={}){ 
@@ -102,11 +128,68 @@ const Rolefetchprogressmodal = () => {
     */
   }
 
+  const Rolesaveprogressmodal = () => {
+		return addNotification({
+				title : 'ROLE DELETE',
+				text: 'Your Changes to Roles are getting updated' ,
+				notificationtype: 'modal',            
+				modaltype:'modal-loading',  	
+        //comp : Circularprogress,				
+			});
+	}
+
+async function toggle_delete(role){
+  console.log(role)
+  let sendrolemaster = {...role,action:'D'};
+  let maudit = {itemid: "ROLE", itemkeys:{rolemasterid:role.rolemasterid},action:"D",oldvalue:[{rolemasterid:role.rolemasterid}],newvalue:[{}]};
+  let submitval = {
+                rolemaster : sendrolemaster,
+                roledetails:{},
+                audit:maudit,
+                Companyid:authVal.activecompany.companyId,
+                Branchid:authVal.activebranch.branchId
+            };
+  
+
+  let mymodal =Rolesaveprogressmodal();  
+        let noerr = true;
+        let respdata = await http.post('rolesave',submitval)
+
+        console.log(respdata);
+
+        if(!(respdata.status === "SUCCESS")) {
+            let s = allAlerts({tgt:"roledetails_1",text:respdata.data.message,type:'error',title:'ERROR'});   
+            if(mymodal) {			
+				mymodal.close();
+				mymodal=null;
+			}
+        } else {
+            await $roleStore.reset;
+            console.log(respdata);
+            let ref = JSON.parse(JSON.stringify(respdata.data.roledata));
+            console.log(ref.Selectedmodules.length);        
+            if (ref.Selectedmodules.length) {
+            $roleStore.Selectedmodules = ref.Selectedmodules.slice();
+            } else {
+            $roleStore.Selectedmodules = [];
+            }        
+            $roleStore.Availablemodules = ref.Availablemodules.slice();
+            if(mymodal) {			
+				mymodal.close();
+				mymodal=null;
+			}
+        }
+        console.log(sendrolemaster);
+        let event= {detail:{action:'DELETE',rolemasterid:sendrolemaster.Rolemasterid,roledisplayname:sendrolemaster.Roledisplayname}}
+        callalert(event);
+}
+
+
   async function handleresult(event) {
   console.log(event.detail.action);  
   //TODO: Don't go for full fetch.  after Save/Update, replace the new values in store
-  if (['Save','Update'].includes(event.detail.action)) await getRolesForCompany(true);
-
+  if (!['cancel'].includes(event.detail.action)) callalert(event);
+  
   
   /* if (roledata.length <= 0) {    
     let s = allAlerts({tgt:"sudo1",text:"No Role setup exists. Please save company",type:'error'});    
@@ -116,6 +199,24 @@ const Rolefetchprogressmodal = () => {
   //}
 }
 
+
+
+function callalert(event) {
+      //let s = allAlerts({tgt:"sudo",text:event.detail.action + " action for Company " + event.detail.company.companyName + " is successful",type:'success'});    
+      let s = addNotification({
+				//targetid: val.tgt,
+				title : 'Alert',				
+				//text: 'dkdkdk',
+				text: event.detail.action + " action for Role : " + event.detail.roledisplayname + " [id# - " + event.detail.rolemasterid + "] is successful",
+				type:'success',								
+				notificationtype: 'notification',     
+				disableClose: false,        
+        position:'bottom-right',
+        removeAfter:2000,
+				//modaltype:'modal-no-action',  	
+				//comp:Modals				
+			});	
+    }
 
 </script>
 
@@ -198,15 +299,19 @@ const Rolefetchprogressmodal = () => {
 
                   <div class="ml-4">
                     <div class="text-sm font-medium text-gray-900">
-                      {role.Displayname}
+                      {role.Roledisplayname}
                     </div>
 
                   </div>
                 </div>
               </td>
+
+              
+
               <td class="px-6 py-1 whitespace-nowrap text-sm text-gray-500">
-                <a href="#" class="text-green-600 hover:text-red-900 mr-5" on:click|preventDefault={()=>toggle_viewdetail(role)}><i class="far fa-eye fa-sm"/></a>
-                <a href="#" class="text-green-600 hover:text-green-900 mr-4" on:click|preventDefault={()=>toggle_edit(role)}><i class="far fa-edit fa-sm"/></a>
+                <a href="#" class="text-green-600 hover:text-green-900 mr-5" on:click|preventDefault={()=>toggle_viewdetail(role)}><i class="far fa-eye fa-sm"/></a>
+                <a href="#" class="text-green-600 hover:text-blue-900 mr-4" on:click|preventDefault={()=>toggle_edit(role)}><i class="far fa-edit fa-sm"/></a>
+                <a href="#" class="text-green-600 hover:text-red-900 mr-4" on:click|preventDefault={()=>toggle_delete(role)}><i class="fa fa-trash fa-sm"/></a>
               </td>
 
             </tr>

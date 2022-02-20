@@ -57,9 +57,10 @@ export const environment = {
    endpt_setplan:'auth/regisplan',  
    endpt_getcompany:'auth/getcompany',
    endpt_getbranch:'auth/getbranch',   
-   endpt_branchsave: 'auth/savebranch',
+   endpt_branchsave: 'auth/savebranch',   
    endpt_getrefdata: 'auth/getrefdata',
    endpt_getroledata: 'auth/getroles',
+   endpt_rolesave: 'auth/saveroles',
 };
 
 
