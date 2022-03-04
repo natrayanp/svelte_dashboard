@@ -757,8 +757,8 @@ function chkcllick(){
                         on:change ={handleChange}                  
                         />
                         {#if $errors.branchPhone && (JSON.stringify($errors.branchPhone)!= '{}') }
-                        <small style="color:red">{$errors.branchPhone}</small>
-                      {/if} 
+                          <small style="color:red">{$errors.branchPhone}</small>
+                        {/if} 
                     </div>
               <div class="md:col-start-4 md:col-span-3">				  
                 <label for="branchFax">Fax</label>

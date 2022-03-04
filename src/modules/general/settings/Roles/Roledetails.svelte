@@ -13,6 +13,7 @@ import { createForm } from "svelte-forms-lib";
 import * as yup from 'yup';
 import { http } from '../../../../stores/services';
 import Alerts from '../../../../common/notifications/components/alerts/Alerts.svelte';
+
 //export let roledata_init;	
 export let mymod;
 //$roleStore.LiveSelectmod.Modules=[];
@@ -51,6 +52,8 @@ $: {
         togglechangeaction();
     }
 }
+
+
 
 onMount(async() => {  
     Initialise(firstload);
@@ -96,7 +99,7 @@ function Initialise(firstload=false){
 }
 
 function reinstate_val(firstload){
-   
+    firstload = true;
     if (JSON.stringify(($roleStore.Liverole)) === JSON.stringify({})) {
         $form.rolemasterid = $roleStore.ChangeDetails.masterdefaul.rolemasterid;
         $form.rolename = $roleStore.ChangeDetails.masterdefaul.rolename;
@@ -111,16 +114,20 @@ function reinstate_val(firstload){
         console.log("going inside reinstate val else");
         console.log(JSON.parse(JSON.stringify(($roleStore.Liverole))));
         if(firstload) $roleStore.LiveSelectmod = JSON.parse(JSON.stringify(($roleStore.Liverole)));
-        $form.rolemasterid = $roleStore.LiveSelectmod.Rolemasterid;
-        $form.rolename = $roleStore.LiveSelectmod.Rolename;
-        $form.roledisplayname = $roleStore.LiveSelectmod.Roledisplayname;
-        $form.roledescription = $roleStore.LiveSelectmod.Roledescription;
+        let cp = JSON.parse(JSON.stringify($roleStore.LiveSelectmod));
+        $form.rolemasterid = cp.Rolemasterid;
+        $form.rolename = cp.Rolename;
+        $form.roledisplayname = cp.Roledisplayname;
+        $form.roledescription = cp.Roledescription;
         if(firstload){            
-            $roleStore.ChangeDetails.orgmaster = {rolemasterid:$form.rolemasterid ,rolename:$form.rolename,roledisplayname: $form.roledisplayname,roledescription:$form.roledescription}
+            $roleStore.ChangeDetails.orgmaster = {Rolemasterid:cp.Rolemasterid ,Rolename:cp.Rolename,Roledisplayname: cp.Roledisplayname,Roledescription:cp.Roledescription};
+            console.log(cp);
+            console.log(JSON.parse(JSON.stringify($roleStore.ChangeDetails.orgmaster)));
             let resultmod =[];
             get_leafs($roleStore.LiveSelectmod.Modules[0],resultmod);        
             console.log(resultmod);
             console.log(resultmod[0].allowedopsval);
+            resultmod = resultmod.filter( f => (f.roledetailid !== null));
             resultmod.map(({roledetailid,rolemasterid,packid,planid,allowedopsval})=> ({roledetailid,rolemasterid,packid,planid,allowedopsval,companyid:$authStore.companyid,branchid:$authStore.branchid}));
             $roleStore.ChangeDetails.orgdetail = resultmod.slice();  
             console.log($roleStore.ChangeDetails.orgdetail);      
@@ -138,6 +145,10 @@ function reinstate_val(firstload){
                  $roleStore.LiveAvailmod = avs.slice();
             })
         } 
+    
+    $roleStore.ChangeDetails.master = {};
+    $roleStore.ChangeDetails.detail = [];
+    $roleStore.ChangeDetails.ischanged = false;
 }
 
 
@@ -163,10 +174,17 @@ function get_leafs(mod,indmod){
 
 
 function chk_value_change(){
+
+    
+    return ($roleStore.ChangeDetails.detail.length) ? true: false;
+
+
+    /*
+    let valch = false;
     console.log(JSON.stringify($roleStore.LiveSelectmod));
     console.log(JSON.stringify($roleStore.Liverole));
     if($roleStore.LiveSelectmod.Modules) console.log($roleStore.LiveSelectmod.Modules.length);
-    let valch = false;
+    
     if (JSON.stringify($roleStore.LiveSelectmod) === JSON.stringify(($roleStore.Liverole))) {
         //No change in value
         console.log("liverole and liveselecetmod are same");
@@ -200,8 +218,9 @@ function chk_value_change(){
 
         valch = true;
     }
-
-    return valch;
+        return valch;
+    */
+    
 }
 
 const {
@@ -255,7 +274,8 @@ if(mod.menulevel !== 'COMPANY') {
 }
 
 
-    function removemodule_d(data) {               
+    function removemodule_d(data) {
+        $roleStore.ChangeDetails.ischanged = false;               
         $roleStore.LiveSelectmod.Modules = $roleStore.LiveSelectmod.Modules.filter(x => !(x.packid === data.packid));
         let mynewv =[];
         //Check if the removedmodule is in Liverole (To retain values got from DB)
@@ -273,19 +293,50 @@ if(mod.menulevel !== 'COMPANY') {
         }
         $roleStore.LiveAvailmod.push({...datas,basketname:"Availablemodules"});
         console.log(data);
-        remove_det(data);        
+        remove_det(data);  
+        toggle_enable_button();      
     }
 
 
     function remove_det(d){        
-        //This function is to remove modules from detail
+        //This function is to delete the leafs in orgdetail as the previous access is now removed for them
         let indmod=[];
+        let op = 'D';
         get_leafs(d,indmod)
         indmod.forEach(x => {
             let bu = $roleStore.ChangeDetails.detail.filter(y => x.packid !== y.packid);
             $roleStore.ChangeDetails.detail = bu.slice();
+
+            let buo = $roleStore.ChangeDetails.orgdetail.filter(y => x.packid === y.packid);
+            if (buo.length){
+                let dp = buo.map(({roledetailid,rolemasterid,packid,planid,allowedopsval})=>  ({roledetailid,rolemasterid,packid,planid,allowedopsval,companyid:$authStore.companyid,branchid:$authStore.branchid,action:op,
+                                                                                                    audit:{old:{packid,allowedopsval},new:{packid,allowedopsval:[]}}}));                
+                $roleStore.ChangeDetails.detail.push(JSON.parse(JSON.stringify(dp[0])));
+            }
         });
+        console.log($roleStore);
     }
+
+    
+    function toggle_enable_button(){
+        $roleStore.ChangeDetails.ischanged = false;
+        if(JSON.stringify($roleStore.ChangeDetails.orgmaster) === JSON.stringify({})) {
+            if ($form.rolemasterid === "NEW"){
+                if($roleStore.ChangeDetails.detail.length){
+                    $roleStore.ChangeDetails.ischanged = true;
+                } 
+            } else {
+                if($roleStore.ChangeDetails.detail.length || JSON.stringify($roleStore.ChangeDetails.master) !== JSON.stringify({})){
+                    $roleStore.ChangeDetails.ischanged = true;
+                }
+            }
+        } else {            
+            if($form.rolemasterid !== "NEW" && ($roleStore.ChangeDetails.detail.length || JSON.stringify($roleStore.ChangeDetails.master) !== JSON.stringify({}))){
+                $roleStore.ChangeDetails.ischanged = true;
+            }            
+        }
+    }
+    
 
          
 
@@ -303,10 +354,10 @@ if(mod.menulevel !== 'COMPANY') {
 		event.preventDefault();
         const json = event.dataTransfer.getData("text/plain");
         const data = JSON.parse(json);   
-        
+        let mynewv = [];
         if(data.basketname !== basket.basketname) {
             if(data.basketname === "Availablemodules" && basket.basketname === "Selectedmodules"){                
-                let mynewv = $roleStore.LiveAvailmod.filter(x => x.packid === data.packid);
+                mynewv = $roleStore.LiveAvailmod.filter(x => x.packid === data.packid);
                 chk(mynewv);
                 $roleStore.LiveAvailmod = $roleStore.LiveAvailmod.filter(x => !(x.packid === data.packid));
                 console.log(JSON.stringify($roleStore.LiveSelectmod));
@@ -316,17 +367,25 @@ if(mod.menulevel !== 'COMPANY') {
                     $roleStore.LiveSelectmod.Modules.push({...JSON.parse(JSON.stringify(mynewv[0])),basketname:"Selectedmodules"});
                 }                
             }
-        }
-
-        
+        }       
 
         hoveringOverBasket = null;
+        
+        // Remove if we have any leaf items in details as this will drop the original data in orgdetail to selected box
+        let indmod = [];
+        get_leafs(mynewv[0],indmod);
+        indmod.forEach(x => {
+            let bu = $roleStore.ChangeDetails.detail.filter(y => x.packid !== y.packid);
+            $roleStore.ChangeDetails.detail = bu.slice();
+        });
+        toggle_enable_button();  
+        console.log($roleStore);
 
-        console.log(JSON.stringify($roleStore));
+
+        console.log(JSON.parse(JSON.stringify($roleStore)));
     }
 
     function chk(mynewv) {
-        //TODO: Check and update the disable
        
 
         if(mynewv[0].menulevel !== 'COMPANY') {
@@ -394,10 +453,11 @@ if(mod.menulevel !== 'COMPANY') {
           //console.log(respdata);
         }        
         console.log(submitval);
+        $roleStore.ChangeDetails.ischanged = false;
         dispatch('editresult',{
         action: btnpressed,
         rolemasterid: (submitval && submitval.rolemaster)? submitval.rolemaster.Rolemasterid:'',
-        rolemasterid: (submitval && submitval.rolemaster)? submitval.rolemaster.Roledisplayname:'',
+        roledisplayname: (submitval && submitval.rolemaster)? submitval.rolemaster.Roledisplayname:'',
         });
         //resetst();
 	}
@@ -475,47 +535,41 @@ const RoleDel = () => {
         tog = !tog;
     }
     
+    //function handleChange(){
     function mych(e) {
-        console.log("sd");
-        console.log(e);
-        $roleStore.LiveSelectmod.Rolemasterid = $form.rolemasterid; 
+        console.log("going mych");
+        $roleStore.ChangeDetails.ischanged = false;
+        $roleStore.ChangeDetails.master = {};
+        let rmcpy = JSON.parse(JSON.stringify($form));
+        let frmcpy = {Rolemasterid:rmcpy.rolemasterid,Rolename:rmcpy.rolename,Roledisplayname:rmcpy.roledisplayname,Roledescription:rmcpy.roledescription};
 
-        switch(e.srcElement.id) {
-            case('rolename'):{
-                /*
-                if(roleStore.LiveSelectmod.rolename && $form.rolename !== roleStore.LiveSelectmod.rolename){
-                    if (!$roleStore.ChangeDetails.master.includes('name')) {
-                        $roleStore.ChangeDetails.master.push('name');
-                    }                    
-                }
-                */
-                $roleStore.LiveSelectmod.Rolename = $form.rolename; 
-                break;
-            }
-            case ('roledisplayname') : {
-                /*
-                if($form.roledisplayname === roleStore.Liverole.Displayname){
-                    if (!$roleStore.ChangeDetails.master.includes('displayname')) {
-                        $roleStore.ChangeDetails.master.push('displayname');
-                    }                    
-                }
-                */
-                $roleStore.LiveSelectmod.Displayname = $form.roledisplayname;
-                break;
-            }
 
-            case ('roledescription'): {
-                /*
-                if($form.roledescription === roleStore.Liverole.Roledescription){
-                    if (!$roleStore.ChangeDetails.master.includes('description')) {
-                        $roleStore.ChangeDetails.master.push('description');
-                    }                    
+        if (JSON.stringify($roleStore.ChangeDetails.orgmaster) === JSON.stringify({})) {
+            console.log("going mych empty")
+            if ($form.rolemasterid === "NEW") {
+                $roleStore.ChangeDetails.master = {...frmcpy,action:'I'};                   
+                if ($roleStore.ChangeDetails.detail.length) {
+                    //$roleStore.ChangeDetails.ischanged = true;
+                    toggle_enable_button();
                 }
-                */
-                $roleStore.LiveSelectmod.Roledescription = $form.roledescription;        
-                break;
+                
+                console.log("going mych empty if")
+            } 
+        } else {
+            console.log("going mych not empty")
+            console.log(JSON.parse(JSON.stringify($roleStore.ChangeDetails.orgmaster)));
+            console.log(JSON.parse(JSON.stringify(frmcpy)));
+
+            if (JSON.stringify($roleStore.ChangeDetails.orgmaster) !== JSON.stringify(frmcpy)){
+                $roleStore.ChangeDetails.master = {...frmcpy,action:'U'};
+                //$roleStore.ChangeDetails.ischanged = true;
+                toggle_enable_button();
+                console.log("going mych not empty if")
             }
         }
+        handleChange(e);
+        //$form.handleChange();
+       
     }
 
   
@@ -531,7 +585,6 @@ const RoleDel = () => {
         console.log("**************************************");
         console.log(maudit);
         let roledetails = [];
-        //let roledetails = [{roledetailid:'',rolemasterid:'',packid:'',planid:'',companyid:'',branchid:'',allowedopsval:[],action:'',audit:{}}];
         if($roleStore.ChangeDetails.detail.length){
              $roleStore.ChangeDetails.detail.forEach((element)=> {
                 console.log(element);
@@ -569,6 +622,7 @@ const RoleDel = () => {
              });
         };
 
+        /*
         let sendrolemaster = {action:'N'};
         let rolmasterchanged = false;
         console.log(sendrolemaster);
@@ -585,25 +639,26 @@ const RoleDel = () => {
                 rolmasterchanged = true;
             }
         }
+        */
 
-        if(!rolmasterchanged) sendrolemaster = {...sendrolemaster,rolemasterid:$form.Rolemasterid}
-        console.log(sendrolemaster);
-
-        console.log(roledetails.length)
-        console.log($isValid);
-
-
-        if((roledetails.length || rolmasterchanged)  && $isValid){
-            console.log("iam assigning");
-            submitval = {
-                rolemaster : sendrolemaster,
-                roledetails:roledetails,
-                audit:maudit,
-                Companyid:authVal.activecompany.companyId,
-                Branchid:authVal.activebranch.branchId
-            }
+        //if(!rolmasterchanged) sendrolemaster = {...sendrolemaster,rolemasterid:$form.Rolemasterid}
+        //console.log(sendrolemaster);
+        let sendrolemaster = {rolemasterid:$form.Rolemasterid,action:'N'};
+        if (JSON.stringify($roleStore.ChangeDetails.master) !== JSON.stringify({})){
+            sendrolemaster = JSON.parse(JSON.stringify($roleStore.ChangeDetails.master));
+            maudit.oldvalue.push({...JSON.parse(JSON.stringify($roleStore.ChangeDetails.master))});
+            maudit.newvalue.push({...JSON.parse(JSON.stringify(sendrolemaster))});
         }
 
+   
+        submitval = {
+            rolemaster : sendrolemaster,
+            roledetails:roledetails,
+            audit:maudit,
+            Companyid:authVal.activecompany.companyId,
+            Branchid:authVal.activebranch.branchId
+        }
+       
         console.log(submitval);
 
  
@@ -652,6 +707,19 @@ const RoleDel = () => {
 */
     }
 
+
+function chk_readytosubmit(){
+    let oktosubmit = false
+        
+        if ($roleStore.ChangeDetails.master.rolemasterid == "NEW"){
+            if($isValid && $roleStore.ChangeDetails.detail.length) {
+                oktosubmit = true; 
+            }
+        } 
+
+}
+
+
     const Rolesaveprogressmodal = () => {
 		return addNotification({
 				title : 'ROLE UPDATE',
@@ -695,15 +763,23 @@ const RoleDel = () => {
       background-color: #68D391;
     }
     </style>
+
+{$roleStore.ChangeDetails.ischanged}
 <Alerts targetid="roledetails_1"/>
 <div class="shadow rounded-lg flex flex-col  bg-white py-1.5">
-    <div class="bg-blue-100 h-20 rounded-t-lg flex flex-row items-center px-7">
+    <div class="bg-blue-100 h-20 rounded-t-lg flex flex-row items-center px-7" >
       
         <h2 class="text-2xl text-black text-gray-700 font-bold">{modtext } Role</h2>  
         <span class="flex-grow"></span>  
         {#if mymod !== 'display'}
-       <!--button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md" on:click|preventDefault={()=>saveaction(btntxt)}>{btntxt}</button-->       
-       <button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md" on:click = {handleSubmit}>{btntxt}</button>
+       <!--button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md" on:click|preventDefault={()=>saveaction(btntxt)}>{btntxt}</button-->   
+
+       
+            {#if $roleStore.ChangeDetails.ischanged}
+                <button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md" on:click = {handleSubmit}>{btntxt}</button>   
+            {:else}
+                <button class=" bg-indigo-400 rounded text-white font-semibold w-36 py-2 px-7 shadow-md" >{btntxt}</button>
+            {/if}
        
        {/if}
        <span class="flex w-5"></span>
@@ -766,8 +842,9 @@ const RoleDel = () => {
                         id = "rolename"
                         name = "rolename"
                         bind:value={$form.rolename}
-                        on:change ={handleChange}
+                        on:change={mych}                              
                         />
+                        <!--on:change ={handleChange}-->
                         {#if $errors.rolename }
                          <small style="color:red">{$errors.rolename}</small>
                         {/if} 
@@ -780,10 +857,10 @@ const RoleDel = () => {
                             type = "text"
                             id = "roledisplayname"
                             name = "roledisplayname"
-                            bind:value={$form.roledisplayname}                            
-                            on:change ={handleChange}
+                            bind:value={$form.roledisplayname}  
+                            on:change={mych}                                                      
                             />
-                            <!--on:change={mych}-->
+                            <!--on:change ={handleChange}-->
                             {#if $errors.roledisplayname }
                                 <small style="color:red">{$errors.roledisplayname}</small>
                             {/if} 
@@ -829,8 +906,9 @@ const RoleDel = () => {
                         
                         type = "text"    
                         bind:value={$form.roledescription}                                    
-                        on:change ={handleChange}
+                        on:change={mych}     
                         ></textarea>
+                        <!--on:change ={handleChange}-->
                         {#if $errors.roledescription }
                             <small style="color:red">{$errors.roledescription}</small>
                         {/if} 
@@ -843,6 +921,7 @@ const RoleDel = () => {
     
     </form> 
     
+    {#if mymod !== 'display'}
     <div class="grid grid-cols-1 auto-rows-auto md:grid-cols-9 md:grid-rows-1 md:gap-x-10  gap-y-5 md:gap-y-0 h-18 " >
         <div class="md:col-span-3">			  
             <Switch bind:istouched={istouched}  bind:checked={uno}></Switch>
@@ -862,7 +941,8 @@ const RoleDel = () => {
         {/if}
     
     </div>
-    
+    {/if}
+
     <div></div>
 
 {#if uno1}

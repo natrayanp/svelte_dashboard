@@ -63,7 +63,7 @@
         console.log(basket.allowedopsval);
         let newbasket = JSON.parse(JSON.stringify(basket));
         newbasket.allowedopsval[d]=event.target.checked;  
-
+        $roleStore.ChangeDetails.ischanged = false;
         /* TODO : Add header checkbox
         if(basket.type === "function") sayHello(event,d,nosubmenu);
         */            
@@ -194,6 +194,8 @@
         }
     }
 
+    if ($roleStore.ChangeDetails.detail.length) $roleStore.ChangeDetails.ischanged = true;
+
 
     console.log(JSON.parse(JSON.stringify($roleStore)));
     console.log("-----inside read change end-----");
@@ -248,23 +250,25 @@
                     <td class="px-3 py-1 whitespace-nowrap">{basket.name}</td>
                     
                     {#each $authStore.allowedops as oper, operindex(oper)}
-                    <td>
-                    <div class="flex items-center">
-                            <div class="ml-2">
-                                
-                            <div class="text-xs font-medium text-gray-900">
-                                {oper}
+                        {#if basket.allowedops[operindex]}
+                            <td>
+                            <div class="flex items-center">
+                                    <div class="ml-2">
+                                        
+                                    <div class="text-xs font-medium text-gray-900">
+                                        {oper}
+                                    </div>
+                                    <!--
+                                        TODO : Add header checkbox
+                                    <div class="text-sm text-gray-500">
+                                            <input type="checkbox" class="h-4 w-4 text-blue-600" on:change={(event)=>onReadChangeIt(event,operindex)} bind:checked={basket.allowedopsval[operindex]}>
+                                    </div>
+                                    -->
+                                </div>
                             </div>
-                            <!--
-                                TODO : Add header checkbox
-                            <div class="text-sm text-gray-500">
-                                    <input type="checkbox" class="h-4 w-4 text-blue-600" on:change={(event)=>onReadChangeIt(event,operindex)} bind:checked={basket.allowedopsval[operindex]}>
-                            </div>
-                            -->
-                        </div>
-                    </div>
 
-                    </td>
+                            </td>
+                        {/if}
                     {/each}
 
                     {#if !expanded}
@@ -288,6 +292,7 @@
             <td class="px-3 py-1 whitespace-nowrap">{basket.name}</td>
             {#each $authStore.allowedops as oper, operindex(oper)}
 
+            {#if basket.allowedops[operindex]}
 
             <td >
                 <div class="flex items-center">
@@ -298,7 +303,7 @@
                     </div>
                   </div>
             </td>          
-             
+             {/if}
     
             {/each}
             <td></td>

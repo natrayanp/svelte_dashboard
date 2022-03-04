@@ -1,6 +1,6 @@
 import { writable, get } from 'svelte/store'
 
-const INITIAL_ROLE_STORE =        {                              
+const INITIAL_USERMATRIX_STORE =        {                              
     "Availablemodules": [] ,                              
     "Selectedmodules": [],
     "Unselectedmodules": [],
@@ -8,13 +8,13 @@ const INITIAL_ROLE_STORE =        {
     "LiveAvailmod":[],
     "LiveSelectmod":{},
     "ChangeDetails" :{masterdefaul: {rolemasterid : "NEW",rolename : "",roledisplayname : "",roledescription : ""},
-                        master:{},orgdetail:[],orgmaster:{},detail:[],audit:{},ischanged:false},
+                        profile:{},orgdetail:[],orgprofile:{},detail:[],audit:{},ischanged:false},
   };
 
-export const initRoleStore = (initialStore = INITIAL_ROLE_STORE) => {
+export const initRoleStore = (initialStore = INITIAL_USERMATRIX_STORE) => {
 
     let store = writable({
-     ...INITIAL_ROLE_STORE
+     ...INITIAL_USERMATRIX_STORE
    })
    
    const { subscribe, set, update } = store;
