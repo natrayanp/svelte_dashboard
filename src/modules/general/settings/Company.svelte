@@ -11,8 +11,8 @@ import Companydetails from './Companydetails.svelte';
 
 import Alerts from '../../../common/notifications/components/alerts/Alerts.svelte';
 
-import { entityStore,enityVal, authStore, authVal } from "../../../stores/stores";
-import {getMissingRef} from "../../../common/utilfuncs/refdata";
+import { enityVal,  authVal } from "../../../stores/stores";
+import {getMissingRef} from "../../../common/utilfuncs/Refdata.svelte";
 
 import { getNotificationsContext } from '../../../common/notifications';
 import { each } from 'svelte/internal';
@@ -192,45 +192,19 @@ const getCompany = async(goforfetch = false) => {
     console.log("inside getCompany inner if");
     mymodal =loginprogressmodal();      
     let respdata;
-  /*
-    if(goforfetch) {
-        let respdata = await http.post('getcompany',[{"Entitytype":"company","Entityid":[authVal.activecompany.companyId]}]).catch( e => {
-          let s = allAlerts({tgt:"sudo",text:"Technical error",type:'error'});    
-          return;
-        });
 
-        if(respdata.data.company.length > 0 ) {
-          authStore.setCompany(JSON.parse(JSON.stringify(respdata.data.company[0])));
-        } else if(respdata.data.company.length < 1){
-          //TODO: Throw error
-        }         
-        let ref = JSON.parse(JSON.stringify(respdata.data.refdata));
-        await entityStore.setRef({refdatatype:"company",refdata:ref}); 
-        console.log("after getcompany set store end");
-    } else 
-    */
-    let misrefs = getMissingRef("company");
-    if(misrefs.length > 0) {
-    //if(JSON.stringify(enityVal.cprefdata) === JSON.stringify({})) {
-
-      
-        //let respdata = await http.post('getrefdata',[{"Reftype": "group", "Refname": "company"}]).catch(e=>{
-        //let respdata = await http.post('getrefdata',getMissingRef("company")).catch(e=>{  
-          let respdata = await http.post('getrefdata',misrefs).catch(e=>{  
-          //TODO Error handling
-            console.error(e);
-          });
-
-        console.log(respdata);
-        let ref = JSON.parse(JSON.stringify(respdata.data.refdata));
-        await entityStore.setRef(ref); 
-    }
+    let misrefs = await getMissingRef("company");
+    
+    if(misrefs){
     console.log(authVal);
     compdata = [];  
     if(authVal.activecompany !== null ) compdata.push(JSON.parse(JSON.stringify(authVal.activecompany)));   
     refdata = JSON.parse(JSON.stringify(enityVal.refdata));  
     console.log(compdata.length );
     console.log(compdata );
+    } else {
+      let s = allAlerts({tgt:"sudo",text:"Reference data error. Contact Tech support",type:'error'});
+    }
 
     if (compdata.length <= 0) {
       firstvisit = true;

@@ -1,6 +1,8 @@
 <script>
+import { onMount,onDestroy,createEventDispatcher } from 'svelte';
 import { createForm } from "svelte-forms-lib";
 import * as yup from 'yup';
+import { usermatrixStore } from '../../../../stores/stores';
 
 let fullinfo = false;
 let futxt ="Show"
@@ -20,41 +22,42 @@ const {
       handleChange,
       handleSubmit
     } = createForm({
-      initialValues:{},
+      initialValues:$usermatrixStore.LiveSelectmatrix,
       validationSchema: yup.object().shape({
-        Usrprof_userid: yup.string().required(),
-        Usrprof_firstname: yup.string().required(),
-        Usrprof_lastname: yup.string().required(),
-        Usrprof_designation: yup.string().required(),
-        Usrprof_department: yup.string().required(),
-        Usrprof_gender: yup.string().required(),
-        Usrprof_dateofbirth: yup.string().required(),
-        Usrprof_addline1: yup.string().required("Required field"),
-        Usrprof_addline2: yup.string().required("Required field"),
-        Usrprof_country: yup.object().test(
+        userid: yup.string().required(),
+        firstname: yup.string().required(),
+        lastname: yup.string().required(),
+        designation: yup.string().required(),
+        department: yup.string().required(),
+        gender: yup.string().required(),
+        dob: yup.string().required(),
+        addressline1: yup.string().required("Required field"),
+        addressline2: yup.string().required("Required field"),
+        country: yup.object().test(
                                           'country',
                                           'Please select Country',
                                             val => !val.refvalue ? false : true,
                                           ),
-        Usrprof_city: yup.object().test(
+        city: yup.object().test(
                                           'city',
                                           'Please select city',
                                             val => !val.refvalue ? false : true,
                                           ),
-        Usrprof_state: yup.object().test(
+        state: yup.object().test(
                                           'state',
                                           'Please select State',
                                             val => !val.refvalue ? false : true,
                                           ),
-        Usrprof_pinCode: yup.string().required("Required field"),        
-        Usrprof_mobile: yup.number().required(),
-        Usrprof_email: yup.string().required(),
-        Usrprof_joiningdate: yup.date().required("Required field")
+        pinCode: yup.string().required("Required field"),        
+        mobile: yup.number().required(),
+        email: yup.string().required(),
+        joiningdate: yup.date().required("Required field")
                                           .default(() => new Date().toLocaleDateString('en-CA')),  
-        Usrprof_lastdate: yup.date().required("Required field")
+        lastdate: yup.date().required("Required field")
                                           .default(() => new Date().toLocaleDateString('en-CA')),   
-        Usrprof_taxid: yup.string().required(),
-        Usrprof_status: yup.string().required(),    
+        taxid: yup.string().required(),
+        Userstatus: yup.string().required(),   
+        Imagelink : yup.string(), 
 
       }),
       onSubmit: values => {
@@ -62,6 +65,15 @@ const {
         saveaction(values);
       },
     });
+
+
+    onMount(async() => {  
+          console.log("going to onmount userprofile");
+      });    
+
+      onDestroy(async() => {  
+          console.log("going to onDestroy userprofile");
+      });    
 
 function fullinf(){
     fullinfo = !fullinfo;
@@ -72,10 +84,10 @@ function fullinf(){
 function countryselect() {
     
     console.log($form);
-    console.log($form.Usrprof_branchCountry.submenu);
-    if($form.Usrprof_branchCountry.submenu) {
+    console.log($form.branchCountry.submenu);
+    if($form.branchCountry.submenu) {
       console.log("@@#$@#@#@#@#@#@#@#@#@#");
-      states = $form.Usrprof_branchCountry.submenu;      
+      states = $form.branchCountry.submenu;      
     } else {
       console.log("@@#$@#@#@#@#@#@#@#@#@#    NUILL");
       states = [];      
@@ -89,22 +101,22 @@ function countryselect() {
     }
 
     //Reset the previously selected values
-    $form.Usrprof_branchState = '';
-    $form.Usrprof_branchCity = '';  
+    $form.branchState = '';
+    $form.branchCity = '';  
   }
 
 
   function stateselect() {
     console.log("------State change start------");
-    console.log($form.Usrprof_branchState);
-    if($form.Usrprof_branchState.submenu) {
-      citys = $form.Usrprof_branchState.submenu;
+    console.log($form.branchState);
+    if($form.branchState.submenu) {
+      citys = $form.branchState.submenu;
     } else {
       citys = [];
     }
 
     //Reset the previously selected values
-    $form.Usrprof_branchCity = '';
+    $form.branchCity = '';
     console.log("------State change End------");
   }
     
@@ -114,14 +126,14 @@ function getvalue(type,matchstr) {
   case 'branchCountry':    
     return match (refdata.country,matchstr);  
   case 'branchState':    
-    if ($form.Usrprof_branchCountry.submenu !== undefined) {
-      return match ($form.Usrprof_branchCountry.submenu,matchstr); 
+    if ($form.branchCountry.submenu !== undefined) {
+      return match ($form.branchCountry.submenu,matchstr); 
     } else {
       return {}
     }
   case 'branchCity':  
-    if ($form.Usrprof_branchState?.submenu !== undefined) {  
-    return match ($form.Usrprof_branchState.submenu,matchstr); 
+    if ($form.branchState?.submenu !== undefined) {  
+    return match ($form.branchState.submenu,matchstr); 
     } else {
       return {}
     }
@@ -152,7 +164,7 @@ function match (arrval,matchstr) {
 
 
 </script>
-
+{JSON.stringify($form)}
 <div class="flex flex-col md:flex-row flex-wrap items-stretch gap-4 leading-8 mx-5 my-5 ">
     <div class="p-3  basis-1/4   bg-white border-t-4 border-green-400 shadow rounded">
     <!-- 01 -->
@@ -204,15 +216,15 @@ function match (arrval,matchstr) {
                     <label for="Firstname">First Name</label>
                     <input required
                     id="Firstname"  
-                    name = "Usrprof_firstname"
+                    name = "firstname"
                     class="peer mt-0 block w-full px-0.5 py-1 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b-2"			
                     type = "text"
-                    bind:value={$form.Usrprof_firstname}
+                    bind:value={$form.firstname}
                     on:blur ={handleChange}
                     on:change ={handleChange}
                     />
-                  {#if $errors.Usrprof_firstname && (JSON.stringify($errors.Usrprof_firstname)!= '{}') }
-                    <small style="color:red">{$errors.Usrprof_firstname}</small>
+                  {#if $errors.firstname && (JSON.stringify($errors.firstname)!= '{}') }
+                    <small style="color:red">{$errors.firstname}</small>
                   {/if}
                 </div>
 
@@ -221,15 +233,15 @@ function match (arrval,matchstr) {
 
                     <input required
                     id = "Lastname"
-                    name = "Usrprof_lastname"
+                    name = "lastname"
                     class="mt-0 block w-full px-0.5 py-1 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b-2"			
                     type = "text"
-                    bind:value={$form.Usrprof_lastname}
+                    bind:value={$form.lastname}
                     on:blur ={handleChange}
                     on:change ={handleChange}
                     />
-                  {#if $errors.Usrprof_lastname && (JSON.stringify($errors.Usrprof_lastname)!= '{}') }
-                    <small style="color:red">{$errors.Usrprof_lastname}</small>
+                  {#if $errors.lastname && (JSON.stringify($errors.lastname)!= '{}') }
+                    <small style="color:red">{$errors.lastname}</small>
                   {/if}
                   
                 </div>
@@ -237,15 +249,15 @@ function match (arrval,matchstr) {
                     <label for="Designation">Designation</label>
                     <input required
                     id = "Designation"
-                    name = "Usrprof_designation"
+                    name = "designation"
                     class="mt-0 block w-full px-0.5 py-1 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b-2"			
                     type = "text"
-                    bind:value={$form.Usrprof_designation}
+                    bind:value={$form.designation}
                     on:blur ={handleChange}
                     on:change ={handleChange}
                     />
-                  {#if $errors.Usrprof_designation && (JSON.stringify($errors.Usrprof_designation)!= '{}') }
-                    <small style="color:red">{$errors.Usrprof_designation}</small>
+                  {#if $errors.designation && (JSON.stringify($errors.designation)!= '{}') }
+                    <small style="color:red">{$errors.designation}</small>
                   {/if}
                 
                 </div>
@@ -253,9 +265,9 @@ function match (arrval,matchstr) {
                     <label for="Department">Department</label>
                     <select required 
                     id = "Department"
-                    name = "Usrprof_department"
+                    name = "department"
                     class="mt-0 block w-full px-0.5 py-1 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			                                     
-                    bind:value={$form.Usrprof_department} 
+                    bind:value={$form.department} 
                     on:change={handleChange}
                     >                            
                       <option>Marketing</option>
@@ -265,17 +277,17 @@ function match (arrval,matchstr) {
                       <option>Frontdesk</option>
 
                     </select>
-                    {#if $errors.Usrprof_department && (JSON.stringify($errors.Usrprof_department)!= '{}') }
-                    <small style="color:red">{$errors.Usrprof_department}</small>
+                    {#if $errors.department && (JSON.stringify($errors.department)!= '{}') }
+                    <small style="color:red">{$errors.department}</small>
                   {/if} 
                 </div>
                 <div class="md:col-start-3 md:col-span-1 " >				  
                     <label for="Gender">Gender</label>
                             <select required 
                             id = "Gender"
-                            name = "Usrprof_gender"
+                            name = "gender"
                             class="mt-0 block w-full px-0.5 py-1 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			                                     
-                            bind:value={$form.Usrprof_gender} 
+                            bind:value={$form.gender} 
                             on:change={handleChange}
                             >                            
                             <option>Male</option>
@@ -283,8 +295,8 @@ function match (arrval,matchstr) {
 
 
                             </select>
-                            {#if $errors.Usrprof_gender && (JSON.stringify($errors.Usrprof_gender)!= '{}') }
-                              <small style="color:red">{$errors.Usrprof_gender}</small>
+                            {#if $errors.gender && (JSON.stringify($errors.gender)!= '{}') }
+                              <small style="color:red">{$errors.gender}</small>
                             {/if} 
                         </div>
 
@@ -292,15 +304,15 @@ function match (arrval,matchstr) {
                             <label for="Dateofbirth">Date of Birth</label>
                             <input required 
                             id = "Dateofbirth"
-                            name = "Usrprof_dateofbirth"
+                            name = "dob"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                             type = "date"
-                            bind:value={$form.Usrprof_dateofbirth}
+                            bind:value={$form.dob}
                             on:blur ={handleChange}
                             on:change ={handleChange}
                             />
-                            {#if $errors.Usrprof_dateofbirth && (JSON.stringify($errors.Usrprof_dateofbirth)!= '{}') }
-                              <small style="color:red">{$errors.Usrprof_dateofbirth}</small>
+                            {#if $errors.dob && (JSON.stringify($errors.dob)!= '{}') }
+                              <small style="color:red">{$errors.dob}</small>
                             {/if}
                         </div>
 
@@ -310,15 +322,15 @@ function match (arrval,matchstr) {
 
                             <textarea required 
                             id = "Addline1"
-                            name = "Usrprof_addline1"
+                            name = "addressline1"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                             type = "text"
-                            bind:value={$form.Usrprof_addline1}
+                            bind:value={$form.addressline1}
                             on:blur ={handleChange}
                             on:change ={handleChange}
                                     ></textarea>
-                                    {#if $errors.Usrprof_addline1 && (JSON.stringify($errors.Usrprof_addline1)!= '{}') }
-                                    <small style="color:red">{$errors.Usrprof_addline1}</small>
+                                    {#if $errors.addressline1 && (JSON.stringify($errors.addressline1)!= '{}') }
+                                    <small style="color:red">{$errors.addressline1}</small>
                                   {/if} 
                         </div>  
 
@@ -327,15 +339,15 @@ function match (arrval,matchstr) {
 
                             <textarea required 
                             id = "Addline2"
-                            name = "Usrprof_addline2"
+                            name = "addressline2"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                             type = "text"
-                            bind:value={$form.Usrprof_addline2}
+                            bind:value={$form.addressline2}
                             on:blur ={handleChange}
                             on:change ={handleChange}
                                     ></textarea>
-                                    {#if $errors.Usrprof_addline2 && (JSON.stringify($errors.Usrprof_addline2)!= '{}') }
-                                    <small style="color:red">{$errors.Usrprof_addline2}</small>
+                                    {#if $errors.addressline2 && (JSON.stringify($errors.addressline2)!= '{}') }
+                                    <small style="color:red">{$errors.addressline2}</small>
                                   {/if} 
                         </div>
 
@@ -344,9 +356,9 @@ function match (arrval,matchstr) {
                             <label for="Country">Country</label>
                             <select required 
                             id = "Country"
-                            name = "Usrprof_country"
+                            name = "country"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                            bind:value={$form.Usrprof_country} 
+                            bind:value={$form.country} 
                             on:change={()=>countryselect()}
     
                             >
@@ -354,8 +366,8 @@ function match (arrval,matchstr) {
                                 <option>Singapore</option> 
                     
                         </select>
-                        {#if $errors.Usrprof_country && (JSON.stringify($errors.Usrprof_country)!= '{}') }
-                         <small style="color:red">{$errors.Usrprof_country}</small>
+                        {#if $errors.country && (JSON.stringify($errors.country)!= '{}') }
+                         <small style="color:red">{$errors.country}</small>
                          {/if} 
                         </div>
 
@@ -364,17 +376,17 @@ function match (arrval,matchstr) {
                             <label for="State">State</label>
                             <select required 
                             id = "State"
-                            name = "Usrprof_state"
+                            name = "state"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                            bind:value={$form.Usrprof_state}  
+                            bind:value={$form.state}  
                             on:change={stateselect}
                             >
                                 <option>TamilNadu</option>
                                 <option>Karnataka</option>
                     
                         </select>
-                        {#if $errors.Usrprof_state && (JSON.stringify($errors.Usrprof_state)!= '{}') }
-                          <small style="color:red">{$errors.Usrprof_state}</small>
+                        {#if $errors.state && (JSON.stringify($errors.state)!= '{}') }
+                          <small style="color:red">{$errors.state}</small>
                         {/if} 
                         </div>
 
@@ -382,16 +394,16 @@ function match (arrval,matchstr) {
                             <label for="City">City</label>
                             <select required 
                             id = "City"
-                            name = "Usrprof_city"
+                            name = "city"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                            bind:value={$form.Usrprof_city}
+                            bind:value={$form.city}
                             >
                                 <option>Chennai</option>
                                 <option>Coibatore</option>
                     
                         </select>
-                        {#if $errors.Usrprof_city && (JSON.stringify($errors.Usrprof_city)!= '{}') }
-                          <small style="color:red">{$errors.Usrprof_city}</small>
+                        {#if $errors.city && (JSON.stringify($errors.city)!= '{}') }
+                          <small style="color:red">{$errors.city}</small>
                         {/if} 
                         </div>
 
@@ -400,15 +412,15 @@ function match (arrval,matchstr) {
                             <label for="PinCode">Pin</label>
                             <input required 
                             id="PinCode"  
-                            name = "Usrprof_pinCode"
+                            name = "pinCode"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                             type = "text"
-                            bind:value={$form.Usrprof_pinCode}
+                            bind:value={$form.pinCode}
                             on:blur ={handleChange}
                             on:change ={handleChange}
                             />
-                            {#if $errors.Usrprof_pinCode && (JSON.stringify($errors.Usrprof_pinCode)!= '{}') }
-                              <small style="color:red">{$errors.Usrprof_pinCode}</small>
+                            {#if $errors.pinCode && (JSON.stringify($errors.pinCode)!= '{}') }
+                              <small style="color:red">{$errors.pinCode}</small>
                             {/if} 
                         </div>
                         {/if}
@@ -418,15 +430,15 @@ function match (arrval,matchstr) {
                             <label for="Mobile">Mobile</label>
                             <input required 
                             id="Mobile"  
-                            name = "Usrprof_mobile"
+                            name = "mobile"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
                             type="text"
-                            bind:value={$form.Usrprof_mobile}      
+                            bind:value={$form.mobile}      
                             on:blur ={handleChange}
                             on:change ={handleChange} 
                             />
-                            {#if $errors.Usrprof_mobile && (JSON.stringify($errors.Usrprof_mobile)!= '{}') }
-                              <small style="color:red">{$errors.Usrprof_mobile}</small>
+                            {#if $errors.mobile && (JSON.stringify($errors.mobile)!= '{}') }
+                              <small style="color:red">{$errors.mobile}</small>
                             {/if} 
                         </div>
 
@@ -434,14 +446,14 @@ function match (arrval,matchstr) {
                             <label for="Email">email</label>
                             <input type="text" required 
                             id = "Email"
-                            name = "Usrprof_email"
+                            name = "email"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			         
-                            bind:value={$form.Usrprof_email}
+                            bind:value={$form.email}
                             on:blur ={handleChange}
                             on:change ={handleChange}
                             />		
-                            {#if $errors.Usrprof_email && (JSON.stringify($errors.Usrprof_email)!= '{}') }
-                              <small style="color:red">{$errors.Usrprof_email}</small>
+                            {#if $errors.email && (JSON.stringify($errors.email)!= '{}') }
+                              <small style="color:red">{$errors.email}</small>
                             {/if}   
                         </div>
 
@@ -450,15 +462,15 @@ function match (arrval,matchstr) {
                             <label for="Joiningdate">Joining Date</label>
                             <input required 
                             id = "Joiningdate"
-                            name = "Usrprof_joiningdate"
+                            name = "joiningdate"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                             type = "date"
-                            bind:value={$form.Usrprof_joiningdate}
+                            bind:value={$form.joiningdate}
                             on:blur ={handleChange}
                             on:change ={handleChange}
                             />
-                            {#if $errors.Usrprof_joiningdate && (JSON.stringify($errors.Usrprof_joiningdate)!= '{}') }
-                              <small style="color:red">{$errors.Usrprof_joiningdate}</small>
+                            {#if $errors.joiningdate && (JSON.stringify($errors.joiningdate)!= '{}') }
+                              <small style="color:red">{$errors.joiningdate}</small>
                             {/if}
                         </div>
 
@@ -467,15 +479,15 @@ function match (arrval,matchstr) {
                             <label for="Lastdate">Last Date</label>
                             <input required 
                             id = "Lastdate"
-                            name = "Usrprof_lastdate"
+                            name = "lastdate"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                             type = "date"
-                            bind:value={$form.Usrprof_lastdate}
+                            bind:value={$form.lastdate}
                             on:blur ={handleChange}
                             on:change ={handleChange}
                             />
-                            {#if $errors.Usrprof_lastdate && (JSON.stringify($errors.Usrprof_lastdate)!= '{}') }
-                              <small style="color:red">{$errors.Usrprof_lastdate}</small>
+                            {#if $errors.lastdate && (JSON.stringify($errors.lastdate)!= '{}') }
+                              <small style="color:red">{$errors.lastdate}</small>
                             {/if}
                         </div>
 
@@ -483,14 +495,14 @@ function match (arrval,matchstr) {
                             <label for="Taxid">Taxid/NRIC/Adhaarcard</label>
                             <input type="text" required                               
                               id = "Taxid"
-                              name = "Usrprof_taxid"
+                              name = "taxid"
                               class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
-                              bind:value={$form.Usrprof_taxid}
+                              bind:value={$form.taxid}
                               on:blur ={handleChange}
                               on:change ={handleChange}
                             />
-                            {#if $errors.Usrprof_taxid && (JSON.stringify($errors.Usrprof_taxid)!= '{}') }
-                              <small style="color:red">{$errors.Usrprof_taxid}</small>
+                            {#if $errors.taxid && (JSON.stringify($errors.taxid)!= '{}') }
+                              <small style="color:red">{$errors.taxid}</small>
                             {/if}
                         </div>
                   

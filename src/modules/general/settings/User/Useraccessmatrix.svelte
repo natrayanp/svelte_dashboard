@@ -1,5 +1,5 @@
 <script>
-    import { onMount,createEventDispatcher } from 'svelte';
+    import { onMount,onDestroy,createEventDispatcher } from 'svelte';
     import { Tabs, TabList, TabPanel, Tab } from '../../../../common/tabs/tab';
     import Userprofile from './Userprofile.svelte';
     import {flip} from 'svelte/animate';
@@ -158,7 +158,15 @@
       let hoveringOverBasket;
       let hoveringOverBasket1;
       
-    
+      onMount(async() => {  
+          console.log("going to onmount Useraccessmatrix");
+      });    
+
+      onDestroy(async() => {  
+          console.log("going to onDestroy Useraccessmatrix");
+      });    
+
+
     
       function togglemenu(event, basketIndex, itemIndex) {
         $baskets.Availablemodules[basketIndex].submodules[itemIndex].menu = !$baskets.Availablemodules[basketIndex].submodules[itemIndex].menu;

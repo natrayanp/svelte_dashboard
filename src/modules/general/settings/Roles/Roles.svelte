@@ -9,6 +9,7 @@ import Roledetails from './Roledetails.svelte';
 import Alerts from '../../../../common/notifications/components/alerts/Alerts.svelte';
 import { http } from '../../../../stores/services';
 import { getNotificationsContext } from '../../../../common/notifications';
+import { getRoleval } from './Rolefetch';
 const { addNotification } = getNotificationsContext();
 
     let datatosend = [];
@@ -35,9 +36,9 @@ const getRolesForCompany = async(goforfetch = false) => {
     if ($roleStore.Selectedmodules.length  === 0) {
     mymodal =Rolefetchprogressmodal();   
     
-    let postdata = {"Optype":"fetch","Companyid":authVal.activecompany.companyId,"Branchid":authVal.activebranch.branchId};
-    console.log("postdate = ", postdata);
-    let respdata = await http.post('getroledata',postdata);
+    let respdata = await getRoleval();
+    //let postdata = {"Optype":"fetch","Companyid":authVal.activecompany.companyId,"Branchid":authVal.activebranch.branchId};
+    //let respdata = await http.post('getroledata',postdata);
 
     if(!(respdata.status === "SUCCESS")) {
     //allAlerts({text:respdata.data.message,type:'success'});
@@ -49,6 +50,8 @@ const getRolesForCompany = async(goforfetch = false) => {
 			}
     //$goto('/login');
   } else {    
+
+    /*
     console.log(respdata);
         let ref = JSON.parse(JSON.stringify(respdata.data.roledata));
         console.log(ref.Selectedmodules.length);        
@@ -57,7 +60,9 @@ const getRolesForCompany = async(goforfetch = false) => {
         } else {
           $roleStore.Selectedmodules = [];
         }        
-        $roleStore.Availablemodules = ref.Availablemodules.slice(); 
+       $roleStore.Availablemodules = ref.Availablemodules.slice(); 
+      */
+     
     if(mymodal) {			
 				mymodal.close();
 				mymodal=null;
@@ -186,8 +191,10 @@ async function toggle_delete(role){
 
 
   async function handleresult(event) {
-  console.log(event.detail.action);  
+  console.log(event.detail.action);   
+
   //TODO: Don't go for full fetch.  after Save/Update, replace the new values in store
+
   if (!['cancel'].includes(event.detail.action)) callalert(event);
   
   

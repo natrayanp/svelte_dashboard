@@ -453,7 +453,7 @@ if(mod.menulevel !== 'COMPANY') {
           //console.log(respdata);
         }        
         console.log(submitval);
-        $roleStore.ChangeDetails.ischanged = false;
+        roleStore.reset_Selection();        
         dispatch('editresult',{
         action: btnpressed,
         rolemasterid: (submitval && submitval.rolemaster)? submitval.rolemaster.Rolemasterid:'',

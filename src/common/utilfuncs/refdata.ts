@@ -2,11 +2,12 @@ import { enityVal } from "../../stores/stores";
 
 const requiredrefs = {
     company:["country", "industype", "compcat","timezone","currency","finyear"],
-    branch:["country"]
+    branch:["country"],
+    useraccess:["country"]
 }
 
 
-export const getMissingRef = (refgroupname="",indiitarr=[]) => {          
+export const getMissingRefts= async (refgroupname="",indiitarr=[]) => {          
     let dd = Object.keys(enityVal.refdata);
     let missrefs;
     if(indiitarr.length < 1) {

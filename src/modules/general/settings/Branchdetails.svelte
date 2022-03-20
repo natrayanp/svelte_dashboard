@@ -7,7 +7,7 @@
     import { http } from '../../../stores/services';
     import { Accordion, AccordionItem } from "../../../common/accordion/index";
     import { createEventDispatcher } from 'svelte';
-    import { entityStore,enityVal, authStore, authVal } from "../../../stores/stores";
+    import {  authStore, authVal } from "../../../stores/stores";
     import { goto } from '@roxi/routify';
     import Alerts from '../../../common/notifications/components/alerts/Alerts.svelte';
     import { createForm } from "svelte-forms-lib";

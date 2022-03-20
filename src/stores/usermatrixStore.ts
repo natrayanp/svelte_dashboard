@@ -1,20 +1,26 @@
 import { writable, get } from 'svelte/store'
 
 const INITIAL_USERMATRIX_STORE =        {                              
-    "Availablemodules": [] ,                              
-    "Selectedmodules": [],
-    "Unselectedmodules": [],
-    "Liverole":{},
-    "LiveAvailmod":[],
-    "LiveSelectmod":{},
-    "ChangeDetails" :{masterdefaul: {rolemasterid : "NEW",rolename : "",roledisplayname : "",roledescription : ""},
-                        profile:{},orgdetail:[],orgprofile:{},detail:[],audit:{},ischanged:false},
+   // "Availablemodules": [] , //Delte this as this is not required                             
+   // "Selectedmodules": [],
+    //"Unselectedmodules": [],
+    "Listallmatrix":[],
+    "Livematrix":{},
+    "Livematrixindex":null,  //This has the index of the "Livematrix" item from "Listallmatrix" array
+    "LiveAvailbranch":[],    
+    "LiveAvailrole":[],
+    //"LiveAvailmatrix":[],
+    "LiveSelectmatrix":{},
+    "ChangeDetails" :{profiledefaul: {rolemasterid : "NEW",rolename : "",roledisplayname : "",roledescription : ""},
+                        profile:{},matrix:[],orgprofile:{},orgmatrix:[],audit:{},
+                        profilechanged: false, matrixchanged: false, Allchanged:false},
+    "mode": "list",
   };
 
-export const initRoleStore = (initialStore = INITIAL_USERMATRIX_STORE) => {
+export const initUserMatrixStore = (initialStore = INITIAL_USERMATRIX_STORE) => {
 
     let store = writable({
-     ...INITIAL_USERMATRIX_STORE
+     ...initialStore
    })
    
    const { subscribe, set, update } = store;
@@ -51,11 +57,45 @@ export const initRoleStore = (initialStore = INITIAL_USERMATRIX_STORE) => {
                     }                   
                      
                 }
- }  
+}  
+
+interface Changestruct {
+    changval: Boolean;
+    changtype: "profile"|"matrix"    
+  }
+
+let calcChange = (self,val:Changestruct) =>{
+    
+    switch(val.changtype){
+        case("profile"): {
+            self.ChangeDetails.profilechanged = val.changval;
+            break;
+        }
+        case("matrix"): {
+            self.ChangeDetails.matrixchanged = val.changval;
+            break;
+        }
+    }
+
+    if(self.ChangeDetails.profilechanged &&  self.ChangeDetails.matrixchanged) {
+        self.ChangeDetails.Allchanged = true;
+    } else {
+        self.ChangeDetails.Allchanged = false;
+    }
+
+ }
+
+
+ let selection_reset = (self) => {
+    self.Livematrix = JSON.parse(JSON.stringify(INITIAL_USERMATRIX_STORE.Livematrix));
+    self.LiveAvailmatrix = (INITIAL_USERMATRIX_STORE.LiveAvailmatrix).slice();
+    self.LiveSelectmatrix = JSON.parse(JSON.stringify(INITIAL_USERMATRIX_STORE.LiveSelectmatrix));
+    self.ChangeDetails = JSON.parse(JSON.stringify(INITIAL_USERMATRIX_STORE.ChangeDetails));
+ }
 
 
 
-     const MyRoleStore = {
+     const MyUserMatrixStore = {
        store: store,
        subscribe,
        set,
@@ -68,12 +108,14 @@ export const initRoleStore = (initialStore = INITIAL_USERMATRIX_STORE) => {
         return self;
       }), 
        update,       
-       reset: () => set(INITIAL_ROLE_STORE),      
+       reset_All: () => set(INITIAL_USERMATRIX_STORE),
+       reset_Selection: () => selection_reset(self),
+       changeStat: (value:Changestruct) => calcChange(self,value), 
      }
 
      
      
-     return MyRoleStore;
+     return MyUserMatrixStore;
    
 }
 

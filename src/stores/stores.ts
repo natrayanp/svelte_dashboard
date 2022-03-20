@@ -6,6 +6,7 @@ import { writable, derived } from "svelte/store"
 import { initAuthStore } from './authStore';
 import { initEntityStore } from './entityStore';
 import { initRoleStore } from './roleStore';
+import { initUserMatrixStore } from './usermatrixStore';
 
 
 //*Auth Store - START
@@ -25,7 +26,7 @@ let entyUnsub = entityStore.subscribe((val) => enityVal=val);
 //*Enitity Store - END
 
 //*Roles store - START
-export let roleStore = initRoleStore();
+export const roleStore = initRoleStore();
 export let roleVal;
 /*
 export const getRoleStore = () => { 
@@ -40,9 +41,27 @@ let roleUnsub = roleStore.subscribe((val) => roleVal=val);
 //*Roles store - END
 
 
+//*UserMatrix store - START             
+export const usermatrixStore = initUserMatrixStore();
+export let usermatrixVal;
+/*
+export const getRoleStore = () => { 
+    console.log("nat");
+    roleStore = initRoleStore();
+    let roleUnsub = roleStore.subscribe((val) => roleVal=val);
+    return roleStore;
+};
+*/
+let usermatrixUnsub = usermatrixStore.subscribe((val) => usermatrixVal=val);
+
+//*Roles store - END
+
+
 const restAllStore = () => {
     authStore.reset();
     entityStore.reset();
+    roleStore.reset();
+    usermatrixStore.reset_All();
 }
 
 export const masterStore = {

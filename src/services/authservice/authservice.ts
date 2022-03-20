@@ -71,6 +71,14 @@ export async function authInit(){
         }
         return respdata;        
     }
+
+   
+    await auth.authStateListener();
+   /*
+    activateListener().then( x => {
+        console.log("activate listener inside");
+    })
+    */
 }
 
 
@@ -238,6 +246,6 @@ const signtk = async() => {
 
 
 export const activateListener = async () => {
-    let tt = await auth.authStateListener();
+    return await auth.authStateListener();
     //authStore.update(dd => ({...dd,listener: tt}));
 }  

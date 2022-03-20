@@ -1,5 +1,4 @@
-
-  <script>
+<script>
 
 import {formValidator} from '../../../common/formvalidators/formvalidator';
 import {onMount, onDestroy} from 'svelte';
@@ -10,8 +9,8 @@ import Branchdetails from './Branchdetails.svelte';
 
 import Alerts from '../../../common/notifications/components/alerts/Alerts.svelte';
 
-import { entityStore,enityVal, authStore, authVal } from "../../../stores/stores";
-import {getMissingRef} from "../../../common/utilfuncs/refdata";
+import { enityVal,  authVal } from "../../../stores/stores";
+import {getMissingRef} from "../../../common/utilfuncs/Refdata.svelte";
 
 import { getNotificationsContext } from '../../../common/notifications';
 const { addNotification } = getNotificationsContext();
@@ -95,109 +94,33 @@ onMount(async() => {
     console.log("inside getBranch inner if");    
     mymodal =brnfetchprogressmodal();  
     let respdata;
-    /*  
-    if(goforfetch && selectedbranch !="") {
-      respdata = await http.post('getbranch',[
-                      {"Entitytype":"company","Entityid":[authVal.activecompany.companyId]},
-                      {"Entitytype":"branch","Entityid":[selectedbranch]}
-                    ]).catch( e => {
-          let s = allAlerts({tgt:"sudo",text:"Technical error",type:'error'});    
-          return;
-        });
-    
-        if(respdata.data.branch.length == 1 ) {
-          await authStore.setBranch(JSON.parse(JSON.stringify(respdata.data.branch[0])));
-        } else {
-          //TODO: Throw error
-        } 
-        ref = JSON.parse(JSON.stringify(respdata.data.refdata));
-        await entityStore.setRef({refdatatype:"branch",refdata:ref}); 
-        console.log("after getcompany set store end");
-    } else 
-    */
+
     let misrefs = getMissingRef("branch");
-    //if(JSON.stringify(enityVal.brrefdata) === JSON.stringify({})) {
-    if(misrefs.length > 0) {
-        //let respdata = await http.post('getrefdata',[{"Reftype": "group", "Refname": "branch"}]).catch(e=>{
-        let respdata = await http.post('getrefdata',misrefs).catch(e=>{  
-            //TODO Error handling
-            console.error(e);
-          });
-        console.log(respdata);
-        let ref = JSON.parse(JSON.stringify(respdata.data.refdata));
-        await entityStore.setRef(ref); 
+
+    if(misrefs){
+      brndata = [];
+      console.log(authVal.allbranch !== undefined);
+      if(authVal.allbranch !== undefined && authVal.allbranch !== null && authVal?.allbranch.length > 0)
+          brndata=(JSON.parse(JSON.stringify(authVal.allbranch.slice())));   
+      refdata = JSON.parse(JSON.stringify(enityVal.refdata));  
+
+      if (brndata.length <= 0) {
+        firstvisit = true;
+        toggle_edit();
+      }else {
+        firstvisit = false;
+      }
+    } else {
+      let s = allAlerts({tgt:"sudo",text:"Reference data error. Contact Tech support",type:'error'});
     }
 
-    brndata = [];
-    console.log(authVal.allbranch !== undefined);
-    if(authVal.allbranch !== undefined && authVal.allbranch !== null && authVal?.allbranch.length > 0)
-        brndata=(JSON.parse(JSON.stringify(authVal.allbranch.slice())));   
-    refdata = JSON.parse(JSON.stringify(enityVal.refdata));  
-
-    if (brndata.length <= 0) {
-      firstvisit = true;
-      toggle_edit();
-    }else {
-      firstvisit = false;
-    }
     mymodal.close();
     mymodal=null;
     console.log("inside onmoung inner if end of getcompany");
-
   }
 
 
-  /*
-  const getBranch = async(goforfetch = false) => {
-    console.log("inside getBranch inner if");
-      console.log(JSON.stringify(enityVal));
-    mymodal =brnfetchprogressmodal();  
-    let respdata;
-    console.log(enityVal);
-    console.log(enityVal.branch);
-    console.log( JSON.stringify(enityVal.branch.length) === 0); 
-    if(!goforfetch) {
-      if (enityVal.branch.length === 0 || JSON.stringify(enityVal.refdata) === JSON.stringify({})) {
-        goforfetch = true;  
-      } 
-    }    
-
-    if(goforfetch) {
-      //respdata = await http.get('getbranch'); 
-      respdata = await http.post('getbranch',{"Entitytype":"company","Entityid":authVal.activecompany.companyId}); 
-      console.log(JSON.stringify(respdata));
-      console.log("after getBranch set store start"); 
-      console.log(respdata.data.branch.length);
-      if(respdata.data.branch.length > 0) {
-        entityStore.setBranch(JSON.parse(JSON.stringify(respdata.data.branch)));
-      } else {
-        entityStore.setBranch([]); 
-      }
-      
-      entityStore.setRef(JSON.parse(JSON.stringify(respdata.data.refdata))); 
-      console.log("after getBranch set store end");
-    }        
-
-    console.log(JSON.stringify(enityVal.branch));
-    console.log(JSON.stringify(enityVal.refdata));
-    
-    brndata=JSON.parse(JSON.stringify(enityVal.branch.slice()));   
-    console.log(enityVal.branch) ;
-    console.log(brndata) ;
-    refdata = JSON.parse(JSON.stringify(enityVal.refdata));  
-
-    if (brndata.length <= 0) {
-      firstvisit = true;
-      toggle_edit();
-      
-    }else {
-      firstvisit = false;
-    }
-    mymodal.close();
-    mymodal=null;
-    console.log("inside onmoung inner if end of getBranch");
-  };
-*/
+  
 
   const allAlerts = (val) => {
     console.log(val);

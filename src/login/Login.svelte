@@ -334,9 +334,9 @@ import { get } from 'svelte/store';
 			if(!mymodal){
 				mymodal = loginprogressmodal();
 			}
-			await sessionexist();
+			await sessionexist();			
+			if(mymodal) mymodal.close();
 			mymodal=null;
-			mymodal.close();
 			console.log("ending sessionexists");
 		} else {
 			await dosignout();

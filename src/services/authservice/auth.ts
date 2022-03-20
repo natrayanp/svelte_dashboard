@@ -296,6 +296,7 @@ export const initAuth = (useRedirect = false) => {
     const authStateListener = () => {
     // will be fired every time auth state changes
     return auth.onAuthStateChanged(async fireUser => {
+        
       if (fireUser) {
         // in here you might want to do some further actions
         // such as loading more data, etc.
@@ -306,8 +307,15 @@ export const initAuth = (useRedirect = false) => {
         const token = await fireUser.getIdTokenResult();
         user = userMapper(token);
       } else {
+          console.log("+++++++++++++++++++++++++++++++++++++++++++++");
+          console.log("+++++++++++++++++++++++++++++++++++++++++++++");
+          console.log("+++++++++++++++++++++++++++++++++++++++++++++");
+          console.log("+++++++++++++++++++++++++++++++++++++++++++++");
+          console.log("+++++++++++++++++++++++++++++++++++++++++++++");
+          console.log("+++++++++++++++++++++++++++++++++++++++++++++");
         user = null;
-      }
+        logout();
+      }      
     });
     }
 

@@ -61,6 +61,8 @@ export const environment = {
    endpt_getrefdata: 'auth/getrefdata',
    endpt_getroledata: 'auth/getroles',
    endpt_rolesave: 'auth/saveroles',
+   endpt_getusrmatrix: 'auth/getmatrix',
+   endpt_usrmatrixsave: 'auth/savematrix',
 };
 
 

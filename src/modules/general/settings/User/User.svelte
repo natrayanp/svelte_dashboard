@@ -1,44 +1,98 @@
 <script>
 
-
+import { onMount } from "svelte";
 import Alerts from '../../../../common/notifications/components/alerts/Alerts.svelte';
 import Userdetails from './Userdetails.svelte';
-
+import { authStore,authVal,usermatrixStore} from '../../../../stores/stores';
+import { getNotificationsContext } from '../../../../common/notifications';
+const { addNotification } = getNotificationsContext();
+import { http } from '../../../../stores/services';
 
 /// Tabs
 //https://catalin.red/css3-jquery-folder-tabs/
 
 let mymod = 'list';
 
+onMount(async ()=> {
+  await getAllUserMatrixForCompany();
+})
+
+const getAllUserMatrixForCompany = async() => {
+  $usermatrixStore.mode = 'list';
+  let mymodal =Rolefetchprogressmodal();       
 
 
+    if ($usermatrixStore.Listallmatrix.length  === 0) {
+      
+      let postdata = {"Optype":"list","Companyid":authVal.activecompany.companyId};
+      console.log("postdate = ", postdata);
+      let respdata = await http.post('getusrmatrix',postdata);
+
+      if((respdata.status !== "SUCCESS")) {
+        //allAlerts({text:respdata.data.message,type:'success'});
+        console.log("inside error")
+            let s = allAlerts({tgt:"useralert_1",text:respdata.data.message,type:'error'});    
+        //$goto('/login');
+      } else {    
+        console.log(respdata);
+        let ref = JSON.parse(JSON.stringify(respdata.data.matrixdata));
+          
+        if (ref.Listmatrix && ref.Listmatrix.length) {
+            $usermatrixStore.Listallmatrix = ref.Listmatrix.slice();
+        } else {
+            $usermatrixStore.Listallmatrix = [];
+        }        
+        //$usermatrixStore.Availablemodules = ref.Availablemodules.slice(); 
+      }
+    }  
+
+    console.log($usermatrixStore);
+  
+  if(mymodal) {			
+    mymodal.close();
+    mymodal=null;
+  }
+}
+
+const Rolefetchprogressmodal = () => {
+		return addNotification({
+				title : 'Checking your account',
+				text: 'hi i am custom notification why it cant be sol long so i can test it before using it' ,
+				notificationtype: 'modal',            
+				modaltype:'modal-loading',  	
+        //comp : Circularprogress,				
+			});
+	}
 
   
-    function toggle_edit(roledata={}) {
-      console.log("toogle eeid");
-      mymod="new";
-  /*
-    mymod="edit";
-    if($roleStore.Selectedmodules.length <= 0)  mymod="new";
-    if(JSON.stringify(roledata)=== JSON.stringify({})) mymod = 'new';
-    if(firstvisit)  mymod="new";
-    myc = "hidden";    
-    $roleStore.Liverole = JSON.parse(JSON.stringify(roledata));   
-  */
+function toggle_edit(matrixdata={item:{},itemIndex:null}) {
+  console.log("toogle eeid");  
+  console.log(matrixdata);
+  $usermatrixStore.mode="edit";
+  if(JSON.stringify(matrixdata.item) === JSON.stringify({})) {
+    $usermatrixStore.mode = 'new';
+    $usermatrixStore.Livematrix = JSON.parse(JSON.stringify(matrixdata.item));
+    $usermatrixStore.Livematrixindex = matrixdata.itemIndex;
   }
+  /*  
+  if($usermatrixStore.Selectedmodules.length <= 0)  mymod="new";  
+  if(firstvisit)  mymod="new";
+  myc = "hidden";  
+  */
+}
 
 
-  async function handleresult(event) {
+async function handleresult(event) {
   console.log(event.detail.action);  
   //TODO: Don't go for full fetch.  after Save/Update, replace the new values in store
   if (!['cancel'].includes(event.detail.action)) callalert(event);
-  
-  
+
+
   /* if (roledata.length <= 0) {    
-    let s = allAlerts({tgt:"sudo1",text:"No Role setup exists. Please save company",type:'error'});    
+  let s = allAlerts({tgt:"sudo1",text:"No Role setup exists. Please save company",type:'error'});    
   } else {*/
-    mymod = 'list';
-    myc = "hidden";
+    $usermatrixStore.mode = 'list';
+  //myc = "hidden";
   //}
 }
 
@@ -58,14 +112,14 @@ function callalert(event) {
 				//modaltype:'modal-no-action',  	
 				//comp:Modals				
 			});	
-    }
+}
       
       
-      </script>
+</script>
 
 <Alerts targetid="useralert_1"/>
 
-{#if (['list'].includes(mymod))}
+{#if (['list'].includes($usermatrixStore.mode))}
 
     <div class="flex flex-col" >
 
@@ -174,7 +228,8 @@ function callalert(event) {
                     </tr>
                   </thead>
                   <tbody class="bg-white divide-y divide-gray-200">
-                    <tr>
+                    {#each $usermatrixStore.Listallmatrix as item, itemIndex (item)}
+                    <tr>                      
                       <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
                           <div class="flex-shrink-0 h-10 w-10">
@@ -208,11 +263,12 @@ function callalert(event) {
                         </span>
                       </td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        <a href="#" class="text-red-600 hover:text-red-900 mr-5"><i class="far fa-trash-alt fa-lg"/></a>
-                        <a href="#" class="text-green-600 hover:text-green-900"><i class="far fa-edit fa-lg"/></a>
+                        <a href="#" class="text-green-600 hover:text-green-900 mr-5" ><i class="far fa-eye fa-sm"/></a>
+                        <a href="#" class="text-red-600 hover:text-red-900 mr-5" ><i class="far fa-trash-alt fa-lg"/></a>
+                        <a href="#" class="text-green-600 hover:text-green-900" on:click|preventDefault={()=>toggle_edit({item,itemIndex})}><i class="far fa-edit fa-lg"/></a>
                       </td>
                     </tr>
-        
+                    {/each}
                     <!-- More rows... -->
                   </tbody>
                 </table>
@@ -222,10 +278,9 @@ function callalert(event) {
         </div>
         {/if}
 
-        {#if (['edit','new','display'].includes(mymod))}
-
-        <Userdetails on:editresult= {handleresult}></Userdetails>
-          {/if}
+        {#if (['edit','new','display'].includes($usermatrixStore.mode))}
+          <Userdetails  on:editresult= {handleresult}></Userdetails>
+        {/if}
 <!--
           <div class="shadow rounded-lg  h-56  bg-white overflow-auto	">
             <ul class="bg-white rounded shadow w-56 flex flex-row flex-grow">
