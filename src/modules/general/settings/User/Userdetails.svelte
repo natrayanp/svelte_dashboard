@@ -1,5 +1,5 @@
 <script>
-
+	import { getContext } from 'svelte';
 import { onMount,createEventDispatcher, onDestroy } from 'svelte';
 import { Tabs, TabList, TabPanel, Tab } from '../../../../common/tabs/tab';
 import Userprofile from './Userprofile.svelte';
@@ -8,14 +8,18 @@ import { writable } from 'svelte/store';
 import Useraccessmatrix from './Useraccessmatrix.svelte';
 import {getMissingRef} from "../../../../common/utilfuncs/Refdata.svelte";
 import Alerts from '../../../../common/notifications/components/alerts/Alerts.svelte';
-import { authStore,authVal,roleStore,usermatrixStore} from '../../../../stores/stores';
+import { authStore,authVal,entityStore,roleStore,usermatrixStore} from '../../../../stores/stores';
 import { getNotificationsContext } from '../../../../common/notifications';
 import { getRoleval } from '../Roles/Rolefetch';
 const { addNotification,clearNotifications } = getNotificationsContext();
 import { http } from '../../../../stores/services';
+import { formValidator } from '../../../../common/formvalidators/formvalidator';
 
 
 let alt = null
+let modtext = '';
+let mystyle ='';
+let btntxt = '';
 
 let bask =        {                              
                               "Availablemodules": [
@@ -75,10 +79,10 @@ let bask =        {
 
   let baskets = writable(bask);
 
-
+  
 
 onMount(async ()=> {
-  await getUserMatrixdetail();
+  await  getUserMatrixdetail();
 })
 
 onDestroy( () => {
@@ -89,7 +93,7 @@ async function  getUserMatrixdetail() {
   let proceed = true;
   let mymodal =Rolefetchprogressmodal();       
 
-  let misrefs = await getMissingRef("useraccess");
+  let misrefs = await getMissingRef("usermatrix");
 
   if(!misrefs) {
     alt = allAlerts({tgt:"useralert_2",text:"Reference data error. Contact Tech support",type:'error'});
@@ -139,9 +143,21 @@ async function  getUserMatrixdetail() {
     }  
   } 
   
-  if(proceed) populateMatrix();
+  if(proceed) reinstate_val();
 
   
+  if($usermatrixStore.mode === 'display') {
+        modtext = 'View';        
+        mystyle ='pointer-events:none';
+    } else if ($usermatrixStore.mode === 'new') {
+        modtext = 'New';
+        btntxt = "Save";
+    } else if ($usermatrixStore.mode === 'edit') {
+        modtext = 'Update';
+        btntxt = "Update";
+    }
+
+
   if(mymodal) {			
     mymodal.close();
     mymodal=null;
@@ -149,7 +165,8 @@ async function  getUserMatrixdetail() {
 
 }
 
-function populateMatrix() {
+
+function reinstate_val() {
   $usermatrixStore.LiveAvailbranch.push($authStore.allbranch.slice());
   $usermatrixStore.LiveAvailrole.push($roleStore.Availablemodules.slice());
    
@@ -161,9 +178,29 @@ function populateMatrix() {
       $usermatrixStore.Livematrix.Accessmatrix.forEach(ama => {
         $usermatrixStore.LiveAvailbranch = $usermatrixStore.LiveAvailbranch.filter( x => ama.branchId !== x.branchId);
       } );
+
+      //Populate Changedetails org details
+      //Orgmatrix      
+      $usermatrixStore.ChangeDetails.orgmatrix = $usermatrixStore.Livematrix.Accessmatrix.slice();    
     }
 
-  } 
+    //Populate Changedetails org details
+    //Orgprofile
+    $usermatrixStore.ChangeDetails.orgprofile = JSON.parse(JSON.stringify($usermatrixStore.Livematrix));
+    delete $usermatrixStore.ChangeDetails.orgprofile.Accessmatrix;
+    delete $usermatrixStore.ChangeDetails.orgprofile.FullDetails;
+    //delete few more?
+  } else {
+
+    //Populate Changedetails org details
+    //Orgprofile
+    $usermatrixStore.ChangeDetails.orgprofile = {};
+    //Orgmatrix      
+    $usermatrixStore.ChangeDetails.orgmatrix = [];    
+
+  }
+  console.log($usermatrixStore); 
+  console.log($entityStore); 
 }
 
 const Rolefetchprogressmodal = () => {
@@ -220,7 +257,12 @@ const sendcardaction = async (btnpressed,submitval) => {
     <div class="bg-blue-100 h-20 rounded-t-lg flex flex-row items-center px-7">
         <h2 class="text-2xl text-black text-gray-700 font-bold">New User</h2>  
         <span class="flex-grow"></span>  
-       <button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md">Save</button>
+       <!--button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md">Save</button-->
+        {#if $usermatrixStore.ChangeDetails.Somechanged}
+          <button class=" bg-indigo-700 rounded text-white font-semibold w-36 py-2 px-7 shadow-md" >{btntxt}</button>   
+        {:else}
+          <button class=" bg-indigo-400 rounded text-white font-semibold w-36 py-2 px-7 shadow-md" >{btntxt}</button>
+        {/if}
        <span class="flex w-5"></span>
       <button class="bg-red-600 rounded text-white font-semibold w-36 py-2 px-7  shadow-md" on:click|preventDefault={()=>sendcardaction('cancel')}>Cancel</button>      
     </div>

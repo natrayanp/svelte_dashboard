@@ -11,9 +11,9 @@ const INITIAL_USERMATRIX_STORE =        {
     "LiveAvailrole":[],
     //"LiveAvailmatrix":[],
     "LiveSelectmatrix":{},
-    "ChangeDetails" :{profiledefaul: {rolemasterid : "NEW",rolename : "",roledisplayname : "",roledescription : ""},
+    "ChangeDetails" :{profiledefaul: {userid : "NEW",Userstatus:"Active"},
                         profile:{},matrix:[],orgprofile:{},orgmatrix:[],audit:{},
-                        profilechanged: false, matrixchanged: false, Allchanged:false},
+                        profilechanged: false, matrixchanged: false, Somechanged:false},
     "mode": "list",
   };
 

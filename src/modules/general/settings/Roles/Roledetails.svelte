@@ -99,7 +99,7 @@ function Initialise(firstload=false){
 }
 
 function reinstate_val(firstload){
-    firstload = true;
+    //firstload = true;
     if (JSON.stringify(($roleStore.Liverole)) === JSON.stringify({})) {
         $form.rolemasterid = $roleStore.ChangeDetails.masterdefaul.rolemasterid;
         $form.rolename = $roleStore.ChangeDetails.masterdefaul.rolename;
@@ -548,13 +548,12 @@ const RoleDel = () => {
             console.log("going mych empty")
             if ($form.rolemasterid === "NEW") {
                 $roleStore.ChangeDetails.master = {...frmcpy,action:'I'};                   
-                if ($roleStore.ChangeDetails.detail.length) {
+               // if ($roleStore.ChangeDetails.detail.length) {
                     //$roleStore.ChangeDetails.ischanged = true;
-                    toggle_enable_button();
-                }
-                
-                console.log("going mych empty if")
-            } 
+                    //toggle_enable_button();
+            } else if (JSON.stringify($roleStore.ChangeDetails.orgmaster) !== JSON.stringify(frmcpy)){
+                $roleStore.ChangeDetails.master = {...frmcpy,action:'U'};
+            }                
         } else {
             console.log("going mych not empty")
             console.log(JSON.parse(JSON.stringify($roleStore.ChangeDetails.orgmaster)));
@@ -562,11 +561,12 @@ const RoleDel = () => {
 
             if (JSON.stringify($roleStore.ChangeDetails.orgmaster) !== JSON.stringify(frmcpy)){
                 $roleStore.ChangeDetails.master = {...frmcpy,action:'U'};
-                //$roleStore.ChangeDetails.ischanged = true;
-                toggle_enable_button();
                 console.log("going mych not empty if")
+            } else {
+                $roleStore.ChangeDetails.master = {};
             }
         }
+        toggle_enable_button();
         handleChange(e);
         //$form.handleChange();
        

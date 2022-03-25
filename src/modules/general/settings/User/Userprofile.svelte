@@ -2,12 +2,19 @@
 import { onMount,onDestroy,createEventDispatcher } from 'svelte';
 import { createForm } from "svelte-forms-lib";
 import * as yup from 'yup';
-import { usermatrixStore } from '../../../../stores/stores';
+import { usermatrixStore,entityStore } from '../../../../stores/stores';
 
 let fullinfo = false;
-let futxt ="Show"
-
-
+let futxt ="Show";
+let myc = [];
+let mys = [];
+$: states = mys;
+$: citys = myc;
+if (!$entityStore.refdata.country) {
+    // /refdata.country = [];
+    mys = [];
+    myc  = [];    
+} 
 const {
       // observables state
       form,
@@ -22,7 +29,7 @@ const {
       handleChange,
       handleSubmit
     } = createForm({
-      initialValues:$usermatrixStore.LiveSelectmatrix,
+      initialValues:JSON.parse(JSON.stringify(($usermatrixStore.Livematrix))),
       validationSchema: yup.object().shape({
         userid: yup.string().required(),
         firstname: yup.string().required(),
@@ -53,8 +60,7 @@ const {
         email: yup.string().required(),
         joiningdate: yup.date().required("Required field")
                                           .default(() => new Date().toLocaleDateString('en-CA')),  
-        lastdate: yup.date().required("Required field")
-                                          .default(() => new Date().toLocaleDateString('en-CA')),   
+        lastdate: yup.date(),   
         taxid: yup.string().required(),
         Userstatus: yup.string().required(),   
         Imagelink : yup.string(), 
@@ -66,14 +72,28 @@ const {
       },
     });
 
-
     onMount(async() => {  
-          console.log("going to onmount userprofile");
+          reinstateform();
+          console.log("going to onmount userprofile");         
       });    
 
       onDestroy(async() => {  
           console.log("going to onDestroy userprofile");
       });    
+
+
+function reinstateform(){    
+    if($usermatrixStore.mode === "new"){
+      //Should be new
+      $form.userid = $usermatrixStore.ChangeDetails.profiledefaul.userid;
+      $form.userstatus = $usermatrixStore.ChangeDetails.profiledefaul.Userstatus;
+      $form.country = $entityStore.refdata;
+    } else {
+      $form = JSON.parse(JSON.stringify($usermatrixStore.LiveSelectmatrix));
+    }
+
+    init_all_Dropdowns();  
+}
 
 function fullinf(){
     fullinfo = !fullinfo;
@@ -84,10 +104,11 @@ function fullinf(){
 function countryselect() {
     
     console.log($form);
-    console.log($form.branchCountry.submenu);
-    if($form.branchCountry.submenu) {
+    console.log(JSON.stringify($form.country));
+    console.log(JSON.stringify($form));
+    if($form.country && $form.country.submenu )  {
       console.log("@@#$@#@#@#@#@#@#@#@#@#");
-      states = $form.branchCountry.submenu;      
+      states = $form.country.submenu;      
     } else {
       console.log("@@#$@#@#@#@#@#@#@#@#@#    NUILL");
       states = [];      
@@ -101,39 +122,39 @@ function countryselect() {
     }
 
     //Reset the previously selected values
-    $form.branchState = '';
-    $form.branchCity = '';  
+    $form.state = '';
+    $form.city = '';  
   }
 
 
   function stateselect() {
     console.log("------State change start------");
-    console.log($form.branchState);
-    if($form.branchState.submenu) {
-      citys = $form.branchState.submenu;
+    console.log($form.state);
+    if($form.state && $form.state.submenu) {
+      citys = $form.state.submenu;
     } else {
       citys = [];
     }
 
     //Reset the previously selected values
-    $form.branchCity = '';
+    $form.city = '';
     console.log("------State change End------");
   }
     
 
 function getvalue(type,matchstr) {  
   switch(type) {  
-  case 'branchCountry':    
-    return match (refdata.country,matchstr);  
-  case 'branchState':    
-    if ($form.branchCountry.submenu !== undefined) {
-      return match ($form.branchCountry.submenu,matchstr); 
+  case 'Country':    
+    return match ($entityStore.refdata.country,matchstr);  
+  case 'State':    
+    if ($form.country.submenu !== undefined) {
+      return match ($form.country.submenu,matchstr); 
     } else {
       return {}
     }
-  case 'branchCity':  
-    if ($form.branchState?.submenu !== undefined) {  
-    return match ($form.branchState.submenu,matchstr); 
+  case 'City':  
+    if ($form.state?.submenu !== undefined) {  
+    return match ($form.state.submenu,matchstr); 
     } else {
       return {}
     }
@@ -161,6 +182,88 @@ function match (arrval,matchstr) {
     console.log(dds);
   return dds;
 }
+
+function init_all_Dropdowns(){
+      console.log("init the dorp down values");
+
+// Populate the default values for the dropdown    
+console.log(JSON.stringify($usermatrixStore.LiveSelectmatrix));
+
+    if (typeof $usermatrixStore.LiveSelectmatrix.country === 'string' || $usermatrixStore.LiveSelectmatrix.country instanceof String) {
+      $form.country = getvalue('Country',$usermatrixStore.LiveSelectmatrix.country);    
+    } else {
+      $form.country = $usermatrixStore.LiveSelectmatrix.country;    
+    }                
+    console.log(JSON.stringify($usermatrixStore.LiveSelectmatrix));
+    let mys = $usermatrixStore.LiveSelectmatrix.state;
+    let myc = $usermatrixStore.LiveSelectmatrix.city;
+
+
+    countryselect();        
+    console.log(JSON.stringify($usermatrixStore.LiveSelectmatrix));   
+    console.log(myc);
+    if (typeof mys === 'string' || mys instanceof String) { 
+        $form.state = getvalue('State', mys);
+    } else {
+        $form.state = mys;
+    }
+  stateselect();      
+  if (typeof myc === 'string' || myc instanceof String) {          
+    $form.city = getvalue('City', myc);
+  } else {
+        $form.city = myc;
+    }               
+
+  //branchdata_init.isdefault === 'Y'?yes =true:yes =false;                  
+  //$form.isdefault =  yes?'Y':'N';
+
+    }
+
+function mych(e) {
+        console.log("going mych");
+        $usermatrixStore.ChangeDetails.profilechanged = false;
+        $usermatrixStore.ChangeDetails.profile = {};
+        let rmcpy = JSON.parse(JSON.stringify($form));
+        let frmcpy = JSON.parse(JSON.stringify(rmcpy));        
+
+        if (JSON.stringify($usermatrixStore.ChangeDetails.orgprofile) === JSON.stringify({}) && ($form.Userid === "NEW")) {
+            //console.log("going mych empty")
+            //if ($form.Userid === "NEW") {
+                $usermatrixStore.ChangeDetails.profile = {...frmcpy,action:'I'};                
+            //} else {
+              //TODO some data error
+            //}           
+
+        } else if (JSON.stringify($usermatrixStore.ChangeDetails.orgprofile) !== JSON.stringify(frmcpy)){
+            console.log("going mych not empty")
+            console.log(JSON.parse(JSON.stringify($usermatrixStore.ChangeDetails.orgprofile)));
+            console.log(JSON.parse(JSON.stringify(frmcpy)));
+
+            //if (JSON.stringify($usermatrixStore.ChangeDetails.orgprofile) !== JSON.stringify(frmcpy)){
+                $usermatrixStore.ChangeDetails.profile = {...frmcpy,action:'U'};                          
+                console.log("going mych not empty if")
+            //} 
+        }                       
+        console.log("going mych empty if")
+        handleChange(e);            
+        toggle_enable_button(); 
+    }
+
+    function toggle_enable_button(){
+      //Here we recalculate the value of profilechanged only
+      $usermatrixStore.ChangeDetails.profilechanged = false;
+
+
+      if(JSON.stringify($usermatrixStore.ChangeDetails.profilechanged) !== JSON.stringify({})) {
+        $usermatrixStore.ChangeDetails.profilechanged = true;
+      }
+
+      if (($usermatrixStore.ChangeDetails.profilechanged || $usermatrixStore.ChangeDetails.matrixchanged)) {
+        $usermatrixStore.ChangeDetails.Somechanged = true;
+      } else {
+        $usermatrixStore.ChangeDetails.Somechanged = false;
+      }
+    }
 
 
 </script>
@@ -220,8 +323,8 @@ function match (arrval,matchstr) {
                     class="peer mt-0 block w-full px-0.5 py-1 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b-2"			
                     type = "text"
                     bind:value={$form.firstname}
-                    on:blur ={handleChange}
-                    on:change ={handleChange}
+                    on:blur ={handleChange}                    
+                    on:change ={mych}
                     />
                   {#if $errors.firstname && (JSON.stringify($errors.firstname)!= '{}') }
                     <small style="color:red">{$errors.firstname}</small>
@@ -238,7 +341,7 @@ function match (arrval,matchstr) {
                     type = "text"
                     bind:value={$form.lastname}
                     on:blur ={handleChange}
-                    on:change ={handleChange}
+                    on:change ={mych}
                     />
                   {#if $errors.lastname && (JSON.stringify($errors.lastname)!= '{}') }
                     <small style="color:red">{$errors.lastname}</small>
@@ -254,7 +357,7 @@ function match (arrval,matchstr) {
                     type = "text"
                     bind:value={$form.designation}
                     on:blur ={handleChange}
-                    on:change ={handleChange}
+                    on:change ={mych}
                     />
                   {#if $errors.designation && (JSON.stringify($errors.designation)!= '{}') }
                     <small style="color:red">{$errors.designation}</small>
@@ -268,7 +371,7 @@ function match (arrval,matchstr) {
                     name = "department"
                     class="mt-0 block w-full px-0.5 py-1 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			                                     
                     bind:value={$form.department} 
-                    on:change={handleChange}
+                    on:change ={mych}
                     >                            
                       <option>Marketing</option>
                       <option>HR</option>
@@ -278,8 +381,8 @@ function match (arrval,matchstr) {
 
                     </select>
                     {#if $errors.department && (JSON.stringify($errors.department)!= '{}') }
-                    <small style="color:red">{$errors.department}</small>
-                  {/if} 
+                      <small style="color:red">{$errors.department}</small>
+                    {/if} 
                 </div>
                 <div class="md:col-start-3 md:col-span-1 " >				  
                     <label for="Gender">Gender</label>
@@ -288,7 +391,7 @@ function match (arrval,matchstr) {
                             name = "gender"
                             class="mt-0 block w-full px-0.5 py-1 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			                                     
                             bind:value={$form.gender} 
-                            on:change={handleChange}
+                            on:change ={mych}
                             >                            
                             <option>Male</option>
                             <option>Female</option>                          
@@ -309,7 +412,7 @@ function match (arrval,matchstr) {
                             type = "date"
                             bind:value={$form.dob}
                             on:blur ={handleChange}
-                            on:change ={handleChange}
+                            on:change ={mych}
                             />
                             {#if $errors.dob && (JSON.stringify($errors.dob)!= '{}') }
                               <small style="color:red">{$errors.dob}</small>
@@ -327,8 +430,8 @@ function match (arrval,matchstr) {
                             type = "text"
                             bind:value={$form.addressline1}
                             on:blur ={handleChange}
-                            on:change ={handleChange}
-                                    ></textarea>
+                            on:change ={mych}
+                            ></textarea>
                                     {#if $errors.addressline1 && (JSON.stringify($errors.addressline1)!= '{}') }
                                     <small style="color:red">{$errors.addressline1}</small>
                                   {/if} 
@@ -344,8 +447,8 @@ function match (arrval,matchstr) {
                             type = "text"
                             bind:value={$form.addressline2}
                             on:blur ={handleChange}
-                            on:change ={handleChange}
-                                    ></textarea>
+                            on:change ={mych}
+                            ></textarea>
                                     {#if $errors.addressline2 && (JSON.stringify($errors.addressline2)!= '{}') }
                                     <small style="color:red">{$errors.addressline2}</small>
                                   {/if} 
@@ -362,8 +465,12 @@ function match (arrval,matchstr) {
                             on:change={()=>countryselect()}
     
                             >
-                                <option>India</option>
-                                <option>Singapore</option> 
+                          {#each $entityStore.refdata.country as country}
+                            <option value={country}>
+                              {country.refvalue}
+                            </option>
+                          {/each}
+                          <option>Singapore</option>
                     
                         </select>
                         {#if $errors.country && (JSON.stringify($errors.country)!= '{}') }
@@ -381,8 +488,11 @@ function match (arrval,matchstr) {
                             bind:value={$form.state}  
                             on:change={stateselect}
                             >
-                                <option>TamilNadu</option>
-                                <option>Karnataka</option>
+                            {#each states as state}
+                            <option value={state}>
+                              {state.refvalue}
+                            </option>
+                          {/each}
                     
                         </select>
                         {#if $errors.state && (JSON.stringify($errors.state)!= '{}') }
@@ -398,8 +508,11 @@ function match (arrval,matchstr) {
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
                             bind:value={$form.city}
                             >
-                                <option>Chennai</option>
-                                <option>Coibatore</option>
+                            {#each citys as city}
+                            <option value={city}>
+                              {city.refvalue}
+                            </option>
+                          {/each}
                     
                         </select>
                         {#if $errors.city && (JSON.stringify($errors.city)!= '{}') }
@@ -417,7 +530,7 @@ function match (arrval,matchstr) {
                             type = "text"
                             bind:value={$form.pinCode}
                             on:blur ={handleChange}
-                            on:change ={handleChange}
+                            on:change ={mych}
                             />
                             {#if $errors.pinCode && (JSON.stringify($errors.pinCode)!= '{}') }
                               <small style="color:red">{$errors.pinCode}</small>
@@ -435,7 +548,7 @@ function match (arrval,matchstr) {
                             type="text"
                             bind:value={$form.mobile}      
                             on:blur ={handleChange}
-                            on:change ={handleChange} 
+                            on:change ={mych}
                             />
                             {#if $errors.mobile && (JSON.stringify($errors.mobile)!= '{}') }
                               <small style="color:red">{$errors.mobile}</small>
@@ -450,7 +563,7 @@ function match (arrval,matchstr) {
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			         
                             bind:value={$form.email}
                             on:blur ={handleChange}
-                            on:change ={handleChange}
+                            on:change ={mych}
                             />		
                             {#if $errors.email && (JSON.stringify($errors.email)!= '{}') }
                               <small style="color:red">{$errors.email}</small>
@@ -467,7 +580,7 @@ function match (arrval,matchstr) {
                             type = "date"
                             bind:value={$form.joiningdate}
                             on:blur ={handleChange}
-                            on:change ={handleChange}
+                            on:change ={mych}
                             />
                             {#if $errors.joiningdate && (JSON.stringify($errors.joiningdate)!= '{}') }
                               <small style="color:red">{$errors.joiningdate}</small>
@@ -484,7 +597,7 @@ function match (arrval,matchstr) {
                             type = "date"
                             bind:value={$form.lastdate}
                             on:blur ={handleChange}
-                            on:change ={handleChange}
+                            on:change ={mych}
                             />
                             {#if $errors.lastdate && (JSON.stringify($errors.lastdate)!= '{}') }
                               <small style="color:red">{$errors.lastdate}</small>
@@ -499,8 +612,8 @@ function match (arrval,matchstr) {
                               class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
                               bind:value={$form.taxid}
                               on:blur ={handleChange}
-                              on:change ={handleChange}
-                            />
+                              on:change ={mych}
+                              />
                             {#if $errors.taxid && (JSON.stringify($errors.taxid)!= '{}') }
                               <small style="color:red">{$errors.taxid}</small>
                             {/if}

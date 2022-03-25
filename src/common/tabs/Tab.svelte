@@ -2,6 +2,8 @@
 	import { getContext } from 'svelte';
 	import { TABS } from './Tabs.svelte';
 
+	
+
 	const tab = {};
 	const { registerTab, selectTab, selectedTab } = getContext(TABS);
 
