@@ -1,4 +1,28 @@
-import { writable, get } from 'svelte/store'
+import { writable, get } from 'svelte/store';
+
+const pfdf = {
+                userid: "NEW",
+                firstname:"", 
+                lastname:"",
+                designation:"", 
+                department:null,
+                gender:null,
+                dob:null,
+                addressline1:null,
+                addressline2:null,
+                country:null,
+                city:null,
+                state:null,
+                pincode:null,        
+                mobile:null,
+                email:null,
+                joiningdate:"",
+                lastdate:null,
+                taxid:null,
+                userstatus:"Active",
+                Imagelink :null
+            };
+
 
 const INITIAL_USERMATRIX_STORE =        {                              
    // "Availablemodules": [] , //Delte this as this is not required                             
@@ -9,13 +33,19 @@ const INITIAL_USERMATRIX_STORE =        {
     "Livematrixindex":null,  //This has the index of the "Livematrix" item from "Listallmatrix" array
     "LiveAvailbranch":[],    
     "LiveAvailrole":[],
+    "LiveAvailmatrix":[],
     //"LiveAvailmatrix":[],
-    "LiveSelectmatrix":{},
-    "ChangeDetails" :{profiledefaul: {userid : "NEW",Userstatus:"Active"},
+    "LiveSelectprofile":{},
+    "LiveSelectmatrix":[], 
+    //"LiveSelectmodule"  :[],
+    "ChangeDetails" :{profiledefaul: pfdf, matrixdefault: [],
                         profile:{},matrix:[],orgprofile:{},orgmatrix:[],audit:{},
                         profilechanged: false, matrixchanged: false, Somechanged:false},
     "mode": "list",
   };
+
+
+
 
 export const initUserMatrixStore = (initialStore = INITIAL_USERMATRIX_STORE) => {
 
@@ -88,9 +118,16 @@ let calcChange = (self,val:Changestruct) =>{
 
  let selection_reset = (self) => {
     self.Livematrix = JSON.parse(JSON.stringify(INITIAL_USERMATRIX_STORE.Livematrix));
-    self.LiveAvailmatrix = (INITIAL_USERMATRIX_STORE.LiveAvailmatrix).slice();
-    self.LiveSelectmatrix = JSON.parse(JSON.stringify(INITIAL_USERMATRIX_STORE.LiveSelectmatrix));
+    self.Livematrixindex = INITIAL_USERMATRIX_STORE.Livematrixindex,
+    //self.LiveAvailmatrix = (INITIAL_USERMATRIX_STORE.LiveAvailmatrix).slice();
+    self.LiveAvailbranch = (INITIAL_USERMATRIX_STORE.LiveAvailbranch).slice();
+    self.LiveAvailrole = (INITIAL_USERMATRIX_STORE.LiveAvailrole).slice();
+    self.LiveAvailmatrix= (INITIAL_USERMATRIX_STORE.LiveAvailmatrix).slice();
+    self.LiveSelectprofile = JSON.parse(JSON.stringify(INITIAL_USERMATRIX_STORE.LiveSelectprofile));
+    self.LiveSelectmatrix = (INITIAL_USERMATRIX_STORE.LiveSelectmatrix).slice();
     self.ChangeDetails = JSON.parse(JSON.stringify(INITIAL_USERMATRIX_STORE.ChangeDetails));
+    console.log(self.ChangeDetails);
+    console.log("selection reset completed");
  }
 
 

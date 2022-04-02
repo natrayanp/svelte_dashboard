@@ -71,6 +71,7 @@ function toggle_edit(matrixdata={item:{},itemIndex:null}) {
   $usermatrixStore.mode="edit";
   if(JSON.stringify(matrixdata.item) === JSON.stringify({})) {
     $usermatrixStore.mode = 'new';
+  } else {
     $usermatrixStore.Livematrix = JSON.parse(JSON.stringify(matrixdata.item));
     $usermatrixStore.Livematrixindex = matrixdata.itemIndex;
   }

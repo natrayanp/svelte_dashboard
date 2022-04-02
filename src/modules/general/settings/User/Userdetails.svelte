@@ -1,6 +1,6 @@
 <script>
 	import { getContext } from 'svelte';
-import { onMount,createEventDispatcher, onDestroy } from 'svelte';
+import { onMount,tick,createEventDispatcher, onDestroy } from 'svelte';
 import { Tabs, TabList, TabPanel, Tab } from '../../../../common/tabs/tab';
 import Userprofile from './Userprofile.svelte';
 import {flip} from 'svelte/animate';
@@ -16,6 +16,7 @@ import { http } from '../../../../stores/services';
 import { formValidator } from '../../../../common/formvalidators/formvalidator';
 
 
+let initialise = false;
 let alt = null
 let modtext = '';
 let mystyle ='';
@@ -80,14 +81,22 @@ let bask =        {
   let baskets = writable(bask);
 
   
-
+//getUserMatrixdetail();
 onMount(async ()=> {
+  
   await  getUserMatrixdetail();
+  initialise = true;
 })
 
-onDestroy( () => {
+onDestroy( async () => {
   //removeNotification(alt);
+  console.log("START On destory userdetails");
+  await usermatrixStore.reset_Selection();
+  console.log(JSON.stringify($usermatrixStore));
+  console.log("On destory userdetails");
 })
+
+
 
 async function  getUserMatrixdetail() {
   let proceed = true;
@@ -167,12 +176,14 @@ async function  getUserMatrixdetail() {
 
 
 function reinstate_val() {
-  $usermatrixStore.LiveAvailbranch.push($authStore.allbranch.slice());
-  $usermatrixStore.LiveAvailrole.push($roleStore.Availablemodules.slice());
+
+  $usermatrixStore.LiveAvailbranch= $authStore.allbranch.slice();
+  $usermatrixStore.LiveAvailrole = $roleStore.Selectedmodules.slice();
+  
    
   if(JSON.stringify($usermatrixStore.Livematrix) !== JSON.stringify({})) {
     
-    $usermatrixStore.LiveSelectmatrix = JSON.parse(JSON.stringify($usermatrixStore.Livematrix));      
+    $usermatrixStore.LiveSelectprofile = JSON.parse(JSON.stringify($usermatrixStore.Livematrix));      
 
     if ($usermatrixStore.Livematrix.Accessmatrix.length > 0) {           
       $usermatrixStore.Livematrix.Accessmatrix.forEach(ama => {
@@ -181,24 +192,48 @@ function reinstate_val() {
 
       //Populate Changedetails org details
       //Orgmatrix      
+      $usermatrixStore.LiveSelectmatrix = $usermatrixStore.Livematrix.Accessmatrix.slice();
       $usermatrixStore.ChangeDetails.orgmatrix = $usermatrixStore.Livematrix.Accessmatrix.slice();    
     }
 
     //Populate Changedetails org details
     //Orgprofile
-    $usermatrixStore.ChangeDetails.orgprofile = JSON.parse(JSON.stringify($usermatrixStore.Livematrix));
-    delete $usermatrixStore.ChangeDetails.orgprofile.Accessmatrix;
-    delete $usermatrixStore.ChangeDetails.orgprofile.FullDetails;
+    let orcp = JSON.parse(JSON.stringify($usermatrixStore.Livematrix));
+    delete orcp.Accessmatrix;
+    delete orcp.FullDetails;    
     //delete few more?
-  } else {
+    $usermatrixStore.ChangeDetails.orgprofile = JSON.parse(JSON.stringify(orcp));
 
+  } else {
+    $usermatrixStore.LiveSelectprofile = JSON.parse(JSON.stringify($usermatrixStore.ChangeDetails.profiledefaul));    
     //Populate Changedetails org details
     //Orgprofile
     $usermatrixStore.ChangeDetails.orgprofile = {};
+
+    $usermatrixStore.LiveSelectmatrix = $usermatrixStore.ChangeDetails.matrixdefault.slice();
     //Orgmatrix      
     $usermatrixStore.ChangeDetails.orgmatrix = [];    
 
   }
+
+ console.log($usermatrixStore.LiveAvailmatrix.slice());
+ 
+  let d1, d2;
+  $usermatrixStore.LiveAvailmatrix = [];
+  
+  if($usermatrixStore.LiveAvailbranch && $usermatrixStore.LiveAvailbranch.length){        
+    $usermatrixStore.LiveAvailbranch.forEach(x => {x.id=x.branchId;x.name= x.branchName;});    
+    d1= {groupid:"mygroup", basketname:"LiveAvailmatrix", type: "Branches",submodules:$usermatrixStore.LiveAvailbranch.slice()};
+    $usermatrixStore.LiveAvailmatrix.push(JSON.parse(JSON.stringify(d1)));
+  }
+  
+  if($usermatrixStore.LiveAvailrole && $usermatrixStore.LiveAvailrole.length){    
+    $usermatrixStore.LiveAvailrole.forEach(x => {x.id=x.Rolemasterid;x.name= x.Roledisplayname;});
+    d2= {groupid:"mygroup", basketname:"LiveAvailmatrix", type: "Roles",submodules: $usermatrixStore.LiveAvailrole.slice()};
+    $usermatrixStore.LiveAvailmatrix.push(JSON.parse(JSON.stringify(d2)));
+  }
+  
+
   console.log($usermatrixStore); 
   console.log($entityStore); 
 }
@@ -249,6 +284,14 @@ const sendcardaction = async (btnpressed,submitval) => {
     //resetst();
 }
 
+
+          /*
+          AUIDT record format
+          let ad = {itemid: "USRMTRIX", itemkeys:{'userid':$usermatrixStore.LiveSelectprofile.userid},action:ac,values:[{datatype:'profile',oldvalue:[],newvalue:[]},
+                                                                                                                        {datatype:'matrix',oldvalue:[],newvalue:[]}]};
+            */
+           
+console.log("user detail code executed");
 </script>
 
 <Alerts targetid="useralert_2"/>
@@ -275,11 +318,11 @@ const sendcardaction = async (btnpressed,submitval) => {
       </TabList>
 
       <TabPanel>
-        <Userprofile/>      
+        <Userprofile {initialise}/>      
       </TabPanel>
       
       <TabPanel>
-        <Useraccessmatrix/>
+        <Useraccessmatrix {initialise}/>
       </TabPanel>
 
     </Tabs>

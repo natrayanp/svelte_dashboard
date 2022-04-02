@@ -1,20 +1,37 @@
 <script>
 import { onMount,onDestroy,createEventDispatcher } from 'svelte';
-import { createForm } from "svelte-forms-lib";
+import { createForm, Form } from "svelte-forms-lib";
 import * as yup from 'yup';
 import { usermatrixStore,entityStore } from '../../../../stores/stores';
 
+export let initialise = false;
+let refdata = {};
 let fullinfo = false;
+let fullinfobut = true;
 let futxt ="Show";
+
+
+// This is required as the data is loaded only after onmount
+let states = [];
+let citys = [];
+if (!refdata.country)  refdata.country = [];
+if (!refdata.designa) refdata.designa = [];
+if (!refdata.dept) refdata.dept = [];
+if (!refdata.gender) refdata.gender = [];
+
+/*
 let myc = [];
 let mys = [];
-$: states = mys;
-$: citys = myc;
+states = mys;
+citys = myc;
 if (!$entityStore.refdata.country) {
     // /refdata.country = [];
     mys = [];
     myc  = [];    
 } 
+*/
+console.log("userprofile code executed");
+
 const {
       // observables state
       form,
@@ -55,14 +72,14 @@ const {
                                           'Please select State',
                                             val => !val.refvalue ? false : true,
                                           ),
-        pinCode: yup.string().required("Required field"),        
+        pincode: yup.string().required("Required field"),        
         mobile: yup.number().required(),
         email: yup.string().required(),
         joiningdate: yup.date().required("Required field")
                                           .default(() => new Date().toLocaleDateString('en-CA')),  
         lastdate: yup.date(),   
         taxid: yup.string().required(),
-        Userstatus: yup.string().required(),   
+        userstatus: yup.string().required(),   
         Imagelink : yup.string(), 
 
       }),
@@ -72,8 +89,10 @@ const {
       },
     });
 
+    $: if(initialise) initialisevalue();
+
     onMount(async() => {  
-          reinstateform();
+         // reinstateform();
           console.log("going to onmount userprofile");         
       });    
 
@@ -82,22 +101,39 @@ const {
       });    
 
 
-function reinstateform(){    
+function initialisevalue(){;
+  console.log("Initialising alues");
+  console.log(JSON.stringify($usermatrixStore.LiveSelectprofile));
+  if($usermatrixStore.mode === "new") fullinf();
+  refdata.country = $entityStore.refdata.country.slice();
+  refdata.designa = $entityStore.refdata.designa.slice();
+  refdata.dept = $entityStore.refdata.dept.slice();
+  refdata.gender = $entityStore.refdata.gender.slice();
+  $form = JSON.parse(JSON.stringify($usermatrixStore.LiveSelectprofile));
+
+  if($form.userid === "NEW") {
+    $form.country = refdata.country[0];
+  }
+   init_all_Dropdowns();
+}
+
+/*
+function reinstateform(initialise=false){
+  console.log("calling reinstate form");
     if($usermatrixStore.mode === "new"){
       //Should be new
-      $form.userid = $usermatrixStore.ChangeDetails.profiledefaul.userid;
-      $form.userstatus = $usermatrixStore.ChangeDetails.profiledefaul.Userstatus;
-      $form.country = $entityStore.refdata;
+      $form = JSON.parse(JSON.stringify($usermatrixStore.ChangeDetails.profiledefaul));
     } else {
       $form = JSON.parse(JSON.stringify($usermatrixStore.LiveSelectmatrix));
     }
-
     init_all_Dropdowns();  
 }
+*/
 
 function fullinf(){
     fullinfo = !fullinfo;
     fullinfo?futxt="Hide":futxt ="Show";
+    if ($usermatrixStore.mode === "new")  fullinfobut = false;
 }
 
 
@@ -143,6 +179,7 @@ function countryselect() {
     
 
 function getvalue(type,matchstr) {  
+  console.log(matchstr);
   switch(type) {  
   case 'Country':    
     return match ($entityStore.refdata.country,matchstr);  
@@ -158,7 +195,12 @@ function getvalue(type,matchstr) {
     } else {
       return {}
     }
-  
+    case 'designa':    
+      return match ($entityStore.refdata.designa,matchstr); 
+    case 'dept':    
+      return match ($entityStore.refdata.dept,matchstr);
+    case 'gender':    
+      return match ($entityStore.refdata.gender,matchstr); 
     default:
     return dd;  
     // code block
@@ -184,49 +226,115 @@ function match (arrval,matchstr) {
 }
 
 function init_all_Dropdowns(){
-      console.log("init the dorp down values");
-
-// Populate the default values for the dropdown    
-console.log(JSON.stringify($usermatrixStore.LiveSelectmatrix));
-
-    if (typeof $usermatrixStore.LiveSelectmatrix.country === 'string' || $usermatrixStore.LiveSelectmatrix.country instanceof String) {
-      $form.country = getvalue('Country',$usermatrixStore.LiveSelectmatrix.country);    
-    } else {
-      $form.country = $usermatrixStore.LiveSelectmatrix.country;    
-    }                
-    console.log(JSON.stringify($usermatrixStore.LiveSelectmatrix));
-    let mys = $usermatrixStore.LiveSelectmatrix.state;
-    let myc = $usermatrixStore.LiveSelectmatrix.city;
-
-
-    countryselect();        
-    console.log(JSON.stringify($usermatrixStore.LiveSelectmatrix));   
-    console.log(myc);
-    if (typeof mys === 'string' || mys instanceof String) { 
-        $form.state = getvalue('State', mys);
-    } else {
-        $form.state = mys;
+  console.log("init the dorp down values");
+  // Populate the default values for the dropdown    
+  /*
+  if($usermatrixStore.mode === "new") {    
+    countrys = JSON.parse(JSON.stringify($entityStore.refdata.country[0]));
+   // $form.country = JSON.parse(JSON.stringify(cty[0]));
+    mys = getvalue('State',$form.country.submenu[0].refvalue);
+    myc = getvalue('City',mys.submenu[0].refvalue);
+    
+    //$form.designation = getvalue('designa',designas[0]); 
+    dept = $entityStore.refdata.dept.slice();
+    $form.department = getvalue('designa',dept[0]); 
+    gender = $entityStore.refdata.gender.slice();
+    $form.department = getvalue('designa',gender[0]); 
+  } else {    
+    cty = $usermatrixStore.LiveSelectmatrix.country;    
+    mys = $usermatrixStore.LiveSelectmatrix.state;
+    myc = $usermatrixStore.LiveSelectmatrix.city;  
+    designas = $usermatrixStore.LiveSelectmatrix.designation;
+    dept = $usermatrixStore.LiveSelectmatrix.department;
+    gend = $usermatrixStore.LiveSelectmatrix.gender;
+  }
+  */
+  if($form.userid  !== "new") { 
+    if (typeof $form.country === 'string' || $form.country instanceof String) { 
+        $form.country = getvalue('Country', $form.country);
     }
-  stateselect();      
-  if (typeof myc === 'string' || myc instanceof String) {          
-    $form.city = getvalue('City', myc);
-  } else {
-        $form.city = myc;
+    countryselect();  
+
+    if (typeof $form.state === 'string' || $form.state instanceof String) { 
+        $form.state = getvalue('State', $form.state);
+    }
+    stateselect();  
+
+    if (typeof $form.city === 'string' || $form.city instanceof String) {          
+      $form.city = getvalue('City', $form.city);
     }               
+    
+    //branchdata_init.isdefault === 'Y'?yes =true:yes =false;                  
+    //$form.isdefault =  yes?'Y':'N';
 
-  //branchdata_init.isdefault === 'Y'?yes =true:yes =false;                  
-  //$form.isdefault =  yes?'Y':'N';
+    if (typeof $form.designation === 'string' || $form.designation instanceof String) {          
+      $form.designation = getvalue('designa',$form.designation);  
+    }  
 
+    if (typeof $form.department === 'string' || $form.department instanceof String) {          
+      $form.department = getvalue('dept',$form.department);  
     }
+
+    if (typeof $form.gender === 'string' || $form.gender instanceof String) {          
+      $form.gender = getvalue('gender',$form.gender);  
+    }
+
+  }
+
+}
+
+function getbackStr(strtochk){
+  let objectConstructor = ({}).constructor;
+
+  if(strtochk === null){
+    return strtochk;    
+  } else if (typeof strtochk === 'string' || strtochk instanceof String) { 
+      return strtochk;    
+  } else if (strtochk.constructor === objectConstructor) {
+      return strtochk.refvalue;
+  }
+}
+
+function mychdr(e){
+  mychall(e);
+  toggle_enable_button(); 
+}
 
 function mych(e) {
+  mychall(e);
+  handleChange(e);            
+  toggle_enable_button(); 
+}
+
+function mychall(e) {
         console.log("going mych");
         $usermatrixStore.ChangeDetails.profilechanged = false;
         $usermatrixStore.ChangeDetails.profile = {};
-        let rmcpy = JSON.parse(JSON.stringify($form));
-        let frmcpy = JSON.parse(JSON.stringify(rmcpy));        
+        let rmcpy = JSON.parse(JSON.stringify($form));        
+        let frmcpy = {
+                userid: rmcpy.userid,
+                firstname:rmcpy.firstname, 
+                lastname:rmcpy.lastname,
+                designation:getbackStr(rmcpy.designation), 
+                department: getbackStr(rmcpy.department),
+                gender:getbackStr(rmcpy.gender),
+                dob:rmcpy.dob,
+                addressline1:rmcpy.addressline1,
+                addressline2:rmcpy.addressline2,
+                country:getbackStr(rmcpy.country),
+                city:getbackStr(rmcpy.city),
+                state:getbackStr(rmcpy.state),
+                pincode:rmcpy.pincode, 
+                mobile:rmcpy.mobile,
+                email:rmcpy.email,
+                joiningdate:rmcpy.joiningdate,
+                lastdate:rmcpy.lastdate,
+                taxid:rmcpy.taxid,
+                userstatus:rmcpy.userstatus,
+                //Imagelink :null
+            };        
 
-        if (JSON.stringify($usermatrixStore.ChangeDetails.orgprofile) === JSON.stringify({}) && ($form.Userid === "NEW")) {
+        if (JSON.stringify($usermatrixStore.ChangeDetails.orgprofile) === JSON.stringify({}) && ($form.userid === "NEW")) {
             //console.log("going mych empty")
             //if ($form.Userid === "NEW") {
                 $usermatrixStore.ChangeDetails.profile = {...frmcpy,action:'I'};                
@@ -245,8 +353,9 @@ function mych(e) {
             //} 
         }                       
         console.log("going mych empty if")
-        handleChange(e);            
-        toggle_enable_button(); 
+        //handleChange(e);            
+        //toggle_enable_button(); 
+        console.log($usermatrixStore);
     }
 
     function toggle_enable_button(){
@@ -267,7 +376,7 @@ function mych(e) {
 
 
 </script>
-{JSON.stringify($form)}
+
 <div class="flex flex-col md:flex-row flex-wrap items-stretch gap-4 leading-8 mx-5 my-5 ">
     <div class="p-3  basis-1/4   bg-white border-t-4 border-green-400 shadow rounded">
     <!-- 01 -->
@@ -278,19 +387,19 @@ function mych(e) {
                 alt="">
         </div>
         <div class ="mx-5">
-        <h1 class="text-gray-900 font-bold text-xl leading-8 mt-10">Natrayan Palani Appan</h1>
-        <h3 class="text-gray-600 font-lg text-semibold leading-6 mt-5">Vice President - Band 5</h3>
+        <h1 class="text-gray-900 font-bold text-xl leading-8 mt-10">{$form.firstname+" "+$form.lastname}</h1>
+        <h3 class="text-gray-600 font-lg text-semibold leading-6 mt-5">{(($form.designation?($form.designation.refvalue?$form.designation.refvalue:(JSON.stringify($form.designation)===JSON.stringify({})?'':$form.designation)):''))}</h3>
 
         <ul
             class="bg-gray-100 text-gray-600 hover:text-gray-700 hover:shadow py-2 px-3 mt-3 divide-y rounded shadow-sm">
             <li class="flex items-center py-1">
                 <span>Status</span>
                 <span class="ml-auto"><span
-                        class="bg-green-500 py-1 px-2 rounded text-white text-sm">Active</span></span>
+                        class="bg-green-500 py-1 px-2 rounded text-white text-sm">{$form.userstatus}</span></span>
             </li>
             <li class="flex items-center py-1">
                 <span>Joined on</span>
-                <span class="ml-auto">Nov 07, 2016</span>
+                <span class="ml-auto">{$form.joiningdate}</span>
             </li>
 
         </ul>
@@ -350,15 +459,19 @@ function mych(e) {
                 </div>
                 <div class="md:col-start-1 md:col-span-1">
                     <label for="Designation">Designation</label>
-                    <input required
+                    <select required
                     id = "Designation"
                     name = "designation"
-                    class="mt-0 block w-full px-0.5 py-1 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b-2"			
-                    type = "text"
-                    bind:value={$form.designation}
-                    on:blur ={handleChange}
-                    on:change ={mych}
-                    />
+                    class="mt-0 block w-full px-0.5 py-1 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b-2"			                    
+                    bind:value={$form.designation}  
+                    on:change ={mychdr}                  
+                    >
+                    {#each refdata.designa as designation}
+                    <option value={designation}>
+                      {designation.refvalue}
+                    </option>
+                    {/each}   
+                    
                   {#if $errors.designation && (JSON.stringify($errors.designation)!= '{}') }
                     <small style="color:red">{$errors.designation}</small>
                   {/if}
@@ -370,15 +483,21 @@ function mych(e) {
                     id = "Department"
                     name = "department"
                     class="mt-0 block w-full px-0.5 py-1 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			                                     
-                    bind:value={$form.department} 
-                    on:change ={mych}
-                    >                            
+                    bind:value={$form.department}  
+                    on:change ={mychdr}                   
+                    >                         
+                    {#each refdata.dept as department}
+                    <option value={department}>
+                      {department.refvalue}
+                    </option>
+                    {/each}   
+                    <!--
                       <option>Marketing</option>
                       <option>HR</option>
                       <option>Delivery</option>
                       <option>Store</option>
                       <option>Frontdesk</option>
-
+                    -->
                     </select>
                     {#if $errors.department && (JSON.stringify($errors.department)!= '{}') }
                       <small style="color:red">{$errors.department}</small>
@@ -390,12 +509,18 @@ function mych(e) {
                             id = "Gender"
                             name = "gender"
                             class="mt-0 block w-full px-0.5 py-1 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			                                     
-                            bind:value={$form.gender} 
-                            on:change ={mych}
-                            >                            
+                            bind:value={$form.gender}   
+                            on:change ={mychdr}                          
+                            >        
+                            {#each refdata.gender as gender}
+                            <option value={gender}>
+                              {gender.refvalue}
+                            </option>
+                            {/each}   
+                            <!--                    
                             <option>Male</option>
                             <option>Female</option>                          
-
+                            -->
 
                             </select>
                             {#if $errors.gender && (JSON.stringify($errors.gender)!= '{}') }
@@ -462,15 +587,14 @@ function mych(e) {
                             name = "country"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
                             bind:value={$form.country} 
-                            on:change={()=>countryselect()}
-    
+                            on:change={()=>countryselect()}    
                             >
-                          {#each $entityStore.refdata.country as country}
+                            <!--option value=""></option-->
+                          {#each refdata.country as country}
                             <option value={country}>
                               {country.refvalue}
                             </option>
-                          {/each}
-                          <option>Singapore</option>
+                          {/each}                          
                     
                         </select>
                         {#if $errors.country && (JSON.stringify($errors.country)!= '{}') }
@@ -507,6 +631,7 @@ function mych(e) {
                             name = "city"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			          
                             bind:value={$form.city}
+                            on:change ={mychdr}
                             >
                             {#each citys as city}
                             <option value={city}>
@@ -524,16 +649,16 @@ function mych(e) {
                         <div class="md:col-start-4 md:col-span-1">				  
                             <label for="PinCode">Pin</label>
                             <input required 
-                            id="PinCode"  
-                            name = "pinCode"
+                            id="Pincode"  
+                            name = "pincode"
                             class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"			
                             type = "text"
-                            bind:value={$form.pinCode}
+                            bind:value={$form.pincode}
                             on:blur ={handleChange}
                             on:change ={mych}
                             />
-                            {#if $errors.pinCode && (JSON.stringify($errors.pinCode)!= '{}') }
-                              <small style="color:red">{$errors.pinCode}</small>
+                            {#if $errors.pincode && (JSON.stringify($errors.pincode)!= '{}') }
+                              <small style="color:red">{$errors.pincode}</small>
                             {/if} 
                         </div>
                         {/if}
@@ -622,10 +747,13 @@ function mych(e) {
             </div>
           </form>
         </div>
+        {#if fullinfobut}
         <button
             on:click={fullinf}
             class="block w-full text-blue-800 text-sm font-semibold rounded-lg hover:bg-gray-100 focus:outline-none focus:shadow-outline focus:bg-gray-100 hover:shadow-xs p-3 my-4">{futxt}
-            Full Information</button>
+            Full Information
+          </button>
+          {/if}
     </div>
     <!-- End of about section -->
     </div>
