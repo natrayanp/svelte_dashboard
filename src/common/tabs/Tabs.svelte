@@ -10,7 +10,7 @@
 	const panels = [];
 	const selectedTab = writable(null);
 	const selectedPanel = writable(null);
-	let selecttabnum = -1;
+	export let active = 0;
 	setContext(TABS, {
 		registerTab: tab => {
 			tabs.push(tab);
@@ -36,7 +36,8 @@
 
 		selectTab: tab => {
 			const i = tabs.indexOf(tab);
-			selecttabnum = i;
+			//selecttabnum = i;
+			active = i;
 			selectedTab.set(tab);
 			selectedPanel.set(panels[i]);
 		},

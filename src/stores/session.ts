@@ -4,7 +4,7 @@ const INITIAL_STORE = {
     token: null    
 };
 
-export const createSessionStore = (initialStore = INITIAL_STORE) => {
+export const createSessionStore = (initialStore = JSON.parse(JSON.stringify(INITIAL_STORE))) => {
 
     const { subscribe, set } = writable(new Map());
 

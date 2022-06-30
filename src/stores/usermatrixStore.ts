@@ -40,14 +40,14 @@ const INITIAL_USERMATRIX_STORE =        {
     //"LiveSelectmodule"  :[],
     "ChangeDetails" :{profiledefaul: pfdf, matrixdefault: [],
                         profile:{},matrix:[],orgprofile:{},orgmatrix:[],audit:{},
-                        profilechanged: false, matrixchanged: false, Somechanged:false},
+                        profilechanged: false, matrixchanged: false, Somechanged:false,matxvalid:null,profvalid:null},
     "mode": "list",
   };
 
 
 
 
-export const initUserMatrixStore = (initialStore = INITIAL_USERMATRIX_STORE) => {
+export const initUserMatrixStore = (initialStore = JSON.parse(JSON.stringify(INITIAL_USERMATRIX_STORE))) => {
 
     let store = writable({
      ...initialStore
@@ -125,9 +125,8 @@ let calcChange = (self,val:Changestruct) =>{
     self.LiveAvailmatrix= (INITIAL_USERMATRIX_STORE.LiveAvailmatrix).slice();
     self.LiveSelectprofile = JSON.parse(JSON.stringify(INITIAL_USERMATRIX_STORE.LiveSelectprofile));
     self.LiveSelectmatrix = (INITIAL_USERMATRIX_STORE.LiveSelectmatrix).slice();
-    self.ChangeDetails = JSON.parse(JSON.stringify(INITIAL_USERMATRIX_STORE.ChangeDetails));
-    console.log(self.ChangeDetails);
-    console.log("selection reset completed");
+    console.log(JSON.parse(JSON.stringify(INITIAL_USERMATRIX_STORE.ChangeDetails)));
+    self.ChangeDetails = JSON.parse(JSON.stringify(INITIAL_USERMATRIX_STORE.ChangeDetails));    
  }
 
 
@@ -146,7 +145,10 @@ let calcChange = (self,val:Changestruct) =>{
       }), 
        update,       
        reset_All: () => set(INITIAL_USERMATRIX_STORE),
-       reset_Selection: () => selection_reset(self),
+       reset_Selection: () => update(self => {
+           selection_reset(self);
+           return self;        
+        }),
        changeStat: (value:Changestruct) => calcChange(self,value), 
      }
 

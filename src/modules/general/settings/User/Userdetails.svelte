@@ -91,9 +91,9 @@ onMount(async ()=> {
 onDestroy( async () => {
   //removeNotification(alt);
   console.log("START On destory userdetails");
-  await usermatrixStore.reset_Selection();
   console.log(JSON.stringify($usermatrixStore));
   console.log("On destory userdetails");
+  await usermatrixStore.reset_Selection();
 })
 
 
@@ -292,6 +292,9 @@ const sendcardaction = async (btnpressed,submitval) => {
             */
            
 console.log("user detail code executed");
+
+
+
 </script>
 
 <Alerts targetid="useralert_2"/>
@@ -318,11 +321,11 @@ console.log("user detail code executed");
       </TabList>
 
       <TabPanel>
-        <Userprofile {initialise}/>      
+        <Userprofile  {initialise}/>      
       </TabPanel>
       
       <TabPanel>
-        <Useraccessmatrix {initialise}/>
+        <Useraccessmatrix  {initialise}/>
       </TabPanel>
 
     </Tabs>

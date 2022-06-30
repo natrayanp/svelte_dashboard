@@ -6,6 +6,7 @@
 
     export let initialise = false;
     let hoveringOverBasket;
+    let livechange = null;
      
       //$: if(initialise) initialisevalue();
 
@@ -150,7 +151,7 @@
               if(putput) x.submodules.push({...item});
               putput = true;
           });
-          updatechange(brnid,rlind,optype);
+          updatechange(brnid,rlid,optype);
           //$baskets = $baskets;
           console.log($usermatrixStore);
         }
@@ -197,6 +198,7 @@
       function  updatechange1(brnid,rlind,optype,reset=true) {
           let orgbrnexists = false;
           let dd=[];
+          livechange = false;
 
           if($usermatrixStore.ChangeDetails.orgmatrix.length) {
             dd = $usermatrixStore.ChangeDetails.orgmatrix.filter(x => x.id === brnid);
@@ -228,7 +230,7 @@
             newaudit.branch = dd[0].name;            
           } else if (orgbrnexists && ab === 'FD') {
             brchn = {...JSON.parse(JSON.stringify(dd[0])),action:'D'};
-            oldaudit.branch = dd[0].name;
+            oldaudit.branch = dd[0].name;            
           }
           //$usermatrixStore.ChangeDetails.matrix.push({...JSON.parse(JSON.stringify(dd[0])),action:ab});
           
@@ -264,6 +266,7 @@
                       console.log(x);
                       brchn.submodules.push({...JSON.parse(JSON.stringify(x)),action:'I'});
                       newaudit.roles.push(x.name);
+                     // $usermatrixStore.ChangeDetails.matrixchanged = true;
                     } 
                     ddcpy.submodules = ddcpy.submodules.filter(z =>  z.id !== x.id);                       
                 });
@@ -276,6 +279,7 @@
                     brchn.submodules.push({...JSON.parse(JSON.stringify(x)),action:'D'});
                     oldaudit.roles.push(x.name);
                   });
+                  //$usermatrixStore.ChangeDetails.matrixchanged = true;
                 }
               
           } else if(['FD'].includes(ar) && orgbrnexists) {                  
@@ -284,16 +288,71 @@
                   brchn.submodules.push({...JSON.parse(JSON.stringify(x)),action:'D'});
                   oldaudit.roles.push(x.name);
                 });
+                //$usermatrixStore.ChangeDetails.matrixchanged = true;
               }
             }
                    
           console.log( JSON.stringify($usermatrixStore.ChangeDetails.matrix));
           if(JSON.stringify(brchn)!==JSON.stringify({})){
-            $usermatrixStore.ChangeDetails.matrix.push({...(JSON.parse(JSON.stringify(brchn))),audit:{oldvaluejson:oldaudit,newvaluejson:newaudit}});         
+            $usermatrixStore.ChangeDetails.matrix.push({...(JSON.parse(JSON.stringify(brchn))),audit:{oldvaluejson:oldaudit,newvaluejson:newaudit}});    
+            if(brchn.submodules.length && $usermatrixStore.ChangeDetails.matrix.length === 1) {
+              livechange = true;
+            } else if(brchn.submodules.length && $usermatrixStore.ChangeDetails.matrix.length > 1) {
+              livechange = false;
+            }else {
+              livechange = null;
+            }
           }
-          
+          toggle_enable_button(brchn);
       }
      
+      function toggle_enable_button(brchn){
+        let matxvalid = false;
+        
+        console.log(livechange);
+        console.log(brchn);
+        
+        
+        $usermatrixStore.ChangeDetails.matrixchanged = false;
+
+        if(livechange === true){
+          $usermatrixStore.ChangeDetails.matrixchanged = true;
+          matxvalid = true;
+        } else if(livechange === false){
+          if($usermatrixStore.ChangeDetails.matrix.length){
+            let otbr = $usermatrixStore.ChangeDetails.matrix.filter(x => x.id !== brchn.id);
+            if(otbr.length) {          
+              for (let y of otbr){                       
+                if(y.submodules.length) {
+                  $usermatrixStore.ChangeDetails.matrixchanged = true;
+                  matxvalid = true;
+                }
+                if($usermatrixStore.ChangeDetails.matrixchanged) break;
+              }
+            }
+          } else {
+            matxvalid = true;
+          } 
+        } 
+
+        $usermatrixStore.ChangeDetails.matxvalid = matxvalid;
+        if($usermatrixStore.ChangeDetails.profvalid !== null){
+          if($usermatrixStore.ChangeDetails.profvalid && matxvalid && ($usermatrixStore.ChangeDetails.matrixchanged || $usermatrixStore.ChangeDetails.profilechanged)) {
+            $usermatrixStore.ChangeDetails.Somechanged = true;
+          } else {
+            $usermatrixStore.ChangeDetails.Somechanged = false;
+          }
+        } else {
+          if(matxvalid && ($usermatrixStore.ChangeDetails.matrixchanged || $usermatrixStore.ChangeDetails.profilechanged)) {
+            $usermatrixStore.ChangeDetails.Somechanged = true;
+          } else {
+            $usermatrixStore.ChangeDetails.Somechanged = false;
+          }
+        }
+        
+      }
+
+    
     </script>
     
     

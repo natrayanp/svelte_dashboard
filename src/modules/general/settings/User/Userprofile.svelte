@@ -1,3 +1,4 @@
+
 <script>
 import { onMount,onDestroy,createEventDispatcher } from 'svelte';
 import { createForm, Form } from "svelte-forms-lib";
@@ -31,6 +32,9 @@ if (!$entityStore.refdata.country) {
 } 
 */
 console.log("userprofile code executed");
+$: if($state.isValid || !$state.isValid){
+  toggle_enable_button()
+}
 
 const {
       // observables state
@@ -297,13 +301,13 @@ function getbackStr(strtochk){
 
 function mychdr(e){
   mychall(e);
-  toggle_enable_button(); 
+  //toggle_enable_button(); 
 }
 
 function mych(e) {
   mychall(e);
   handleChange(e);            
-  toggle_enable_button(); 
+  //toggle_enable_button(); 
 }
 
 function mychall(e) {
@@ -358,21 +362,52 @@ function mychall(e) {
         console.log($usermatrixStore);
     }
 
-    function toggle_enable_button(){
+    async function toggle_enable_button(){
+      console.log("inside toggle enabled button");
+      console.log(($usermatrixStore));
       //Here we recalculate the value of profilechanged only
       $usermatrixStore.ChangeDetails.profilechanged = false;
+      console.log("--------------------------");
+      console.log($state.isValid);
+      console.log($state.isModified);
+      console.log($state.touched);
+      console.log("--------------------------");
+      if(JSON.stringify($usermatrixStore.ChangeDetails.profile) !== JSON.stringify({}) &&
+          $state.isValid) {
+            console.log("iam inside tr")
+        $usermatrixStore.ChangeDetails.profilechanged = true;       
+      } 
+      console.log($usermatrixStore.LiveSelectprofile.userid);
+      if($usermatrixStore.LiveSelectprofile.userid === "NEW" || $usermatrixStore.LiveSelectprofile.userid === undefined){
+          await ($usermatrixStore.ChangeDetails.profvalid =  ($state.isValid && $state.isModified));
+        } else {          
+          await ($usermatrixStore.ChangeDetails.profvalid =  ($state.isValid));
+        }      
+    
 
 
-      if(JSON.stringify($usermatrixStore.ChangeDetails.profilechanged) !== JSON.stringify({})) {
-        $usermatrixStore.ChangeDetails.profilechanged = true;
+      await (console.log($usermatrixStore.ChangeDetails.profvalid));
+      await (console.log($usermatrixStore.ChangeDetails.matxvalid));
+
+      if($usermatrixStore.ChangeDetails.matxvalid !== null) {
+      if ( $usermatrixStore.ChangeDetails.profvalid && $usermatrixStore.ChangeDetails.matxvalid &&  
+            ($usermatrixStore.ChangeDetails.profilechanged || $usermatrixStore.ChangeDetails.matrixchanged)) {
+        $usermatrixStore.ChangeDetails.Somechanged = true;
+      } else {
+        $usermatrixStore.ChangeDetails.Somechanged = false;
       }
-
-      if (($usermatrixStore.ChangeDetails.profilechanged || $usermatrixStore.ChangeDetails.matrixchanged)) {
+    } else {
+      if ( $usermatrixStore.ChangeDetails.profvalid &&  
+            ($usermatrixStore.ChangeDetails.profilechanged || $usermatrixStore.ChangeDetails.matrixchanged)) {
         $usermatrixStore.ChangeDetails.Somechanged = true;
       } else {
         $usermatrixStore.ChangeDetails.Somechanged = false;
       }
     }
+      
+
+    }
+
 
 
 </script>

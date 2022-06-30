@@ -27,6 +27,7 @@ let mymodal = null;
 let pgtog = false;
 let yes = false;
 let myurl = null;
+let active_tab = 0;
 
 const loginunsub = domainstore.subscribe(value => {		
 		console.log(value)	;
@@ -121,7 +122,7 @@ onDestroy(async () => {
 </style>
 <div class="w-1/2 mx-auto mt-4  rounded">
 
-<Tabs>
+<Tabs bind:active={active_tab}>
   <TabList>
     <Tab>Register Company</Tab>
     <Tab>User Enrolment</Tab>

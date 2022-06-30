@@ -837,7 +837,7 @@ function chk_readytosubmit(){
             <div class="md:col-start-1 md:col-span-5">
             <label for="rolename">Role Name</label>
                         <input  
-                        class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 focus:ring-0 focus:border-blue hover:border-blue hover:border-b"
+                        class="mt-0 block w-full px-0.5 py-1.5 border-0 border-b-2 border-gray-200 ring-0 focus:border-blue hover:border-blue hover:border-b"
                         type = "text"
                         id = "rolename"
                         name = "rolename"

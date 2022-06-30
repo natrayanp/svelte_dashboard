@@ -12,7 +12,7 @@ import { writable, get } from 'svelte/store'
                         profile:{},orgdetail:[],orgprofile:{},detail:[],audit:{},ischanged:false},
   };
 
-export const initRoleStore = (initialStore = INITIAL_ROLE_STORE) => {
+export const initRoleStore = (initialStore = JSON.parse(JSON.stringify(INITIAL_ROLE_STORE))) => {
 
     let store = writable({
      ...INITIAL_ROLE_STORE

@@ -11,7 +11,7 @@ const INITIAL_ENT_STORE = {
 
 
 
-export const initEntityStore = (initialStore = INITIAL_ENT_STORE) => {
+export const initEntityStore = (initialStore = JSON.parse(JSON.stringify(INITIAL_ENT_STORE))) => {
 
  let store = writable({
   ...INITIAL_ENT_STORE
